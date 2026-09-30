@@ -94,3 +94,27 @@ describe('PromptDock band presence', () => {
     expect(band(container, 'bottom').style.transitionDuration).toBe('180ms');
   });
 });
+
+describe('PromptDock controlled presence', () => {
+  it('topOpen=false closes the band while the content stays mounted to fade', () => {
+    const [open, setOpen] = createSignal(true);
+    const { container } = render(() => (
+      <PromptDock top={<span>Heads up</span>} topOpen={open()}><input /></PromptDock>
+    ));
+    resize(40);
+    const el = band(container, 'top');
+    expect(el).toHaveAttribute('data-state', 'open');
+    setOpen(false);
+    expect(el).toHaveAttribute('data-state', 'closed');
+    expect(el.style.height).toBe('0px');
+    expect(el.style.opacity).toBe('0');
+    expect(el).toHaveTextContent('Heads up');
+  });
+
+  it('topOpen=true opens a band whose content is already mounted', () => {
+    const { container } = render(() => (
+      <PromptDock top={<span>Heads up</span>} topOpen={false}><input /></PromptDock>
+    ));
+    expect(band(container, 'top')).toHaveAttribute('data-state', 'closed');
+  });
+});

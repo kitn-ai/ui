@@ -7142,6 +7142,22 @@
         "description": "How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`.",
         "default": "'soft'",
         "displayType": "undefined | \"soft\" | \"outlined\" | \"filled\" | \"plain\""
+      },
+      {
+        "name": "topOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "bottomOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],

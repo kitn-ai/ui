@@ -7,6 +7,16 @@ interface Props extends Record<string, unknown> {
   frame?: PromptDockFrame;
   /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: PromptDockAppearance;
+  /** Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes. */
+  topOpen?: boolean;
+  /** Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition. */
+  bottomOpen?: boolean;
+}
+
+/** Whether a band is driven by its prop rather than by slot occupancy. A bare attribute
+ *  parses to `undefined`, so an attribute that is present also counts as set. */
+export function isBandControlled(value: unknown, hasAttribute: boolean): boolean {
+  return value !== undefined || hasAttribute;
 }
 
 /** The named slots whose occupancy gates a dock lip. An empty `<slot>` is always
@@ -22,7 +32,9 @@ type SlotName = (typeof SLOT_NAMES)[number];
 defineWebComponent<Props>('kai-prompt-dock', {
   frame: 'inset',
   appearance: 'soft',
-}, (props, { element }) => {
+  topOpen: undefined,
+  bottomOpen: undefined,
+}, (props, { element, flag }) => {
   // Track which named lip slots are filled. Re-read on child mutations so streamed
   // / late content lights up its band. An unfilled lip is never rendered (the
   // primitive gates on a truthy top/bottom, and a bare <slot> is always truthy).
@@ -40,7 +52,12 @@ defineWebComponent<Props>('kai-prompt-dock', {
     onCleanup(() => observer.disconnect());
   });
 
-  const lip = (name: SlotName) => (filled()[name] ? <slot name={name} /> : undefined);
+  // A controlled band keeps its slot rendered whether open or closing, so the slotted
+  // child can fade out instead of vanishing the moment the prop flips.
+  const controlled = (name: SlotName) =>
+    isBandControlled(props[name === 'top' ? 'topOpen' : 'bottomOpen'], element.hasAttribute(name === 'top' ? 'top-open' : 'bottom-open'));
+  const lip = (name: SlotName) => (controlled(name) || filled()[name] ? <slot name={name} /> : undefined);
+  const openOf = (name: SlotName) => (controlled(name) ? flag(name === 'top' ? 'topOpen' : 'bottomOpen') : undefined);
 
   return (
     <PromptDock
@@ -48,6 +65,8 @@ defineWebComponent<Props>('kai-prompt-dock', {
       appearance={props.appearance as PromptDockAppearance}
       top={lip('top')}
       bottom={lip('bottom')}
+      topOpen={openOf('top')}
+      bottomOpen={openOf('bottom')}
     >
       <slot />
     </PromptDock>

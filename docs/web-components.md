@@ -3631,6 +3631,8 @@ The corner launcher: a floating button pinned to a viewport corner, with a panel
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
 | `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
+| `topOpen` | `top-open` | `undefined | false | true` | — | Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes. |
+| `bottomOpen` | `bottom-open` | `undefined | false | true` | — | Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition. |
 
 #### Slots
 

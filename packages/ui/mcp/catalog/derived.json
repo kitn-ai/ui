@@ -3739,6 +3739,18 @@
           "scalar": true,
           "optional": true,
           "fn": false
+        },
+        {
+          "name": "topOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "bottomOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
         }
       ],
       "events": [],

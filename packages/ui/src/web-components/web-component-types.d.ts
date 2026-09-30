@@ -1509,6 +1509,10 @@ export interface KaiPromptDockElement extends HTMLElement {
   frame?: "inset" | "edge" | "none";
   /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: "soft" | "outlined" | "filled" | "plain";
+  /** Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes. */
+  topOpen?: boolean;
+  /** Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition. */
+  bottomOpen?: boolean;
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
@@ -4136,6 +4140,10 @@ export interface KaiPromptDockElementProps {
   frame?: "inset" | "edge" | "none";
   /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: "soft" | "outlined" | "filled" | "plain";
+  /** Drives the `top` band directly. Unset, the band is open while a child is slotted into `top`. To animate a band out, keep the child slotted, set this to `false`, and remove the child after the transition (about 200ms); the content fades as the band closes. */
+  topOpen?: boolean;
+  /** Drives the `bottom` band directly, the same way as `topOpen`: flip to `false`, then remove the child after the transition. */
+  bottomOpen?: boolean;
 }
 
 export interface KaiPromptInputElementProps {

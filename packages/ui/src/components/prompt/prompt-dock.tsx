@@ -21,8 +21,12 @@ export type PromptDockAppearance = 'soft' | 'outlined' | 'filled' | 'plain';
 export interface PromptDockProps {
   /** Content for the recessed band above the input (a notice, a hint); omitted, no top lip renders. */
   top?: JSX.Element;
+  /** Drives the top band's presence directly. Omitted, the band is open while `top` has content. Set it `false` while `top` is still mounted to slide the band shut with its content fading; drop `top` afterwards. */
+  topOpen?: boolean;
   /** Content for the recessed band below the input (a mode or control row); omitted, no bottom lip renders. */
   bottom?: JSX.Element;
+  /** Drives the bottom band's presence directly, like `topOpen`. */
+  bottomOpen?: boolean;
   // The eventual `kai-prompt-dock` element exposes this region as `::part(top)`. A
   // tinted notice here leaves the bottom lip alone.
   /** Extra classes for the top lip wrapper, merged over the default band styling. */
@@ -57,11 +61,13 @@ const BAND_MS = 180;
 function Band(props: {
   name: 'top' | 'bottom';
   content: JSX.Element;
+  /** Overrides the content-occupancy rule when set. */
+  open?: boolean;
   class?: string;
 }) {
   // One evaluation of the content prop: it may build DOM, so it is read exactly once.
   const content = createMemo(() => props.content);
-  const open = () => !!content();
+  const open = () => props.open ?? !!content();
   // Keep the last content mounted while the band slides shut, so it fades out rather
   // than collapsing blank. Dropped once the slide has finished.
   const [held, setHeld] = createSignal<JSX.Element>(undefined);
@@ -192,9 +198,9 @@ export function PromptDock(props: PromptDockProps) {
               : 'var(--kai-prompt-dock-inset, 0.375rem)',
       }}
     >
-      <Band name="top" content={props.top} class={props.topClass} />
+      <Band name="top" content={props.top} open={props.topOpen} class={props.topClass} />
       {props.children}
-      <Band name="bottom" content={props.bottom} class={props.bottomClass} />
+      <Band name="bottom" content={props.bottom} open={props.bottomOpen} class={props.bottomClass} />
     </div>
   );
 }
