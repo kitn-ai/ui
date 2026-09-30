@@ -478,6 +478,8 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 | `attachments` | — | `AttachmentData[] | undefined` | — | Attachments to seed the input with. Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `triggers` | — | `undefined | { char: string; kind: string; items?: undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; group?: undefined | string; kind?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> }[] }[]` | — | Rich entity triggers. Each `{ char, kind, items }` opens a caret-anchored menu that inserts an atomic pill. JS property. |
 | `kindIcons` | — | `undefined | Record<string, string>` | — | Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. |
+| `aboveOpen` | `above-open` | `undefined | false | true` | — | Drives the `above` region directly: `false` slides it shut with its content fading, and unset returns to slot occupancy. |
+| `belowOpen` | `below-open` | `undefined | false | true` | — | Drives the `below` region directly, the same way as `aboveOpen`. |
 
 #### Events
 
@@ -510,6 +512,8 @@ Project your own markup with `slot="name"` on a light-DOM child.
 | Slot | Mode | Description |
 |------|------|-------------|
 | `input-top` | inject | Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout; that is light DOM you control. |
+| `above` | inject | Attached to the top of the card: a plan, a notice or a question, over a hairline divider above the input row. The card grows to hold it and keeps its one surface, shadow and focus ring. Rendered only while filled, so an empty slot leaves the plain input. |
+| `below` | inject | Attached to the bottom of the card, under a hairline divider: a mode row, repo or branch pills. Grows in like `above`; rendered only while filled. |
 | `toolbar-start` | inject | Leading controls in the input toolbar, where a + menu goes. |
 | `toolbar-end` | inject | Trailing controls in the toolbar, before the Send button. |
 
@@ -529,6 +533,10 @@ Restyle from outside the Shadow DOM via `kai-prompt-input::part(name)`.
 |------|-------------|
 | `::part(send)` | The send button. Restyle from outside, or hide it entirely (Enter-only). Hiding is pure CSS, which is why there is no `submit="never"`. <br>`kai-prompt-input::part(send) { display: none } /* Enter-only; or restyle: background, border-radius, … */` |
 | `::part(tools)` | The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all. <br>`kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */` |
+| `::part(attachment-above)` | The content region inside the card, above the input row: whatever you slot into `above`. It carries no surface of its own, only the inset that lines it up with the text; the card owns the surface. Restyle its padding or type. <br>`kai-prompt-input::part(attachment-above) { font-size: 0.8125rem; color: var(--color-muted-foreground) }` |
+| `::part(attachment-below)` | The content region inside the card, below the input row: whatever you slot into `below`. <br>`kai-prompt-input::part(attachment-below) { font-size: 0.8125rem }` |
+| `::part(divider-above)` | The hairline between `above` content and the input row. Recolor or restyle it; hide it to let the content run straight into the input. <br>`kai-prompt-input::part(divider-above) { border-color: var(--color-primary) } /* or display: none */` |
+| `::part(divider-below)` | The hairline between the input row and `below` content. <br>`kai-prompt-input::part(divider-below) { border-style: dashed }` |
 
 #### Composed from
 

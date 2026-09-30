@@ -1531,6 +1531,10 @@ export interface KaiPromptInputElement extends HTMLElement {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  /** Drives the `above` region directly: `false` slides it shut with its content fading, and unset returns to slot occupancy. */
+  aboveOpen?: boolean;
+  /** Drives the `below` region directly, the same way as `aboveOpen`. */
+  belowOpen?: boolean;
   /** Focus the text editor inside the shadow root (not the hidden file input). */
   focus(options?: FocusOptions): void;
   /** Blur the focused input control. */
@@ -4133,6 +4137,10 @@ export interface KaiPromptInputElementProps {
   triggers?: { char: string; kind: string; items?: { id: string; label: string; icon?: string; description?: string; group?: string; kind?: string; promptText?: string; data?: Record<string, unknown> }[] }[];
   /** Default icon per entity kind (kind → image URL/data-URI) for pills/menu items without their own `icon`. Overrides the built-in agent/plugin glyphs. JS property. */
   kindIcons?: Record<string, string>;
+  /** Drives the `above` region directly: `false` slides it shut with its content fading, and unset returns to slot occupancy. */
+  aboveOpen?: boolean;
+  /** Drives the `below` region directly, the same way as `aboveOpen`. */
+  belowOpen?: boolean;
 }
 
 export interface KaiRadioGroupElementProps {

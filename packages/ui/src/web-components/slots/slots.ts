@@ -44,6 +44,8 @@ export const CHAT_SLOTS: SlotDef[] = [
  *  that surrounding hole belongs to `kai-chat`; see `composer-actions`/`footer`.) */
 export const PROMPT_INPUT_SLOTS: SlotDef[] = [
   { name: 'input-top',     mode: 'inject', doc: 'Inside the card, above the textarea (e.g. an inline status strip). For content above/below the whole card, use your own layout; that is light DOM you control.' },
+  { name: 'above',        mode: 'inject', doc: 'Attached to the top of the card: a plan, a notice or a question, over a hairline divider above the input row. The card grows to hold it and keeps its one surface, shadow and focus ring. Rendered only while filled, so an empty slot leaves the plain input.' },
+  { name: 'below',        mode: 'inject', doc: 'Attached to the bottom of the card, under a hairline divider: a mode row, repo or branch pills. Grows in like `above`; rendered only while filled.' },
   { name: 'toolbar-start', mode: 'inject', doc: 'Leading controls in the input toolbar, where a + menu goes.' },
   { name: 'toolbar-end',   mode: 'inject', doc: 'Trailing controls in the toolbar, before the Send button.' },
 ];
@@ -202,6 +204,26 @@ export const PROMPT_INPUT_PARTS: PartDef[] = [
     name: 'tools',
     doc: 'The `+` tools trigger, the leading control of the composer row. Restyle it from outside, or hide it to offer no menu at all.',
     recipe: 'kai-prompt-input::part(tools) { display: none } /* or restyle: background, border-radius, … */',
+  },
+  {
+    name: 'attachment-above',
+    doc: 'The content region inside the card, above the input row: whatever you slot into `above`. It carries no surface of its own, only the inset that lines it up with the text; the card owns the surface. Restyle its padding or type.',
+    recipe: 'kai-prompt-input::part(attachment-above) { font-size: 0.8125rem; color: var(--color-muted-foreground) }',
+  },
+  {
+    name: 'attachment-below',
+    doc: 'The content region inside the card, below the input row: whatever you slot into `below`.',
+    recipe: 'kai-prompt-input::part(attachment-below) { font-size: 0.8125rem }',
+  },
+  {
+    name: 'divider-above',
+    doc: 'The hairline between `above` content and the input row. Recolor or restyle it; hide it to let the content run straight into the input.',
+    recipe: 'kai-prompt-input::part(divider-above) { border-color: var(--color-primary) } /* or display: none */',
+  },
+  {
+    name: 'divider-below',
+    doc: 'The hairline between the input row and `below` content.',
+    recipe: 'kai-prompt-input::part(divider-below) { border-style: dashed }',
   },
 ];
 

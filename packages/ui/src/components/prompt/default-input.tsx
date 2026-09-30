@@ -1,6 +1,7 @@
-import { For, Show } from 'solid-js';
+import { type JSX, For, Show, createMemo, untrack } from 'solid-js';
 import { cn } from '../../utils/cn';
-import { PromptInput, PromptInputTextarea, PromptInputBand } from './prompt-input';
+import { PromptInput, PromptInputTextarea, PromptInputBand, usePromptInput } from './prompt-input';
+import { MeasuredPresence } from '../presence/measured-presence';
 import { ComposerChips, chipItems } from './composer-chips';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
@@ -107,6 +108,61 @@ export function buildComposerTools(options: {
   return needsDerivedSeparator ? [fileItem, { separator: true }, ...host] : [fileItem, ...host];
 }
 
+/** One attachment region of the card. It sits INSIDE the card's padding as a full-line
+ *  flex item: `order-first` puts `above` ahead of every band and `order-last` puts
+ *  `below` after the control row, and a closed region is a 0px line that costs nothing
+ *  (the card has no row gap). The measured content carries its own padding, so the
+ *  height it animates to includes the space around the hairline.
+ *
+ *  The inset is `px-1.5`, the same 6px the expanded layout's content column adds, so the
+ *  attached content, the hairline and the prose all start on the 16px edge while the
+ *  controls ride the card's 10px.
+ *
+ *  The card's own top padding (10px collapsed, 14px expanded) is what the first line of
+ *  an `above` region would sit under, so `above` tops up to 14px and `below` tops the
+ *  10px the last row would have had, in each layout. The hairline is a part on its own
+ *  element, with the spacing on a wrapper, so a consumer restyling the part changes the
+ *  line and never the rhythm. */
+function AttachmentRegion(props: {
+  side: 'above' | 'below';
+  content: JSX.Element;
+  open?: boolean;
+}) {
+  const ctx = usePromptInput();
+  const collapsed = () => ctx.layout() === 'collapsed';
+  // One evaluation of the content prop: it may build DOM (a facade's `<slot>`), so it is
+  // read exactly once and shared.
+  const content = createMemo(() => props.content);
+  // Literal `part` values: the parts registry checks the source for them.
+  const body = () =>
+    props.side === 'above' ? (
+      <>
+        <div part="attachment-above" class={cn('px-1.5 pb-3', collapsed() && 'pt-1')}>{content()}</div>
+        <div class={cn('px-1.5', collapsed() ? 'pb-2.5' : 'pb-3.5')}>
+          <div part="divider-above" class="border-border border-t" />
+        </div>
+      </>
+    ) : (
+      <>
+        <div class="px-1.5 pt-2.5">
+          <div part="divider-below" class="border-border border-t" />
+        </div>
+        <div part="attachment-below" class="px-1.5 pt-3 pb-1">{content()}</div>
+      </>
+    );
+  return (
+    <MeasuredPresence
+      data-attachment-region={props.side}
+      class={cn('basis-full', props.side === 'above' ? 'order-first' : 'order-last')}
+      open={props.open}
+    >
+      {/* `untrack`: a layout change updates the padding classes in place instead of
+          rebuilding the region, which would detach and re-attach the content. */}
+      {content() ? untrack(body) : undefined}
+    </MeasuredPresence>
+  );
+}
+
 export interface DefaultPromptInputProps {
   /** String = controlled text mirror; ComposerDoc = a seed that pre-populates pills. */
   value: string | ComposerDoc;
@@ -115,6 +171,18 @@ export interface DefaultPromptInputProps {
   loading?: boolean;
   /** Pins the box's layout: `true` two rows, `false` one row, omitted derives it. */
   expanded?: boolean;
+  // INSIDE the card, not around it: the card keeps the one surface, shadow and focus ring,
+  // and this content grows into it over a hairline. Nothing here renders (no divider, no
+  // padding) until it has content, so an input with nothing attached is the plain input.
+  /** Content attached to the top of the card, above the input row and a hairline divider (a plan, a notice). Grows in when it appears. */
+  above?: JSX.Element;
+  // `false` slides the region shut while the content is still mounted, so it fades out.
+  /** Drives the `above` region's presence directly; unset, it is open while `above` has content. */
+  aboveOpen?: boolean;
+  /** Content attached to the bottom of the card, below the input row and a hairline divider (a mode row, repo pills). */
+  below?: JSX.Element;
+  /** Drives the `below` region's presence directly, like `aboveOpen`. */
+  belowOpen?: boolean;
   suggestions?: string[];
   /** How `suggestions` render. `'pill'` is the default; the alternative renders
    *  each suggestion as a full-width list row. */
@@ -322,6 +390,10 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         attachmentCount={attachments().length}
         class="relative"
       >
+        {/* First in the DOM, so among the `order-first` lines this is the topmost, and the
+            first thing keyboard focus reaches inside the card. `below` mirrors it as the
+            last child, so tab order reads top to bottom. */}
+        <AttachmentRegion side="above" content={props.above} open={props.aboveOpen} />
         <Show when={canAttach() && attachments().length}>
           {/* First in the DOM: the editable below carries the same `order-first` so it can
               claim its own line, and without this the chips would be lifted BELOW the
@@ -560,6 +632,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
             </Show>
           </div>
         </div>
+        <AttachmentRegion side="below" content={props.below} open={props.belowOpen} />
       </PromptInput>
     </>
   );

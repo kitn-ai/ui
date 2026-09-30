@@ -189,7 +189,7 @@ export default defineConfig({
        * Run: `npx playwright test --config config/playwright/storybook.config.ts --project=promptinput`
        */
       name: 'promptinput',
-      testMatch: /promptinput-(shot|behavior|pills)\.spec\.ts/,
+      testMatch: /promptinput-(shot|behavior|pills|attachments)\.spec\.ts/,
       retries: 0,
       expect: COLD_COMPILE,
       use: CHROMIUM,

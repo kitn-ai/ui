@@ -89,9 +89,9 @@ describe('readSlots', () => {
 });
 
 describe('PROMPT_INPUT_SLOTS registry', () => {
-  it('lists the three prompt-input slots in order, with unique names', () => {
+  it('lists the prompt-input slots in order, with unique names', () => {
     expect(PROMPT_INPUT_SLOTS.map((s) => s.name)).toEqual([
-      'input-top', 'toolbar-start', 'toolbar-end',
+      'input-top', 'above', 'below', 'toolbar-start', 'toolbar-end',
     ]);
     const names = PROMPT_INPUT_SLOTS.map((s) => s.name);
     expect(new Set(names).size).toBe(names.length);

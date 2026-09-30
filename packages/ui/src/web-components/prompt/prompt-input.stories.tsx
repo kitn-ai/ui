@@ -495,6 +495,56 @@ const SQUARED_SNIPPET = `<!-- a squared composer: set the token, leave the compo
   document.getElementById('input').placeholder = 'Ask anything...';
 </script>`;
 
+const ATTACHED_SNIPPET = `<!-- Slot content into the card: it grows in over a hairline, and the card keeps its
+     one surface, shadow and focus ring. An empty slot leaves the plain input. -->
+<kai-prompt-input style="display:block; max-width:40rem;">
+  <div slot="above" style="font-size:0.875rem; font-weight:500;">
+    Plan · 3 of 5 done · Write the failing test first
+  </div>
+  <div slot="below" style="display:flex; gap:0.5rem;">
+    <button type="button">Local</button>
+    <button type="button">main</button>
+  </div>
+</kai-prompt-input>
+
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+
+  // Attach and detach by adding and removing the slotted child. The region grows in and
+  // collapses on its own; to fade the content out first, keep it slotted and set
+  // \`above-open="false"\`, then remove the child once the slide has finished.
+  const input = document.querySelector('kai-prompt-input');
+  input.querySelector('[slot="above"]').remove();
+</script>`;
+
+/** Content slotted into `above` and `below` grows into the input's own card, over a
+ *  hairline divider. Add or remove the slotted child and the region grows or collapses. */
+export const WithContentAboveAndBelow: Story = {
+  name: 'With Content Above and Below',
+  render: () => {
+    const [attached, setAttached] = createSignal(true);
+    return (
+      <div style={{ padding: '16px', 'max-width': '40rem' }}>
+        <button type="button" style={{ 'margin-bottom': '12px' }} onClick={() => setAttached(!attached())}>
+          {attached() ? 'Detach' : 'Attach'}
+        </button>
+        <kai-prompt-input style={{ display: 'block' }}>
+          {attached() ? (
+            <div slot="above" style={{ 'font-size': '0.875rem', 'font-weight': '500' }}>
+              Plan · 3 of 5 done · Write the failing test first
+            </div>
+          ) : undefined}
+          <div slot="below" style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="button">Local</button>
+            <button type="button">main</button>
+          </div>
+        </kai-prompt-input>
+      </div>
+    );
+  },
+  parameters: { docs: { source: { code: ATTACHED_SNIPPET, language: 'html' } } },
+};
+
 /**
  * The same composer with `--kai-radius-composer` set, which is how the pill is replaced by
  * the rounded square the kit used before it.
