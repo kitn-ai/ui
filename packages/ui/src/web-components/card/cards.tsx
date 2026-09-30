@@ -12,6 +12,7 @@ import { CARD_EVENT_NAME, emitCardEvent, routeCardEvent } from '../../primitives
 import { BUILTIN_CARD_TAGS, mergeCardTags } from '../../components/card/card-registry';
 import type { JsonSchema } from '../../primitives/card-validate';
 import { cardValidationMessage, validateCardData, type CardValidationReport } from '../../primitives/card-validate-cards';
+// lint-preset-parts: private hasConsumerSchema -- facade-side registry probe for the warn-once path, not a renderable part
 import { hasConsumerSchema } from '../../components/card/card-renderer';
 import { CardFallback } from '../../components/card/card-fallback';
 // Register the built-in child card elements so that importing <kai-cards> is self-contained.

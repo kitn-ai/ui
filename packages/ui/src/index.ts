@@ -475,3 +475,20 @@ export type {
 // after this block was written, and prop-types-exported.test.ts caught it, which
 // is the point of deriving that list from the facades rather than maintaining it.
 export type { ShaderSpec } from './components/audio-visualizer/index';
+
+// ---------------------------------------------------------------------------
+// Parts a preset facade renders. `lint:preset-parts` requires every value a
+// preset imports from src/components or src/primitives to be public, so a
+// consumer can compose exactly what the preset composes.
+// ---------------------------------------------------------------------------
+export { resolveActionsReveal } from './components/message/message';
+export { createMessageFeedback } from './primitives/message-feedback';
+export type { MessageActionDetail, MessageFeedbackOptions, MessageFeedback } from './primitives/message-feedback';
+export { createControllableSignal } from './primitives/controllable';
+export { resolveExpandedProp } from './primitives/composer-expansion';
+export { computeSeverity, DEFAULT_WARN_THRESHOLD, DEFAULT_DANGER_THRESHOLD } from './components/context/context';
+export { DEFAULT_FORMAT } from './components/input/input';
+export { compileMask, formatForDisplay, formatRaw, normalizeToRaw } from './primitives/field-mask';
+export { canonicalize, fieldSemantics } from './primitives/field-semantics';
+export { noticeIconNode } from './components/notice/notice';
+export { normalizeValue, serializeToText, entitiesOf } from './primitives/composer-model';

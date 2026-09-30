@@ -2,6 +2,7 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { readSlots, CONVERSATION_ITEM_SLOTS } from '../slots/slots';
 import { SlottedConversationItem, type ConversationRowDensity } from '../../components/conversation/conversation-item';
+// lint-preset-parts: private isStandaloneConversationItem -- DOM-host predicate that only exists for the element form of the item
 import { isStandaloneConversationItem, readConversationItemId } from '../../components/conversation/conversation-list';
 
 interface Props extends Record<string, unknown> {
