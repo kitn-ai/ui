@@ -308,10 +308,10 @@ export function ConversationItem(props: ConversationItemProps) {
   // ConversationPanel. The same option empties THIS edge in this density: the
   // preview line under the title is not the trailing edge, so it stays.
   // The ACTIVE row (every density) sits on `bg-muted`, and muted text on the muted surface itself is
-  // 4.42:1 in dark (#93918a on #2d2c2a), just under AA's 4.5. The token is right for every
-  // other surface it lands on (5.68 on the background, 4.94 on the strongest surface), so
-  // the row steps its own secondary text up instead, the same treatment the message-count
-  // line below gives an active row.
+  // 4.42:1 in dark (#93918a on #2d2c2a) when the token sat at 56% lightness. The token now
+  // sits at 57% (4.56:1 there), so AA no longer needs this; the row keeps stepping its
+  // secondary text up because 4.56 is a thin margin and the brighter text also marks the
+  // active row, the same treatment the message-count line below gives it.
   const activeMuted = () => (local.isActive ? 'text-foreground/70' : 'text-muted-foreground');
   const panelTime = () => (showTrailing()
     ? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
