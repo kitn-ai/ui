@@ -66,6 +66,13 @@
   --kai-callout-info-border: var(--kai-info);
 }
 
+/* ---- the site's own theme toggle drives the kit's scheme ----
+   Starlight flips `data-theme` on <html>; the kai-* elements in the live demos follow
+   `--kai-color-scheme`, so one declaration per scheme makes them track the toggle
+   instead of the OS (see the Dark mode section of the theming guide). */
+:root[data-theme='dark'] { --kai-color-scheme: dark; }
+:root[data-theme='light'] { --kai-color-scheme: light; }
+
 /* ---- map Starlight chrome to the same tokens ----
    Listed for every theme selector so specificity matches Starlight's own
    :root[data-theme='…'] rules (otherwise its defaults win in light mode). */
