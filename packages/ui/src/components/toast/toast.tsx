@@ -155,7 +155,7 @@ export function Toast(props: ToastProps) {
         <AlertTriangle class={cn('size-4 shrink-0 text-warning', iconAlign())} />
       </Show>
       <Show when={variant() === 'error'}>
-        <XCircle class={cn('size-4 shrink-0 text-destructive', iconAlign())} />
+        <XCircle class={cn('size-4 shrink-0 text-destructive-text', iconAlign())} />
       </Show>
       <Show when={variant() === 'info'}>
         <Info class={cn('size-4 shrink-0 text-info', iconAlign())} />

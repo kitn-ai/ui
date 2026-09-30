@@ -38,7 +38,7 @@ function ToolStateIcon(props: { state: ToolPart['state'] }) {
         <CheckCircle class="size-4 text-green-500" />
       </Show>
       <Show when={props.state === 'output-error'}>
-        <XCircle class="size-4 text-red-500" />
+        <XCircle class="size-4 text-destructive-text" />
       </Show>
     </>
   );
