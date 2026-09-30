@@ -87,7 +87,12 @@ const SIZE_SM = 'px-2.5 py-1';
 // field box and a second hand-typed copy of this string is exactly the kind of
 // restatement that rots (`docs/coupling-map.md` owns that list). `INVALID` stays as the local
 // alias so the three call sites below read unchanged.
-export const FIELD_INVALID = 'border-destructive dark:border-red-400/70';
+//
+// One class, both schemes: `light-dark()` resolves against the element's inherited scheme (no `dark:`
+// variant, which keyed on a `.dark` ancestor and so ignored `--kai-color-scheme` and `theme`). Light is
+// the destructive token; dark is Tailwind's red-400 at 70%, written as its oklch literal because the
+// utility's own theme variable is not emitted unless a plain class uses it.
+export const FIELD_INVALID = 'border-[light-dark(var(--color-destructive),color-mix(in_oklab,oklch(0.704_0.191_22.216)_70%,transparent))]';
 const INVALID = FIELD_INVALID;
 
 // Suppress the native search affordances Chrome/WebKit render for `type="search"`.

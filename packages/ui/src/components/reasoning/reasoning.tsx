@@ -270,7 +270,7 @@ function ReasoningContent(props: ReasoningContentProps) {
         class={cn(
           // Markdown content is styled by the token-based `.chat-markdown` (see
           // Markdown component), which themes via design tokens — so no Tailwind
-          // `prose`/`dark:prose-invert` is needed (those wouldn't follow a scoped theme).
+          // `prose` variant is needed (a `dark:` one would not follow a scoped scheme).
           'text-muted-foreground text-body',
           local.contentClass
         )}

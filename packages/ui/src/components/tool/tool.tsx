@@ -48,7 +48,7 @@ function ToolStateIcon(props: { state: ToolPart['state'] }) {
 // (mirroring the inline-code chip). The TEXT color comes from a theme token
 // (--color-tool-*) whose light value is darkened so it reaches WCAG AA (4.5:1)
 // on the faint fill, while dark mode keeps a brighter hue for AA on the dark
-// surface — both modes resolve via the token's `.dark` override. The FILL keeps
+// surface — both modes resolve inside the token's `light-dark()`. The FILL keeps
 // a fixed bright hue so the chip's colored tint looks the same in both modes.
 const STATE_TOKEN: Record<ToolPart['state'], string> = {
   'input-streaming': 'var(--color-tool-blue)',
