@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup } from 'solid-js';
+import { createSignal, createEffect, onMount, onCleanup } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { readSlots, THREAD_SLOTS } from '../slots/slots';
 import { Thread, type ThreadController } from '../../components/thread/thread';
@@ -13,7 +13,7 @@ interface Props extends Record<string, unknown> {
   // actions/avatar/feedback; mutating an entry in place does not re-render. Re-declared
   // from `ChatAppProps` so the element's own prop table carries its own description,
   // matching `<kai-chat>`.
-  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
+  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. Ignored while the element has `<kai-message>` children, which render instead. */
   messages?: ChatMessage[];
   /** Show a typing indicator on the pending assistant turn. Set it while
    *  awaiting the assistant's reply. */
@@ -71,6 +71,9 @@ interface Events extends Record<string, unknown> {
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
 }
 // Fills the height its parent gives it and scrolls internally (`:host{display:block;height:100%}`).
+// The rows are the app's own `<kai-message>` children when it supplies them; `messages` is the
+// data-driven preset over the same row component. Either way the thread owns the scroller, stick-to-bottom, the
+// live region, the pending indicator and the empty state.
 // No composer, header, suggestions or sidebar: pair it with `<kai-prompt-input>` and your own
 // layout, or reach for the batteries-included `<kai-chat>`.
 /**
@@ -105,8 +108,19 @@ defineWebComponent<Props, Events>('kai-thread', {
   // Detect whether the consumer projected `slot="empty"` content, so the built-in
   // default only renders when they did NOT.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  // Item mode: any visible light-DOM child that is not assigned to a NAMED slot is one of the
+  // app's own rows (`<kai-message>`, or a wrapper around one). The app then owns the loop and
+  // the thread stops rendering `messages`. Hidden children fill nothing, the same rule
+  // `readSlots` applies to the named slots, so a row toggled with `hidden` behaves the same in
+  // both shapes.
+  const [composed, setComposed] = createSignal(false);
+  const readComposed = () =>
+    [...element.children].some((c) => !c.hasAttribute('slot') && !c.hasAttribute('hidden'));
   onMount(() => {
-    const read = () => setSlots(readSlots(element, THREAD_SLOTS));
+    const read = () => {
+      setSlots(readSlots(element, THREAD_SLOTS));
+      setComposed(readComposed());
+    };
     read();
     const observer = new MutationObserver(read);
     // `attributes` and `subtree`, matching the four other readSlots callers.
@@ -118,6 +132,19 @@ defineWebComponent<Props, Events>('kai-thread', {
     // not delivered by observing the host alone.
     observer.observe(element, { childList: true, attributes: true, subtree: true });
     onCleanup(() => observer.disconnect());
+  });
+
+  // Two competing sources of rows: children win, and the data is dropped WITH a message,
+  // once per element (a streaming consumer sets a fresh array per chunk).
+  let warnedBoth = false;
+  createEffect(() => {
+    if (!composed() || warnedBoth) return;
+    if (Array.isArray(props.messages) && props.messages.length > 0) {
+      warnedBoth = true;
+      console.warn(
+        "<kai-thread>: it has message children, so the 'messages' property is ignored. Render your rows as children OR set 'messages', not both.",
+      );
+    }
   });
 
   // Imperative method API — forward the thread's scroll control onto the host.
@@ -134,7 +161,8 @@ defineWebComponent<Props, Events>('kai-thread', {
       <style>{':host{display:block;height:100%}'}</style>
       <Thread
         class={props.class as string | undefined}
-        messages={validMessages(props.messages)}
+        messages={composed() ? [] : validMessages(props.messages)}
+        composed={composed()}
         loading={flag('loading')}
         proseSize={props.proseSize as ProseSize}
         codeTheme={props.codeTheme as string}

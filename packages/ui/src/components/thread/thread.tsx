@@ -30,6 +30,13 @@ export interface ThreadProps {
   density?: ThreadDensity;
   /** The messages to render, newest last; a new array reference per streaming chunk is what re-renders. */
   messages: ChatMessage[];
+  // Set by the `<kai-thread>` facade when the app put its own `<kai-message>` children in the
+  // light DOM. The thread then owns everything AROUND the rows (scroll, stick-to-bottom, the
+  // live region, the pending indicator, the empty state) and the app owns the rows, which are
+  // projected through the default slot. `messages` is expected to be empty in this mode: the
+  // facade drops it (with a warning) rather than render two sources of rows.
+  /** Render the app's own slotted rows instead of `messages`. */
+  composed?: boolean;
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
@@ -110,7 +117,12 @@ export function Thread(props: ThreadProps) {
     target: () => rootEl,
   });
   const showScrollButton = () => props.scrollButton !== false;
-  const showEmpty = () => props.messages.length === 0 && !props.loading;
+  const showEmpty = () => !props.composed && props.messages.length === 0 && !props.loading;
+  // `space-y-*` cannot reach a projected row: its selector is a CHILD combinator, and a
+  // `<slot>` is the child, not the nodes assigned to it. `::slotted(*)` is the one selector
+  // that can, and margin-block-end on every row is the same rule `space-y-*` compiles to
+  // (every non-last child, and the scroll anchor is always the last one).
+  const slottedGap = () => (resolvedDensity() === 'compact' ? '[&::slotted(*)]:mb-2' : '[&::slotted(*)]:mb-4');
   // Keyed by message id, NOT by object reference: a streaming message is a new
   // object every delta, and a reference-keyed <For> rebuilds the whole row for
   // each one — which is why expanding a tool/reasoning panel mid-stream used to
@@ -152,6 +164,9 @@ export function Thread(props: ThreadProps) {
               <Show when={props.empty} fallback={<DefaultEmpty />}>
                 {props.empty}
               </Show>
+            </Show>
+            <Show when={props.composed}>
+              <slot class={slottedGap()} />
             </Show>
             <For each={messageKeys()}>
               {(_id, i) => (

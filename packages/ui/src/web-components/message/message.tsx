@@ -196,6 +196,8 @@ defineWebComponent<Props, Events>('kai-message', {
   // (an unusable message rendered an empty body, not a crash).
   let lastWarnedMessage: unknown;
   const hasValidParts = (): boolean => {
+    // Composed mode never reads `parts`, so a malformed `message` cannot blank the row.
+    if (composed()) return true;
     const m = msg();
     if (hasParts(m)) return true;
     if (m !== lastWarnedMessage) {
@@ -217,13 +219,37 @@ defineWebComponent<Props, Events>('kai-message', {
     // the chat owns feedback and targets ITSELF, so in-chat toasts still stay in-chat.)
   });
 
+  // Composed mode has no `parts` to derive the copied text from, so it is read off the body
+  // children: their `content` (a `<kai-markdown>`) or, failing that, their text.
+  const childText = (): string =>
+    bodyChildren()
+      .map((c) => {
+        const content = (c as unknown as { content?: unknown }).content;
+        return typeof content === 'string' ? content : (c.textContent ?? '').trim();
+      })
+      .filter(Boolean)
+      .join('\n\n');
+  const actionMsg = (): ChatMessage =>
+    composed() ? { ...msg(), parts: [{ type: 'text', text: childText() }] } : msg();
+
+  // Two competing bodies: children win, and `message.parts` is dropped WITH a message, once
+  // per element (a streaming consumer sets a fresh object per chunk).
+  let warnedBoth = false;
+  createEffect(() => {
+    if (!composed() || warnedBoth || props.message === undefined) return;
+    warnedBoth = true;
+    console.warn(
+      "<kai-message>: it has body children, so the 'message' property's parts are ignored. Render the body as children OR set 'message', not both.",
+    );
+  });
+
   // Imperative method API — `copy()` runs the exact path of the built-in copy
   // action (`feedback.handleAction(msg, 'copy')`): writes the content to the
   // clipboard, shows the transient copied-check on the bar, and emits
   // `kai-message-action{action:'copy'}`.
   expose({
     /** Copy the message content to the clipboard and show the copied check. */
-    copy: () => { if (hasValidParts()) feedback.handleAction(msg(), 'copy'); },
+    copy: () => { if (hasValidParts()) feedback.handleAction(actionMsg(), 'copy'); },
   });
 
   // Read declarative <kai-action> children from light DOM.
@@ -231,8 +257,18 @@ defineWebComponent<Props, Events>('kai-message', {
   const [slottedActions, setSlottedActions] = createSignal<import('../chat/chat-types').CustomAction[]>([]);
   // Which composition slots (before-body / after-body / avatar) the consumer filled.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
+  // Composed mode: visible light-DOM children that fill no NAMED slot and are not
+  // `<kai-action>` descriptors are the app's own body (a `<kai-markdown>`, a custom
+  // element). They replace `message.parts` as the body; the row chrome, the action bar and
+  // the named slots stay this element's.
+  const bodyChildren = () =>
+    [...element.children].filter(
+      (c) => !c.hasAttribute('slot') && !c.hasAttribute('hidden') && c.localName !== 'kai-action',
+    );
+  const [composed, setComposed] = createSignal(false);
   onMount(() => {
     const read = () => {
+      setComposed(bodyChildren().length > 0);
       const nodes = [...element.querySelectorAll('kai-action')];
       setSlottedActions(nodes.map(n => ({
         id: n.id || n.getAttribute('action') || '',
@@ -278,7 +314,7 @@ defineWebComponent<Props, Events>('kai-message', {
   const mergedActions = () => [...(msg().actions ?? []), ...slottedActions()];
   const body = () => (
     <MessageBody
-      parts={msg().parts}
+      parts={composed() ? [] : msg().parts}
       cardTypes={cardComponentsFromTags(props.cardTypes, (props as { theme?: string }).theme)}
       cardSchemas={props.cardSchemas}
       /* Card parts emit off THIS element as the bubbling `kai-card` event. */
@@ -289,8 +325,15 @@ defineWebComponent<Props, Events>('kai-message', {
       actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}
       activeFeedback={feedback.resolveFeedback(msg())}
       copied={feedback.isCopied(msg().id)}
-      onAction={(action) => feedback.handleAction(msg(), action)}
-      beforeBody={slots()['before-body'] ? <slot name="before-body" /> : undefined}
+      onAction={(action) => feedback.handleAction(actionMsg(), action)}
+      // In composed mode the app's children ride in the before-body position: MessageBody
+      // renders it first, then no parts, then the action bar, so the body lands where the
+      // parts would have and the bar and `after-body` keep their places below it.
+      beforeBody={
+        composed()
+          ? <>{slots()['before-body'] ? <slot name="before-body" /> : null}<slot /></>
+          : slots()['before-body'] ? <slot name="before-body" /> : undefined
+      }
       afterBody={slots()['after-body'] ? <slot name="after-body" /> : undefined}
     />
   );
@@ -326,6 +369,11 @@ defineWebComponent<Props, Events>('kai-message', {
         codeHighlight={flag('codeHighlight')}
         portalMount={outer.portalMount()}
       >
+        {/* `<kai-action>` children are descriptors, but with a default slot they are ASSIGNED
+            to it and would paint their label text as body content. */}
+        <Show when={composed()}>
+          <style>{'::slotted(kai-action){display:none}'}</style>
+        </Show>
         <Show
           when={showRail()}
           fallback={
