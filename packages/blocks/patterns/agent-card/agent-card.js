@@ -53,8 +53,9 @@ function createAgentCard(/** @type {Agent} */ agent) {
 
   // kai-* events do not bubble, so both listeners sit on their own elements.
   row.addEventListener('kai-click', () => {
-    for (const other of list.children) delete other.dataset.active;
-    card.dataset.active = '';
+    // `active` drives aria-current on the row's own button, so assistive tech
+    // hears which card is selected; the card's border follows it in CSS.
+    for (const other of list.children) other.querySelector('kai-row').active = other === card;
     log.textContent = `${agent.name} is focused.`;
   });
   menu.addEventListener('kai-select', (event) => {

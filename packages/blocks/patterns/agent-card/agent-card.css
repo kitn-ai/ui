@@ -31,7 +31,7 @@
 }
 
 /* Selected. The row keeps its own hover fill; the card only marks the state. */
-.agent-card[data-active] {
+.agent-card:has(kai-row[active]) {
   border-color: var(--ac-primary);
   background: var(--ac-accent);
 }
