@@ -241,3 +241,8 @@ body {
   line-height: 1.65;
   color: var(--color-muted-foreground);
 }
+
+/* The composed toolbar's address keeps the built-in field's mono face (light DOM, so the page reaches the part). */
+.frame kai-input[aria-label="Address"]::part(input) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

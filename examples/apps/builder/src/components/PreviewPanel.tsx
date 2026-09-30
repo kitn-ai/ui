@@ -8,7 +8,7 @@
  * `tab` prop, and `kai-tab-change` keeps `tab` in step with the element.
  */
 import { useRef } from 'react';
-import { Artifact, Button, Checkpoint, Icon, Segmented } from '@kitn.ai/ui/react';
+import { Artifact, Button, Checkpoint, Input, Segmented } from '@kitn.ai/ui/react';
 import type { KaiArtifactElement } from '@kitn.ai/ui/web-components';
 
 import type { PageVersion } from '../versions';
@@ -33,54 +33,15 @@ const TOOLBAR_STYLE = {
   background: 'var(--color-surface)',
 } as const;
 
-// The address box, matching the built-in field: a native read-only input, since kai-input is taller.
-const ADDRESS_STYLE = {
-  flex: 1,
-  minWidth: 0,
-  height: '1.75rem',
-  boxSizing: 'border-box',
-  padding: '0 0.625rem',
-  borderRadius: '0.375rem',
-  border: '1px solid var(--color-border)',
-  background: 'color-mix(in srgb, var(--color-muted) 40%, transparent)',
-  color: 'var(--color-foreground)',
-  font: '12px ui-monospace, SFMono-Regular, Menlo, monospace',
-  outline: 'none',
-} as const;
+// The address field is a 28px `kai-input`; the box only needs to flex.
+const ADDRESS_STYLE = { flex: 1, minWidth: 0 } as const;
 
 // Labels only: the kit ships 48 icon names and has no tablet/phone glyph among
 // them, and an unknown `icon` renders as plain text rather than failing loudly.
 const TAB_OPTIONS = [
   { value: 'preview', label: 'Preview', icon: 'eye' },
   { value: 'code', label: 'Code', icon: 'code' },
-] as const;
-
-// Native buttons in the built-in toggle's box: kai-segmented is taller than the bar's 28px row.
-const TABLIST_STYLE = {
-  display: 'flex',
-  flexShrink: 0,
-  alignItems: 'center',
-  gap: '0.125rem',
-  padding: '0.125rem',
-  borderRadius: '0.375rem',
-  background: 'var(--color-muted)',
-} as const;
-
-const tabStyle = (selected: boolean) =>
-  ({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.375rem',
-    height: '1.5rem',
-    padding: '0 0.5rem',
-    border: 0,
-    borderRadius: '0.25rem',
-    font: '500 12px system-ui, sans-serif',
-    cursor: 'pointer',
-    background: selected ? 'var(--color-background)' : 'transparent',
-    color: selected ? 'var(--color-foreground)' : 'var(--color-muted-foreground)',
-    boxShadow: selected ? '0 1px 2px rgb(0 0 0 / 0.08)' : 'none',
-  }) as const;
+];
 
 const DEVICE_OPTIONS = [
   { value: 'desktop', label: 'Desktop' },
@@ -188,22 +149,15 @@ export function PreviewPanel(props: Props) {
               <div slot="toolbar" style={TOOLBAR_STYLE}>
                 <Button size="icon-sm" variant="ghost" icon="rotate-cw" label="Reload" onClick={() => artifact.current?.reload()} />
                 <Button size="icon-sm" variant="ghost" icon="home" label="Home" onClick={() => artifact.current?.home()} />
-                <input readOnly aria-label="Address" value={selected.fileName} style={ADDRESS_STYLE} />
-                <div role="tablist" aria-label="View" style={TABLIST_STYLE}>
-                  {TAB_OPTIONS.map((o) => (
-                    <button
-                      key={o.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={tab === o.value}
-                      style={tabStyle(tab === o.value)}
-                      onClick={() => props.onTab(o.value)}
-                    >
-                      <Icon name={o.icon} size="sm" />
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
+                <Input size="xs" readonly aria-label="Address" value={selected.fileName} style={ADDRESS_STYLE} />
+                <Segmented
+                  size="xs"
+                  aria-label="View"
+                  options={TAB_OPTIONS}
+                  value={tab}
+                  style={{ flexShrink: 0 }}
+                  onChange={(e) => props.onTab(e.detail.value as 'preview' | 'code')}
+                />
               </div>
             </Artifact>
           </div>
