@@ -138,7 +138,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `density` | `density` | `undefined | "default" | "compact"` | `'default'` | How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
@@ -265,7 +265,7 @@ A complete chat interface: a scrolling message list (with Markdown rendering, re
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `startCollapsed` | `start-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). |
 | `defaultStartCollapsed` | `default-start-collapsed` | `undefined | false | true` | — | Initial collapsed state of the start aside when uncontrolled (default false). Use the `default-start-collapsed` attribute to start collapsed in plain HTML. |
 | `endCollapsed` | `end-collapsed` | `undefined | false | true` | — | Controlled collapsed state of the end aside. Omit for uncontrolled (the element manages it). |
@@ -379,7 +379,7 @@ The full app shell in one tag — a collapsible conversation-list sidebar (left)
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `groups` | — | `undefined | { id: string; userId?: undefined | string; teamId?: undefined | string; name: string; sortOrder: number; createdAt: string }[]` | `[]` | The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. |
 | `conversations` | — | `undefined | { id: string; title: string; groupId?: undefined | string; scope?: undefined | { type: "document" | "collection"; documentId?: undefined | string; filters?: undefined | { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } }; messageCount: number; lastMessageAt?: undefined | string; updatedAt: string; trailing?: undefined | string; lastReadAt?: undefined | string; pinned?: undefined | false | true; archived?: undefined | false | true }[]` | `[]` | The conversations to render, flat. JS property; omit to pass `<kai-conversation>` light-DOM children instead, or for the empty state. |
 | `activeId` | `active-id` | `undefined | string` | — | The id of the currently-open conversation, highlighted in the list. |
@@ -461,7 +461,7 @@ Sidebar panel listing conversations, optionally grouped. Emits events for naviga
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the input and submit button entirely (non-interactive). |
@@ -550,7 +550,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `message` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }` | — | The full message object. Set as a JS property. |
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Who is speaking. NOT an ARIA role: it renders role="article" with a named aria-label instead, and shadows the ARIA role attribute (see the note above). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
@@ -631,7 +631,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `content` | `content` | `string` | `''` | The markdown source. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text and markdown sizing. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme for fenced code blocks. |
@@ -659,7 +659,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `code` | `code` | `string` | `''` | The source code to render. |
 | `language` | `language` | `undefined | string` | — | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name. |
@@ -705,7 +705,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `text` | `text` | `string` | `''` | The reasoning text to display. |
 | `label` | `label` | `undefined | string` | `'Reasoning'` | Trigger label. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
@@ -750,7 +750,7 @@ Collapsible reasoning/thinking block with optional streaming auto-expand.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `tool` | — | `undefined | { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }` | — | The tool-call to display. Set as a JS property. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
@@ -794,7 +794,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `items` | — | `AttachmentData[] | undefined` | `[]` | The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. |
 | `variant` | `variant` | `undefined | "grid" | "inline" | "list"` | `'grid'` | Layout: `grid` = visual tiles, `inline` = icon + label chips, `list` = rows. |
 | `hoverCard` | `hover-card` | `undefined | false | true` | `false` | Wrap each item in a hover card that previews its details. |
@@ -839,7 +839,7 @@ Renders a list of file/document attachments in grid, inline, or list layouts.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | `[]` | The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. |
 | `currentModel` | `current-model` | `undefined | string` | — | The currently-selected model id. Defaults to the first model. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
@@ -891,7 +891,7 @@ A dropdown that lets the user switch between available models.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `context` | — | `ContextData | undefined` | — | Token-usage data. Set as a JS property. |
 | `warnThreshold` | `warn-threshold` | `undefined | number` | — | Fraction (0–1) above which the meter turns yellow. Defaults to `0.7` (70%). |
 | `dangerThreshold` | `danger-threshold` | `undefined | number` | — | Fraction (0–1) above which the meter turns red. Defaults to `0.9` (90%). |
@@ -933,7 +933,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `steps` | — | `undefined | { label: string; content?: undefined | string; id?: undefined | string }[]` | `[]` | The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. |
 | `type` | `type` | `undefined | "single" | "multiple"` | — | Open mode: `'multiple'` (default, any number of steps open at once) or `'single'` (at most one open; opening a step closes the others). |
 | `value` | — | `undefined | string | string[]` | — | Controlled open step key(s): a string in `single` mode, a string array in `multiple`. JS property. |
@@ -985,7 +985,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `suggestions` | — | `undefined | (string | { label: string; value?: undefined | string; icon?: undefined | string })[]` | `[]` | The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). |
 | `variant` | `variant` | `undefined | "outline" | "ghost" | "default"` | `'outline'` | Chip style. Defaults to `outline`. |
 | `size` | `size` | `undefined | "md" | "lg"` | `'md'` | Row height for the list layout. Defaults to `md`; chips are unaffected. |
@@ -1027,7 +1027,7 @@ Suggestion chips or full-width rows. Can render plain strings or `{ label, value
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `href` | `href` | `undefined | string` | `''` | The URL this citation links to (the domain also seeds the default label/favicon). |
 | `label` | `label` | `undefined | string` | — | Trigger label (defaults to the domain). |
 | `headline` | `headline` | `undefined | string` | `''` | Hover-card headline. Attribute: `headline` (`title` is avoided because it is a global HTML attribute that reflects in a CE constructor and breaks it). |
@@ -1056,7 +1056,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `sources` | — | `undefined | { href: string; title?: undefined | string; description?: undefined | string; label?: undefined | string; showFavicon?: undefined | false | true }[]` | `[]` | The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. |
 | `showFavicon` | `show-favicon` | `undefined | false | true` | `false` | Show favicons on all items (per-item `showFavicon` overrides). |
 | `numbered` | `numbered` | `undefined | false | true` | `false` | Label each citation chip with its 1-based index in the merged list (`[1]`, `[2]`) instead of its own `label`. |
@@ -1091,7 +1091,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `barTitle` | `bar-title` | `undefined | string` | `'Was this helpful?'` | The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided because it is a global HTML attribute). |
 | `collectDetail` | `collect-detail` | `undefined | false | true` | — | When set, a not-helpful vote opens an optional detail form before the thank-you confirmation. Attribute: `collect-detail`. |
 | `categories` | — | `undefined | string[]` | — | Optional category chips for the detail form. Set as a JS property (array). |
@@ -1128,7 +1128,7 @@ A thumbs-up / thumbs-down banner (e.g. "Was this helpful?").
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `multiple` | `multiple` | `undefined | false | true` | `true` | Allow picking more than one file. Default true. |
 | `accept` | `accept` | `undefined | string` | — | `accept` for the file picker, e.g. `image/*`. |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | No clicking and no drag-and-drop. |
@@ -1168,7 +1168,7 @@ A drag-and-drop / click-to-pick file upload dropzone.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `transcribe` | — | `undefined | ((audio: Blob) => Promise<string>)` | — | Transcriber the host supplies: records audio, returns the text. **Function-valued property.** |
 | `disabled` | `disabled` | `undefined | false | true` | `false` | Disable the mic button (non-interactive). |
 | `recognitionLang` | `recognition-lang` | `undefined | string` | — | BCP-47 language tag for the native `SpeechRecognition` path (e.g. `en-US`). Attribute: `recognition-lang`. |
@@ -1213,7 +1213,7 @@ A mic button that records audio and optionally transcribes it via a host-supplie
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `variant` | `variant` | `LoaderVariant | undefined` | `'circular'` | Animation style. Default `circular`. |
 | `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Loader size. Default `md`. |
 | `text` | `text` | `undefined | string` | — | Label for the text-based variants. |
@@ -1240,7 +1240,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `text` | `text` | `undefined | string` | `'Thinking'` | The shimmering label, e.g. "Thinking…". |
 | `stoppable` | `stoppable` | `undefined | false | true` | `false` | When true, show a "stop" affordance that fires a `stop` event. |
 | `stopLabel` | `stop-label` | `undefined | string` | `'Answer now'` | Label for the stop affordance. |
@@ -1271,7 +1271,7 @@ An animated "thinking" shimmer bar with an optional stop affordance.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `text` | `text` | `undefined | string` | `''` | The text to shimmer. |
 | `as` | `as` | `undefined | string` | `'span'` | Element tag to render as. Default `span`. |
 | `duration` | `duration` | `undefined | number` | `4` | Animation duration in seconds. |
@@ -1299,7 +1299,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `text` | — | `undefined | string | AsyncIterable<string>` | `''` | Text to stream: a string, or an `AsyncIterable<string>` set as a property. |
 | `mode` | `mode` | `undefined | "typewriter" | "fade"` | `'typewriter'` | Reveal animation. |
 | `speed` | `speed` | `undefined | number` | `20` | Characters or segments per tick. |
@@ -1331,7 +1331,7 @@ Renders a string or an `AsyncIterable<string>` with a reveal animation.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `src` | `src` | `undefined | string` | — | The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. |
 | `alt` | `alt` | `undefined | string` | `''` | Alt text. Attribute `alt`. Always give meaningful text: an empty alt marks the image as decorative. |
 | `class` | `class` | `undefined | string` | — | Extra classes for the `<img>`. |
@@ -1358,7 +1358,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `label` | `label` | `undefined | string` | — | Text beside the icon. |
 | `tooltip` | `tooltip` | `undefined | string` | — | Hint shown on hover. |
 | `variant` | `variant` | `undefined | "ghost" | "default" | "outline"` | `'ghost'` | Button style. |
@@ -1390,7 +1390,7 @@ A small button used to mark or navigate to a conversation checkpoint.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `availableAuthors` | — | `undefined | string[]` | `[]` | Authors to offer as filters. Omit to drop the Authors section. Property only. |
 | `availableTags` | — | `undefined | string[]` | `[]` | Tags to offer as filters. Omit to drop the Tags section. Property only. |
 | `currentLabel` | `current-label` | `undefined | string` | `'All Content'` | Label on the trigger for the active scope. |
@@ -1435,7 +1435,7 @@ A dropdown for filtering the chat to specific authors, tags, content type, or da
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `skills` | — | `undefined | { id: string; name: string }[]` | `[]` | The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. |
 
 #### Declarative children
@@ -1468,7 +1468,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `emptyTitle` | `empty-title` | `undefined | string` | `''` | Title text. Attribute: `empty-title` (`title` is a global HTML attribute). |
 | `description` | `description` | `undefined | string` | `''` | Line of copy under the title. |
 
@@ -1511,7 +1511,7 @@ No events.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | — | The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show a typing indicator on the pending assistant turn. Set it while awaiting the assistant's reply. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
@@ -1567,7 +1567,7 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `src` | `src` | `undefined | string` | — | URL the preview iframe frames. Consumer-controlled. |
 | `files` | — | `undefined | { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[]` | `[]` | Files for the Code tab tree, plus each file's preview `url`. JS property (array); omit for a preview-only artifact. |
 | `tab` | `tab` | `undefined | "preview" | "code"` | — | Controlled active tab: `preview` or `code`. When set, the artifact follows it (re-asserted on change). Leave unset for an uncontrolled tab (see `defaultTab`). |
@@ -1633,7 +1633,7 @@ A sandboxed preview panel for generated apps and pages: an iframe with browser c
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `variant` | `variant` | `undefined | string` | `'bar'` | Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. |
 | `state` | `state` | `undefined | string` | `'idle'` | `idle` (default) or `connecting`/`listening`/`thinking`/`speaking`/`disconnected`; LiveKit's room-lifecycle names are aliases. |
 | `size` | `size` | `undefined | string` | `'md'` | `icon` | `sm` | `md` (default) | `lg` | `xl`. Attribute: `size`. |
@@ -1686,7 +1686,7 @@ Voice-mode visualizer with `bar`, `grid`, `radial`, `wave`, `aurora` and shader 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `text` | `text` | `undefined | string` | `''` | The utterance to read aloud. |
 | `autoplay` | `autoplay` | `undefined | false | true` | `false` | Speak automatically when `text` is set/changed. |
 | `synthesize` | — | `undefined | ((text: string) => Promise<Blob>)` | — | TTS model seam the host supplies: given text, returns an audio `Blob`. **Function-valued property.** |
@@ -1739,7 +1739,7 @@ A speaker button that reads `text` aloud. Native `speechSynthesis` by default; s
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `cards` | — | `undefined | { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }[]` | — | The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. |
 | `types` | — | `undefined | Record<string, string>` | — | Card type→element tag overrides/additions, merged over the built-ins. JS property: `el.types`. |
 | `schemas` | — | `undefined | Record<string, object>` | — | Card-type JSON Schemas keyed by envelope type; validates each card's `data`. JS property: `el.schemas`. |
@@ -1782,7 +1782,7 @@ The list dispatcher for generative-UI card envelopes: set `cards` as a JS proper
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `data` | — | `undefined | { heading?: undefined | string; body?: undefined | string; tone?: undefined | "default" | "warning" | "danger"; actions: { id: string; label: string; style?: undefined | "primary" | "default" | "destructive"; payload?: unknown; default?: undefined | false | true }[]; dismissible?: undefined | false | true }` | — | The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
@@ -1820,7 +1820,7 @@ A named-intent approval card: title, body and a small set of action buttons, def
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `data` | — | `undefined | { prompt?: undefined | string; options: { id: string; label: string; description?: undefined | string; media?: undefined | { image?: undefined | string; imageAlt?: undefined | string; icon?: undefined | string }; meta?: undefined | string; recommended?: undefined | false | true; disabled?: undefined | false | true; payload?: unknown }[]; allowOther?: undefined | false | true | { label?: undefined | string; placeholder?: undefined | string }; submitLabel?: undefined | string; dismissible?: undefined | false | true }` | — | The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
@@ -1867,7 +1867,7 @@ A pick-one-of-N card: a prompt plus a radiogroup of rich option rows, set via th
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `data` | — | `undefined | { type: "object"; title?: undefined | string; description?: undefined | string; required?: undefined | string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: undefined | string; description?: undefined | string; default?: unknown; enum?: undefined | unknown[]; format?: undefined | "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: undefined | number; maximum?: undefined | number; minLength?: undefined | number; maxLength?: undefined | number; pattern?: undefined | string; minItems?: undefined | number; maxItems?: undefined | number; items?: undefined | Record<string, unknown> | { enum: unknown[] }; properties?: undefined | Record<string, Record<string, unknown>>; required?: undefined | string[]; readOnly?: undefined | false | true; "x-kai-widget"?: undefined | "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: undefined | string; "x-kai-step"?: undefined | number; "x-kai-format"?: undefined | "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: undefined | string; "x-kai-mask-guide"?: undefined | string }>; "x-kai-order"?: undefined | string[]; "x-kai-inlineMax"?: undefined | number; "x-kai-submitLabel"?: undefined | string; "x-kai-dismissible"?: undefined | false | true; "x-kai-actions"?: undefined | { id: string; label: string; variant?: undefined | "default" | "ghost" | "outline" }[] }` | — | The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
@@ -1915,7 +1915,7 @@ Renders a JSON-Schema form definition (the `data` property: `type:'object'` plus
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `data` | — | `undefined | { mode?: undefined | "select" | "progress"; heading?: undefined | string; tasks: { id: string; label: string; description?: undefined | string; checked?: undefined | false | true; disabled?: undefined | false | true }[]; selectAll?: undefined | false | true; confirmLabel?: undefined | string; allowEmpty?: undefined | false | true; min?: undefined | number; max?: undefined | number; dismissible?: undefined | false | true }` | — | The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. |
 | `cardId` | `card-id` | `undefined | string` | — | Stable card id correlating every emitted CardEvent. Attribute: `card-id`. |
 | `heading` | `heading` | `undefined | string` | — | Heading rendered in the card chrome (= CardEnvelope.title). Attribute: `heading`. |
@@ -1964,7 +1964,7 @@ A selectable task/plan list card: checkbox rows, an optional select-all, and a c
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `src` | `src` | `undefined | string` | — | The remote card URL. Attribute: `src`. |
 | `providerOrigin` | `provider-origin` | `undefined | string` | — | Exact provider origin (https: or http://localhost for dev). Attribute: `provider-origin`. |
 | `envelope` | — | `undefined | Record<string, unknown>` | — | The card envelope to render. JS property only. |
@@ -1986,7 +1986,7 @@ Mounts a third-party card in a sandboxed cross-origin iframe and re-emits every 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `headline` | `headline` | `undefined | string` | — | The bold title. Named `headline` because `title` collides with the global `HTMLElement.title` attribute (it throws at registration). |
@@ -2057,7 +2057,7 @@ The polished building blocks you compose your own chrome from — themed, access
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `variant` | `variant` | `undefined | "default" | "subtle" | "ghost" | "outline" | "destructive"` | `'default'` | Visual style. Defaults to `default` (filled). |
 | `size` | `size` | `undefined | "sm" | "md" | "lg" | "icon" | "icon-sm"` | `'md'` | Size token: the square glyph-only sizes, or the text-button sizes. Defaults to `md`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: a named icon (e.g. `"mic"`, `"plus"`), an image URL/data-URI, or plain text. Renders before any slotted label. |
@@ -2121,7 +2121,7 @@ A themed button — `variant` (incl. `subtle`), `size` (incl. icon-only), leadin
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `src` | `src` | `undefined | string` | — | Image URL/data-URI. When absent, the `fallback` initials show instead. |
 | `alt` | `alt` | `undefined | string` | — | Alt text for the image. Defaults to `fallback`. |
 | `fallback` | `fallback` | `undefined | string` | `''` | Short text shown when there's no image, usually initials (e.g. "JD", "AI"). |
@@ -2147,7 +2147,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | Badge style; `default` is the muted pill. |
 
 #### Slots
@@ -2186,7 +2186,7 @@ A small pill for labels, status, counts, or inline citation markers. Restyle via
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `name` | `name` | `undefined | string` | `''` | A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. |
 | `size` | `size` | `undefined | "sm" | "md" | "lg"` | `'md'` | Size token. |
 
@@ -2214,7 +2214,7 @@ A curated, theme-aware icon used standalone. Recolor via `::part(icon)` or `curr
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `content` | `content` | `undefined | string` | `''` | The hint text shown on hover/focus of the slotted trigger. |
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the tooltip appears on hover. Defaults to 600. Focus shows it immediately regardless. |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it hides after the pointer leaves. Defaults to 0 (hides immediately). |
@@ -2268,7 +2268,7 @@ A text hint shown on hover/focus of a slotted trigger; positioned and portaled i
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `openDelay` | `open-delay` | `undefined | number` | — | Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). |
 | `closeDelay` | `close-delay` | `undefined | number` | — | Delay (ms) before it closes after the pointer leaves. Defaults to 300. |
 | `placement` | `placement` | `undefined | string` | — | Preferred placement: `'top' | 'bottom' | 'left' | 'right'` (+ optional `-start`/`-end`). Defaults to `'bottom'`; flips to stay in view. |
@@ -2321,7 +2321,7 @@ Rich content on hover/focus of a trigger — the markup-carrying sibling of `<ka
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `severity` | `severity` | `undefined | "neutral" | "info" | "warning" | "error" | "success"` | `'neutral'` | Severity. Defaults to `'neutral'`. |
 | `icon` | `icon` | `undefined | string` | — | Leading icon: omit for the severity default, `"none"` to hide it, or a named icon to override. |
 | `dismissible` | `dismissible` | `undefined | false | true` | `false` | Show a dismiss (×) that hides the notice and emits `kai-dismiss`. |
@@ -2362,7 +2362,7 @@ An inline notice/alert carrying a severity icon, the right a11y role, an optiona
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. |
 
 #### Styleable parts
@@ -2393,7 +2393,7 @@ A themed divider between groups of content (toolbar sections, menu groups, heade
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `orientation` | `orientation` | `undefined | "vertical" | "horizontal" | "both"` | `'vertical'` | Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. |
 
 #### Slots
@@ -2432,7 +2432,7 @@ A scroll container with a themed, thin, cross-browser scrollbar and a keyboard-r
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `variant` | `variant` | `undefined | "text" | "rect" | "circle"` | `'text'` | `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. |
 | `width` | `width` | `undefined | string` | — | CSS width (e.g. `'12rem'`, `'60%'`). Defaults to full width (responsive); for `circle` it is the diameter. |
 | `height` | `height` | `undefined | string` | — | CSS height. Defaults per variant (a text line height; circle = width). |
@@ -2466,7 +2466,7 @@ A pulsing loading placeholder that preserves layout while content arrives. Respo
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `items` | — | `undefined | { id?: undefined | string; label?: undefined | string; icon?: undefined | string; shortcut?: undefined | string; checked?: undefined | false | true; radioGroup?: undefined | string; disabled?: undefined | false | true; description?: undefined | string; control?: undefined | "check" | "switch"; note?: undefined | true; separator?: undefined | false | true; heading?: undefined | false | true; items?: undefined | Record<string, unknown>[] }[]` | — | Tree of menu items. Set as a JS property, not an HTML attribute. |
 | `placement` | `placement` | `undefined | string` | — | Optional placement hint (unused by the underlying Dropdown which always positions bottom-start, kept for future extension). |
 | `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: a leading icon (a named icon, an image URL/data-URI, or text). A slotted trigger overrides it. |
@@ -2540,7 +2540,7 @@ A cascading action menu built from a JSON items-tree (submenus, separators, chec
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `items` | — | `undefined | { id: string; label: string; icon?: undefined | string; description?: undefined | string; shortcut?: undefined | string; group?: undefined | string }[]` | — | Flat list of items. Set as a JS property, not an HTML attribute. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder text for the search input. |
 | `emptyLabel` | `empty-label` | `undefined | string` | — | Label shown when no items match the current query. |
@@ -2591,7 +2591,7 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `type` | `type` | `undefined | string` | `'text'` | Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. |
 | `value` | `value` | `undefined | string` | — | Controlled value, reflected to the `value` attribute. |
 | `placeholder` | `placeholder` | `undefined | string` | — | Placeholder shown when empty. |
@@ -2672,7 +2672,7 @@ Single-line text field with a label, hint and error, plus opt-in format masks: `
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `appearance` | `appearance` | `undefined | "outlined" | "filled" | "plain" | "accent"` | `'outlined'` | Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. |
 | `orientation` | `orientation` | `undefined | "vertical" | "horizontal" | "responsive"` | `'vertical'` | `vertical` (default, media on top), `horizontal` (media at the start), or `responsive`. |
 | `collapse` | `collapse` | `undefined | string` | `'28rem'` | The card width below which a `responsive` card collapses to vertical and the footer actions stack. A CSS length; default `28rem`. Attribute: `collapse`. |
@@ -2736,7 +2736,7 @@ The presentational card: one web component whose flexibility comes from structur
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `label` | `label` | `undefined | string` | `DEFAULT_LABEL` | Accessible name for the modal, used when no `header` slot is projected. Defaults to `Dialog`. |
@@ -2800,7 +2800,7 @@ A modal dialog with `header` and `footer` slots, Escape and backdrop close, and 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `placement` | `placement` | `undefined | "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start"` | `'bottom-start'` | Floating placement relative to the trigger (floating-ui placement). |
 | `gutter` | `gutter` | `undefined | number` | `6` | Gap in px between the trigger and the panel. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
@@ -2854,7 +2854,7 @@ Popover, dropdown and menu are three corners of one deliberate triangle, not thr
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `triggerIcon` | `trigger-icon` | `undefined | string` | — | Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. |
 | `triggerLabel` | `trigger-label` | `undefined | string` | — | Built-in trigger: a text label. |
 | `triggerIconTrailing` | `trigger-icon-trailing` | `undefined | string` | — | Built-in trigger: a trailing icon (e.g. `"chevron-down"` for a select look). |
@@ -2918,7 +2918,7 @@ A trigger plus a floating menu surface you fill yourself: slot arbitrary markup 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `items` | — | `undefined | { id: string; label?: undefined | string; icon?: undefined | string; disabled?: undefined | false | true }[]` | — | Tabs to render. Set as a JS property, not an HTML attribute. |
 | `value` | `value` | `undefined | string` | — | Controlled selected id. Set as a JS property (or the `value` attribute); drive it from your app in response to `kai-tab-change`. Omit for uncontrolled. |
 | `defaultValue` | `default-value` | `undefined | string` | — | Initial selected id when uncontrolled (use the `default-value` attribute in plain HTML). |
@@ -2970,7 +2970,7 @@ An accessible tab strip, selection only: set `items` as a JS property, listen fo
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `options` | — | `{ value: string; label: string; icon?: undefined | string }[]` | `[]` | The selectable segments, left to right. Set as a JS property (array). |
 | `value` | `value` | `undefined | string` | — | Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. |
 | `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
@@ -3010,7 +3010,7 @@ A single-select pill track (a segmented / toggle group). Set `options` as a JS p
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence state, which sets the colour. Default `new`. |
 | `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring; off by default and never under prefers-reduced-motion. |
 | `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative. |
@@ -3044,7 +3044,7 @@ A small presence / notification dot: `status` picks the color, `pulse` adds a pi
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `keys` | `keys` | `undefined | string` | — | Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. |
 | `platform` | `platform` | `undefined | "auto" | "mac" | "other"` | `'auto'` | `mac` uses ⌘/⌥, `other` uses Ctrl. `auto` (default) sniffs the OS. |
 | `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Cap size. Defaults to `md`. |
@@ -3086,7 +3086,7 @@ A keyboard-shortcut display: feed `keys` tokens joined by `+` (`Mod+Shift+K`) an
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `value` | `value` | `undefined | string` | — | The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. |
 | `editing` | `editing` | `undefined | false | true` | `false` | Controlled edit state. `el.editing = true` opens the field; reflected to the `editing` attribute. |
 | `editTrigger` | `edit-trigger` | `undefined | "dblclick" | "click"` | `'dblclick'` | How the read view enters edit mode. Default is a double click; `edit()` and `editing` are unaffected. |
@@ -3139,7 +3139,7 @@ Inline rename, built on `kai-input`: shows `value` as text, and a double-click (
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `value` | `value` | `undefined | number` | — | Current progress value (0..max). Attribute: `value`. |
 | `max` | `max` | `undefined | number` | — | The value `value` runs to (default 100). Attribute: `max`. |
 | `label` | `label` | `undefined | string` | — | Optional caption above the track. Attribute: `label`. |
@@ -3174,7 +3174,7 @@ A thin determinate progress bar: a rounded track whose fill width is `value / ma
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `name` | `name` | `undefined | string` | — | The agent's name, the primary label. Attribute: `name`. |
 | `active` | `active` | `undefined | false | true` | — | Selected / focused state: highlighted border + surface. Attribute: `active`. |
 | `needsAttention` | `needs-attention` | `undefined | false | true` | — | Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. |
@@ -3220,7 +3220,7 @@ Chat-agnostic arrangement: the navigation, panes, docks and settings rows you co
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `items` | — | `undefined | { id: string; label?: undefined | string; icon?: undefined | string; badge?: undefined | string; trailing?: undefined | string; disabled?: undefined | false | true; children?: undefined | Record<string, unknown>[]; status?: undefined | { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: undefined | string; pulse?: undefined | false | true }; meta?: undefined | string; action?: undefined | { icon: string; label: string }; closable?: undefined | false | true }[]` | — | The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. |
 | `value` | `value` | `undefined | string` | — | Active item id (controlled). |
 | `defaultValue` | `default-value` | `undefined | string` | — | Initial active id when uncontrolled. |
@@ -3276,7 +3276,7 @@ A vertical navigation list driven by a JSON `items` tree set as a JS property: i
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `headline` | `headline` | `undefined | string` | — | Header title text. A projected `title` slot overrides it. (Named `headline` because `title` collides with the global `HTMLElement.title` attribute.) |
@@ -3342,7 +3342,7 @@ A full-bleed overlay destination: the push/drill-in surface that takes over its 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `headline` | `headline` | `undefined | string` | `''` | The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. |
 | `subtitle` | `subtitle` | `undefined | string` | — | A role / label shown under the title (e.g. "Reviewer", "claude-sonnet"). Attribute: `subtitle`. |
 | `maximized` | `maximized` | `undefined | false | true` | `false` | Show the restore glyph instead of maximize, and signal the maximized view-state. Drive it yourself in response to `kai-maximize`. Attribute: `maximized`. |
@@ -3402,7 +3402,7 @@ A framed panel for a multi-agent workspace: a header with title and subtitle, a 
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `tabs` | — | `undefined | { id: string; name: string; status?: undefined | { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: undefined | string; pulse?: undefined | false | true }; needsAttention?: undefined | false | true; number?: undefined | number }[]` | — | The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). |
 | `active` | `active` | `undefined | string` | — | The active tab id (controlled). Omit for uncontrolled (the first tab). |
 | `focused` | `focused` | `undefined | false | true` | `false` | Highlight the frame as the ACTIVE group in a multi-group layout. Attribute: `focused`. |
@@ -3464,7 +3464,7 @@ An editor group: a tab strip of numbered status-badge tabs over the active tab's
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `orientation` | `orientation` | `undefined | "horizontal" | "vertical"` | `'horizontal'` | Whether the group lays out as a row or a column. |
 | `maximizedIndex` | — | `undefined | number | null` | `null` | Which item index is maximized (null = none). Declarative source of truth. |
 | `handle` | `handle` | `undefined | "line" | "grip" | "none"` | `'line'` | Divider affordance drawn inside each draggable handle's 8px grab zone. |
@@ -3514,7 +3514,7 @@ A drag-resizable panel group: lays out its `<kai-resizable-item>` children along
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `size` | `size` | `undefined | string` | — | Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. |
 | `min` | `min` | `undefined | string` | — | Minimum size during resize (px or %). |
 | `max` | `max` | `undefined | string` | — | Maximum size during resize (px or %). |
@@ -3558,7 +3558,7 @@ One panel inside `<kai-resizable>`: `size` (the starting share), `min` / `max` b
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `open` | `open` | `undefined | false | true` | — | Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. |
 | `defaultOpen` | `default-open` | `undefined | false | true` | — | Initial open state on mount (uncontrolled seed). |
 | `position` | `position` | `undefined | "bottom-end" | "bottom-start" | "top-end" | "top-start"` | `'bottom-end'` | Which corner the dock sits in. Logical, so `-end` follows the writing direction and an RTL page docks on the left. Attribute: `position`. |
@@ -3628,7 +3628,7 @@ The corner launcher: a floating button pinned to a viewport corner, with a panel
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
 | `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
 
@@ -3672,7 +3672,7 @@ A recessed tray that frames a prompt input, with optional lip regions above (`sl
 
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
+| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `label` | `label` | `undefined | string` | `''` | Row label (primary text). Attribute: `label`. |
 | `description` | `description` | `undefined | string` | — | Optional secondary description under the label. Attribute: `description`. |
 

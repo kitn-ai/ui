@@ -10,7 +10,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -97,7 +97,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -369,7 +369,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -529,7 +529,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -720,7 +720,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -781,7 +781,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -831,7 +831,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -981,7 +981,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -1163,7 +1163,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -1263,7 +1263,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -1363,7 +1363,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -1989,7 +1989,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2100,7 +2100,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2193,7 +2193,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2269,7 +2269,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2393,7 +2393,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2548,7 +2548,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2649,7 +2649,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2748,7 +2748,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -2864,7 +2864,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3050,7 +3050,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3146,7 +3146,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3255,7 +3255,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3388,7 +3388,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3617,7 +3617,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3745,7 +3745,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -3934,7 +3934,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4086,7 +4086,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4200,7 +4200,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4246,7 +4246,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4331,7 +4331,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4434,7 +4434,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4527,7 +4527,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4607,7 +4607,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4738,7 +4738,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4859,7 +4859,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4906,7 +4906,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -4958,7 +4958,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5018,7 +5018,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5283,7 +5283,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5355,7 +5355,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5396,7 +5396,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5541,7 +5541,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5587,7 +5587,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5640,7 +5640,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5703,7 +5703,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -5886,7 +5886,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6110,7 +6110,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6226,7 +6226,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6351,7 +6351,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6428,7 +6428,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6588,7 +6588,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6655,7 +6655,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6776,7 +6776,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6863,7 +6863,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -6941,7 +6941,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7048,7 +7048,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7120,7 +7120,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7199,7 +7199,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7488,7 +7488,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7573,7 +7573,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7694,7 +7694,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7748,7 +7748,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7841,7 +7841,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -7945,7 +7945,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8014,7 +8014,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8126,7 +8126,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8175,7 +8175,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8285,7 +8285,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8429,7 +8429,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8479,7 +8479,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8555,7 +8555,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8691,7 +8691,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8766,7 +8766,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8891,7 +8891,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8934,7 +8934,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -8997,7 +8997,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9060,7 +9060,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9127,7 +9127,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9176,7 +9176,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9287,7 +9287,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9370,7 +9370,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9453,7 +9453,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9522,7 +9522,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9620,7 +9620,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9715,7 +9715,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9803,7 +9803,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -9900,7 +9900,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10011,7 +10011,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10151,7 +10151,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10214,7 +10214,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10275,7 +10275,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10429,7 +10429,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10534,7 +10534,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10627,7 +10627,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10749,7 +10749,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10794,7 +10794,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10877,7 +10877,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -10982,7 +10982,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
@@ -11095,7 +11095,7 @@
         "type": "\"light\" | \"dark\" | \"auto\"",
         "optional": true,
         "scalar": true,
-        "description": "Color mode (`auto` follows prefers-color-scheme).",
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
         "default": "'auto'",
         "universal": true,
         "displayType": "\"light\" | \"dark\" | \"auto\""
