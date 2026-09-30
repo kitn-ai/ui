@@ -10,6 +10,7 @@
  * prompt (packages/create-kai/test/menu-honesty.test.ts).
  */
 import { FRAMEWORK_BLOCK_FORMS, type BlockFormId, type FormFile } from '@kitn.ai/blocks/forms';
+import cliPackage from '../../../../packages/cli/package.json';
 import { PATTERN_INSTALL_ROOT } from '@kitn.ai/blocks/targets';
 import { BLOCKS_PREVIEW } from '../generated/blocks-preview';
 
@@ -128,9 +129,14 @@ export function patternsUrl(): string {
   return '/blocks/patterns.json';
 }
 
-/** The add command for a pattern, derived from its own id. */
+/**
+ * The add command for a pattern, derived from its own id and from the CLI
+ * package's own name. `kai add` forwards to create-kai, and `npx -y` is the
+ * documented no-install spelling (guides/installation). The package name is
+ * read from packages/cli/package.json, so a rename moves the page with it.
+ */
 export function addPatternCommandFor(id: string): string {
-  return `npx @kitn.ai/cli add ${id}`;
+  return `npx -y ${cliPackage.name} add ${id}`;
 }
 
 /** Where `add` writes a pattern's files, from the ONE install-root table. */
