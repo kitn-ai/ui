@@ -303,6 +303,24 @@ describe('component_reference — composition seams (slots + ::part)', () => {
     expect(hint).toMatch(/<kai-suggestion>/);
   });
 
+  it('points kai-conversations at its real row element, and calls the data carrier what it is', async () => {
+    const text = await textFor('kai-conversations');
+    const hint = text.split('\n').find((l) => l.includes('compose it:'))!;
+    // The row element lives in the default slot; the old hint never mentioned it.
+    expect(hint).toMatch(/<kai-conversation-item>/);
+    // `<kai-conversation>` is read by the parent and is not a registered element.
+    expect(listWebComponents()).not.toContain('kai-conversation');
+    expect(hint).toMatch(/<kai-conversation>[^;]*not a standalone element/);
+  });
+
+  it('names the default slot, from its own manifest description, where there is one', async () => {
+    const text = await textFor('kai-button');
+    const hint = text.split('\n').find((l) => l.includes('compose it:'))!;
+    const dflt = getElement('kai-button')!.slots!.find((s) => s.name === '')!;
+    expect(hint).toContain('default slot');
+    expect(hint).toContain(dflt.description!.split('. ')[0].replace(/\.$/, ''));
+  });
+
   it('gives an element with no slots and no children support no compose-it line', async () => {
     const text = await textFor('kai-avatar');
     expect(text).not.toContain('compose it:');

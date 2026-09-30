@@ -668,15 +668,24 @@ function eventDetail(typeText: string | undefined): string | undefined {
  */
 function composeHint(
   tag: string,
-  slots: { name: string }[],
+  slots: { name: string; description?: string }[],
   children: { tagName: string }[],
 ): string | undefined {
   const ways: string[] = [];
   const named = slots.filter((s) => s.name).map((s) => `\`slot="${s.name}"\``);
   if (named.length > 0) ways.push(`fill ${named.join(', ')}`);
-  else if (slots.length > 0) ways.push('put your markup inside it (its default slot)');
+  const dflt = slots.find((s) => !s.name);
+  if (dflt) {
+    // The slot's own doc says what belongs in it (a row element, a label); the first sentence is enough.
+    const doc = dflt.description?.trim().split(/\.\s/)[0].replace(/\.$/, '');
+    ways.push(`put children in the default slot${doc ? ` (${doc})` : ''}`);
+  }
   if (children.length > 0) {
-    ways.push(`write ${children.map((c) => `\`<${c.tagName}>\``).join(', ')} children instead of setting the array prop`);
+    const registered = new Set(listWebComponents());
+    const tags = children.map((c) =>
+      registered.has(c.tagName) ? `\`<${c.tagName}>\`` : `\`<${c.tagName}>\` (read by the parent, not a standalone element)`,
+    );
+    ways.push(`or write ${tags.join(', ')} instead of setting the array prop`);
   }
   if (ways.length === 0) return undefined;
   return `**compose it:** \`<${tag}>\`: ${ways.join('; ')}. Three ways to compose: https://ui.kitn.ai/guides/composition/`;
