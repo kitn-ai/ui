@@ -10,7 +10,6 @@ prev: false
 next: false
 ---
 
-import BlocksIsland from '../../../components/blocks/BlocksIsland.tsx';
 import PatternsList from '../../../components/blocks/PatternsList.tsx';
 
 {/* SERVER-rendered marker, the same as `.landing-page` and `.kai-fullscreen`.
@@ -20,5 +19,4 @@ import PatternsList from '../../../components/blocks/PatternsList.tsx';
     cannot live inside the island. */}
 <div class="blocks-page not-content">
   <PatternsList client:only="solid" />
-  <BlocksIsland client:only="solid" />
 </div>
