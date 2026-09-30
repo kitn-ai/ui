@@ -179,10 +179,10 @@ async function main() {
   // dist/patterns. No twins: a pattern's script is written as-is, and only its
   // kit import is ever rewritten (at `add` time, by the shared renderer).
   const patternsSrcDir = path.join(blocksPkgRoot, 'patterns');
-  failIf(existsSync(patternsSrcDir) ? null : `create-kai build: no patterns directory at ${patternsSrcDir} - @kitn.ai/blocks resolved, but its patterns/ directory is not there`);
+  failIf(guards.patternsSourceRootProblem(patternsSrcDir, existsSync));
   await cp(patternsSrcDir, path.join(dist, 'patterns'), { recursive: true });
   const patternCount = (await readdir(path.join(dist, 'patterns'), { withFileTypes: true })).filter((d) => d.isDirectory()).length;
-  failIf(patternCount === 0 ? 'create-kai build: copied zero pattern directories from @kitn.ai/blocks - a zero-pattern copy is a broken resolve, not an empty tier' : null);
+  failIf(guards.zeroPatternsCopiedProblem(patternCount));
   console.log(`  patterns  ${patternCount} copied from ${path.relative(repoRoot, blocksPkgRoot)}/patterns`);
 
   // The .js twin beside every .ts block source, written AFTER the recursive

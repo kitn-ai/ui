@@ -451,6 +451,25 @@ export function zeroBlocksCopiedProblem(count: number): string | null {
 }
 
 /**
+ * The pattern tier's two build rules, the same shape as the block pair above
+ * and for the same reason: `add <pattern>` walks `dist/patterns/` at runtime,
+ * so a missing source directory (checked BEFORE the `cp` it explains) or an
+ * empty copy installs cleanly and then finds no pattern to write.
+ */
+export function patternsSourceRootProblem(
+  patternsDir: string,
+  exists: (absolutePath: string) => boolean,
+): string | null {
+  if (exists(patternsDir)) return null;
+  return `create-kai build: no patterns directory at ${patternsDir} - @kitn.ai/blocks resolved, but its patterns/ directory is not there`;
+}
+
+export function zeroPatternsCopiedProblem(count: number): string | null {
+  if (count > 0) return null;
+  return 'create-kai build: copied zero pattern directories from @kitn.ai/blocks - a zero-pattern copy is a broken resolve, not an empty tier';
+}
+
+/**
  * Refuse to build a tarball whose copied blocks carry no stripped .js twins.
  *
  * The block controller is TypeScript, and `add` renders the html form at
