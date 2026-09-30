@@ -289,6 +289,41 @@ describe('component_reference — composition seams (slots + ::part)', () => {
     expect(text).toMatch(/\bsidebar\b/);
   });
 
+  it('gives kai-thread a one-line "compose it:" hint that names its slots', async () => {
+    const text = await textFor('kai-thread');
+    const hint = text.split('\n').filter((l) => l.includes('compose it:'));
+    expect(hint).toHaveLength(1);
+    expect(hint[0]).toMatch(/slot="empty"/);
+    expect(hint[0]).toMatch(/\/guides\/composition\//);
+  });
+
+  it('names the child element for an element that takes light-DOM children', async () => {
+    const text = await textFor('kai-suggestions');
+    const hint = text.split('\n').find((l) => l.includes('compose it:'));
+    expect(hint).toMatch(/<kai-suggestion>/);
+  });
+
+  it('gives an element with no slots and no children support no compose-it line', async () => {
+    const text = await textFor('kai-avatar');
+    expect(text).not.toContain('compose it:');
+  });
+
+  it('derives the hint from the manifest: present exactly when slots or children exist', async () => {
+    let withHint = 0;
+    for (const tag of listWebComponents()) {
+      const el = getElement(tag)!;
+      const expected = (el.slots?.length ?? 0) > 0 || (el.declarativeChildren?.length ?? 0) > 0;
+      const text = await textFor(tag);
+      expect(text.includes('compose it:'), tag).toBe(expected);
+      if (expected) {
+        withHint++;
+        for (const s of el.slots ?? []) if (s.name) expect(text, tag).toContain(`slot="${s.name}"`);
+        for (const c of el.declarativeChildren ?? []) expect(text, tag).toContain(`<${c.tagName}>`);
+      }
+    }
+    expect(withHint).toBeGreaterThan(10);
+  });
+
   it('documents kai-prompt-input styleable ::part with its copy-paste recipe', async () => {
     const text = await textFor('kai-prompt-input');
     expect(text).toMatch(/### Styleable parts/);

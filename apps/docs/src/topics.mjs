@@ -32,6 +32,7 @@ export const topics = [
         label: 'Compose & customize',
         items: [
           { label: 'How composition works', slug: 'guides/how-composition-works' },
+          { label: 'The three ways to compose', slug: 'guides/composition' },
           { label: 'Build a composer', slug: 'guides/build-a-composer' },
           { label: 'Compose a message thread', slug: 'guides/compose-message-thread' },
           { label: 'Compose your own shell', slug: 'patterns/compose-your-own' },

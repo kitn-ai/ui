@@ -113,6 +113,8 @@ export interface Declaration {
   cssProperties?: CemCssProperty[];
   slots?: CemSlot[];
   cssParts?: CemCssPart[];
+  /** Light-DOM child elements the element parses into data (`<kai-suggestion>` in `<kai-suggestions>`). */
+  declarativeChildren?: { tagName: string }[];
 }
 
 interface CemModule {

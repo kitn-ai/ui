@@ -660,6 +660,28 @@ function eventDetail(typeText: string | undefined): string | undefined {
   return m ? m[1].trim() || undefined : undefined;
 }
 
+/**
+ * The one-line "compose it:" hint. Every name in it is read off the element's own
+ * manifest entry (its slots and its declarative child elements), so an element that
+ * gains a slot gains the hint with no edit here, and one with neither gets no line
+ * rather than a claim that it composes. The guide link is the only literal.
+ */
+function composeHint(
+  tag: string,
+  slots: { name: string }[],
+  children: { tagName: string }[],
+): string | undefined {
+  const ways: string[] = [];
+  const named = slots.filter((s) => s.name).map((s) => `\`slot="${s.name}"\``);
+  if (named.length > 0) ways.push(`fill ${named.join(', ')}`);
+  else if (slots.length > 0) ways.push('put your markup inside it (its default slot)');
+  if (children.length > 0) {
+    ways.push(`write ${children.map((c) => `\`<${c.tagName}>\``).join(', ')} children instead of setting the array prop`);
+  }
+  if (ways.length === 0) return undefined;
+  return `**compose it:** \`<${tag}>\`: ${ways.join('; ')}. Three ways to compose: https://ui.kitn.ai/guides/composition/`;
+}
+
 function formatReference(tag: string, provider: ToolProvider): string {
   const el = getElement(tag);
 
@@ -859,6 +881,8 @@ function formatReference(tag: string, provider: ToolProvider): string {
 
   // ── Composition slots ──────────────────────────────────────────────────────
   const slots = el.slots ?? [];
+  const compose = composeHint(tag, slots, el.declarativeChildren ?? []);
+  if (compose) lines.push('', compose);
   if (slots.length > 0) {
     lines.push(
       '',

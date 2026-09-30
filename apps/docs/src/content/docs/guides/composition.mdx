@@ -1,0 +1,179 @@
+---
+title: The three ways to compose
+description: Fill a slot, write child elements, or register a tag. One runnable HTML page for each, plus where components, patterns and templates fit.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+You build with `kai-*` elements at three sizes, and you bend each one in three ways. Pick the size first, then the way.
+
+## Three tiers
+
+| Tier | What it is | How you get it |
+| --- | --- | --- |
+| **Components** | One `kai-*` element: `kai-button`, `kai-thread`, `kai-artifact`. | The `<script type="module">` import, or your bundler. |
+| **Patterns** | A small arrangement of components as plain HTML and JS you own. | `npx -y @kitn.ai/cli add <id>`. See [Patterns](/patterns/). |
+| **Templates** | A whole app: the `create-kai` starters. | `npm create kai`. |
+
+A pattern is not a black box. It is a page of ordinary components with a script wired to them, and it is the fastest way to see the ways below used together.
+
+Every example on this page is a complete page. Save it, open it, and it runs from the CDN. The unpinned URL tracks the latest release, so [pin a version](/guides/installation/) before you ship.
+
+## 1. Fill a named slot
+
+A slot is a hole in the element's shadow DOM. Put a child with `slot="name"` in it and the element renders your markup there, styled by your page.
+
+`kai-prompt-dock` frames a prompt input and has a `top` and a `bottom` band. A band renders only when something fills it, and `topOpen` / `bottomOpen` open and close it from script:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<kai-prompt-dock id="dock" style="display:block;max-width:40rem;margin:2rem auto">
+  <div slot="top">You are close to your plan limit.</div>
+  <kai-prompt-input placeholder="Ask anything"></kai-prompt-input>
+  <div slot="bottom"><kai-button id="dismiss" size="sm" variant="ghost">Dismiss notice</kai-button></div>
+</kai-prompt-dock>
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
+  const dock = document.getElementById('dock');
+  dock.topOpen = true;
+  // kai-* events do not bubble, so listen on the element itself.
+  document.getElementById('dismiss').addEventListener('kai-click', () => {
+    dock.topOpen = false;
+  });
+</script>
+```
+
+`kai-artifact` does the same with `toolbar`, `toolbar-start` and `toolbar-end`: replace the whole bar, or add controls at either end.
+
+Every element lists its slots on its own page and in `component_reference`. A slot is either **inject** (yours is added) or **replace** (yours stands in, and you own the wiring). [How composition works](/guides/how-composition-works/) has the detail.
+
+### Read state off the element
+
+Slotted content is your DOM, so it can't see the element's internal state. The elements that need this publish read-only properties instead. `kai-artifact` exposes `url`, `urlSafe`, `canGoBack` and `canGoForward`, and fires `kai-history-change` when they move:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<kai-artifact id="viewer" src="https://example.com/" iframe-title="Preview" style="display:block;height:20rem">
+  <div slot="toolbar-end">
+    <kai-button id="back" size="sm" variant="ghost" disabled>Back</kai-button>
+    <kai-button id="open" size="sm" variant="ghost" disabled>Open</kai-button>
+  </div>
+</kai-artifact>
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
+  const viewer = document.getElementById('viewer');
+  const back = document.getElementById('back');
+  const open = document.getElementById('open');
+  viewer.addEventListener('kai-history-change', () => {
+    back.disabled = !viewer.canGoBack;
+    // url is display text only. Gate any link or window.open on urlSafe.
+    open.disabled = !viewer.urlSafe;
+  });
+  back.addEventListener('kai-click', () => viewer.back());
+  open.addEventListener('kai-click', () => {
+    if (viewer.urlSafe) window.open(viewer.url, '_blank', 'noopener,noreferrer');
+  });
+</script>
+```
+
+The properties have no setter. Drive the element with its methods (`back()`, `navigate(url)`), not by assigning to them.
+
+## 2. Write child elements
+
+When the content is a list, you write the rows. `kai-conversations` takes `kai-conversation-item` children, so a row can carry your markup and sit inside your structure. A `<details>` folder works, and the list keeps one tab stop across folders:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<style>
+  kai-conversations { display: block; width: 18rem; height: 24rem; }
+  summary { padding: 0.5rem; cursor: pointer; }
+  details > kai-conversation-item { margin-inline-start: 1rem; }
+</style>
+<kai-conversations id="list" active-id="a1">
+  <details open>
+    <summary>Kanban board</summary>
+    <kai-conversation-item conversation-id="a1">Four columns</kai-conversation-item>
+    <kai-conversation-item conversation-id="a2">Drag and drop</kai-conversation-item>
+  </details>
+  <kai-conversation-item conversation-id="r1">Naming the export</kai-conversation-item>
+</kai-conversations>
+<p id="status"></p>
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js';
+  const list = document.getElementById('list');
+  list.addEventListener('kai-conversation-select', (e) => {
+    // The list reports the click; your state decides what is active.
+    list.activeId = e.detail.id;
+    document.getElementById('status').textContent = `Opened ${e.detail.id}`;
+  });
+</script>
+```
+
+Several elements accept light-DOM children in place of an array property: `kai-suggestions` with `kai-suggestion`, `kai-model-switcher` with `kai-model`, `kai-chain-of-thought` with `kai-step`, and the rest listed in `component_reference`. Use the array when the data comes from code, and the children when it is markup you write.
+
+For the whole arrangement (header, folders, search, collapse) start from the [conversation-rail pattern](/patterns/conversation-rail/).
+
+## 3. Register a tag
+
+Some content is per-item data the element has to render itself, like a card inside a message. You can't slot it, because a slotted node can't read the item. Instead you map a type to a custom-element tag, and the kit creates that tag for each item and sets the data on it as properties.
+
+`cardTypes` on `kai-thread` (and on `kai-message`) is that map from a card's `type` to your tag. Your element receives `data`, `cardId`, `heading` and `resolution`:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<kai-thread id="thread" style="display:block;height:20rem"></kai-thread>
+<script type="module">
+  const thread = document.getElementById('thread');
+
+  // Set before the kit has loaded. A property set on a not-yet-defined kai-*
+  // element is kept and applied when it upgrades.
+  thread.cardTypes = { 'order-status': 'order-status-card' };
+  thread.messages = [
+    {
+      id: 'm1',
+      role: 'assistant',
+      parts: [
+        { type: 'text', text: 'Your order shipped.' },
+        { type: 'card', envelope: { type: 'order-status', id: 'c1', data: { id: '4821', state: 'Shipped' } } },
+      ],
+    },
+  ];
+
+  customElements.define('order-status-card', class extends HTMLElement {
+    set data(d) {
+      this.textContent = `Order ${d.id}: ${d.state}`;
+    }
+  });
+
+  await import('https://cdn.jsdelivr.net/npm/@kitn.ai/ui/dist/kai.es.js');
+</script>
+```
+
+A type with no tag renders the kit's fallback card. A tag that is not defined within two seconds renders the fallback too and logs one warning, so a typo shows up instead of leaving a blank. Define it late and it still swaps in.
+
+The same lookup is exported for your own code as `resolveRenderer(map, keys)` and the `RendererMap` type from `@kitn.ai/ui`. Per-tool renderers on `kai-thread` are not built yet. Today the registry covers card types.
+
+Card contents themselves are covered in [Generative UI](/guides/generative-ui/).
+
+## Which way
+
+- **Your markup in a fixed place** → a slot.
+- **A list you write** → child elements.
+- **Per-item content the kit renders from data** → register a tag.
+- **Restyle what the kit renders** → `::part` and tokens, not a slot.
+
+## The page owns the theme
+
+None of these examples sets a color. Every `kai-*` element follows the page's scheme through one variable, `--kai-color-scheme`, set by a `dark` or `light` class on `<html>` or any ancestor. Your slotted content and your registered tags sit under the same ancestor, so they follow it too. Details are in [Dark mode](/guides/theming/#dark-mode).
+
+## The preset rule
+
+A ready-made element, like `kai-chat` or `kai-workspace`, may be built only from parts you can also import. If a preset uses a piece that is not public, you can't rebuild it when you outgrow it. `pnpm --filter @kitn.ai/ui run lint:preset-parts` enforces it: it fails when a facade imports a private module, so anything a preset does, you can compose yourself.
+
+<Aside title="Outgrown a preset?">
+Step down a tier. Copy a [pattern](/patterns/), or [compose your own shell](/patterns/compose-your-own/) from the same parts the preset uses.
+</Aside>
