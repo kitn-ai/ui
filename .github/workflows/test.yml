@@ -1640,8 +1640,15 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
+      # `scheme` is the colour scheme axe audits. `dark` sets KAI_A11Y_DARK=1,
+      # which puts `.dark` on <html> for the whole run (see .storybook/preview.ts).
+      # A matrix dimension rather than a second pass inside each leg: the two
+      # schemes run in parallel, so wall-clock stays where the light-only run was,
+      # and `storybook-gate` (needs: [storybook]) requires EVERY leg of the
+      # expanded matrix, so the dark pass is required with no ruleset change.
       matrix:
         shard: [1, 2, 3, 4]
+        scheme: [light, dark]
     steps:
       - uses: actions/checkout@v4
 
@@ -1662,9 +1669,10 @@ jobs:
       - name: Build (web-components bundle + provider subpath)
         run: pnpm exec nx build ui
 
-      - name: Storybook tests (a11y + interaction) -- shard ${{ matrix.shard }}/4
+      - name: Storybook tests (a11y + interaction, ${{ matrix.scheme }}) -- shard ${{ matrix.shard }}/4
         env:
           STORYBOOK_SHARD: ${{ matrix.shard }}/4
+          KAI_A11Y_DARK: ${{ matrix.scheme == 'dark' && '1' || '0' }}
           STORYBOOK_SUBSHARD_TOTAL: '20'
         run: pnpm --filter @kitn.ai/ui test:storybook:ci
 
@@ -1677,7 +1685,7 @@ jobs:
   # a long time because the browser suite flaked, and leaving it advisory is how
   # three a11y defects shipped; #359 fixed them and the ruleset was raised to two
   # contexts. The aggregation is what makes that possible: the ruleset names this
-  # one stable context rather than the per-shard `storybook (N)` ones, so
+  # one stable context rather than the per-leg `storybook (N, scheme)` ones, so
   # changing the shard count never breaks the required-checks config.
   #
   # It is a SIBLING of `test`, not a leg of it. `lint:gate-parity` exempts this

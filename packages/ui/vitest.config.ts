@@ -325,6 +325,10 @@ export default defineConfig({
       storybookTest({
         configDir: path.join(dirname, '.storybook')
       })],
+      // KAI_A11Y_DARK=1 runs the SAME story set with `.dark` on <html>, so axe
+      // audits the dark palette (read in .storybook/preview.ts). A compile-time
+      // constant rather than a runtime env read: the browser can't see process.env.
+      define: { __KAI_A11Y_DARK__: JSON.stringify(process.env.KAI_A11Y_DARK === '1') },
       test: {
         name: 'storybook',
         // Browser-runner CI flake mitigation: under parallel load the Vite dev

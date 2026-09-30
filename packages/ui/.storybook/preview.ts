@@ -34,6 +34,19 @@ const brandMark = (wordmark: string): string =>
   )}`;
 const BRAND = { brandTitle: 'AI/UI', brandUrl: 'https://ui.kitn.ai' };
 
+// ── Dark a11y pass ───────────────────────────────────────────────────────────
+// `KAI_A11Y_DARK=1` (set by the CI `scheme` matrix leg via the vitest storybook
+// project's `define`, see vitest.config.ts) puts `.dark` on <html> before any
+// story renders, so the axe run that `a11y.test: 'error'` triggers per story
+// measures the DARK palette. The root theme makes that one class reach every
+// element (light-dark() tokens + the inherited --kai-color-scheme), and the
+// observer below mirrors it onto each kai-* element's `theme` attribute.
+declare const __KAI_A11Y_DARK__: boolean;
+const A11Y_DARK = typeof __KAI_A11Y_DARK__ !== 'undefined' && __KAI_A11Y_DARK__;
+if (A11Y_DARK && typeof document !== 'undefined') {
+  document.documentElement.classList.add('dark');
+}
+
 // Storybook's dark toggle adds `.dark` to the preview <html>, but the `kai-*`
 // custom elements render in SHADOW DOM, which a light-DOM class can't cross — so
 // they'd otherwise fall back to their own `theme="auto"` (the OS preference) and
@@ -109,6 +122,15 @@ const preview: Preview = {
   async beforeEach() {
     if (typeof window === 'undefined') return;
     await webComponentsReady;
+    // The dark pass must not be vacuous: if `.dark` did not take, every story
+    // would quietly be audited in light and the leg would go green for nothing.
+    if (A11Y_DARK) {
+      document.documentElement.classList.add('dark');
+      const scheme = getComputedStyle(document.documentElement).colorScheme;
+      if (scheme !== 'dark') {
+        throw new Error(`KAI_A11Y_DARK=1 but <html> resolved color-scheme "${scheme}", not "dark"`);
+      }
+    }
   },
   // Outermost decorator: clear any imperatively-raised toasts when a story
   // unmounts so sticky toasts don't leak across story navigation (see
@@ -121,16 +143,13 @@ const preview: Preview = {
     // violations FAIL that run. Override per-story with a local `a11y.test`
     // parameter if a fixture differs.
     //
-    // "so a11y is gated" is what this comment used to say, and it was wrong on
-    // both halves. It credited a kit-wide audit script (`scripts/audit-a11y.mjs`,
-    // PR #49) that had no assertions and always exited 0, and that is now deleted.
-    // And the `storybook` job is ADVISORY -- it is not in the branch ruleset, so
-    // a red run here does not block a merge. What IS gated on a11y in the
-    // required `test` job is the focus-indicator paint guard
-    // (tests/e2e/focus-ring-paints.spec.ts). Per-story axe here is real signal
-    // and worth keeping; it is just not a gate, and the kit does not currently
-    // pass a full axe sweep -- see apps/docs/.../guides/accessibility.mdx for the
-    // standing violations.
+    // The `storybook` CI job is REQUIRED (through its aggregate `storybook-gate`
+    // context, see .github/workflows/test.yml), so a red axe run here blocks a
+    // merge. It runs TWICE per story set, once per colour scheme: a `scheme`
+    // matrix leg sets `KAI_A11Y_DARK=1` for the dark pass (see `KAI_A11Y_DARK`
+    // below), so a dark-only contrast failure is as red as a light one.
+    // Before that the run only ever rendered light, which is how a 4.42:1
+    // muted-on-muted pair shipped in dark.
     //
     // `context.exclude` is the kit's ONE documented a11y exception: the Shiki
     // dark theme (github-dark-dimmed) renders code comments at #768390 (~3.87:1),

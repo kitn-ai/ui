@@ -191,7 +191,8 @@ export function main() {
   const start = (i - 1) * per + 1;
   const subshards = Array.from({ length: per }, (_, j) => start + j);
 
-  console.log(`storybook tests — CI shard ${i}/${N}; sub-shards ${subshards.join(', ')} of ${M}, ${MAX_ATTEMPTS} attempts each\n`);
+  const scheme = process.env.KAI_A11Y_DARK === '1' ? 'dark' : 'light';
+  console.log(`storybook tests — ${scheme} scheme, CI shard ${i}/${N}; sub-shards ${subshards.join(', ')} of ${M}, ${MAX_ATTEMPTS} attempts each\n`);
 
   const reportDir = mkdtempSync(join(tmpdir(), 'kai-storybook-report-'));
   const reportFile = join(reportDir, 'results.json');
