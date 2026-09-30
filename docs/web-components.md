@@ -613,7 +613,7 @@ Restyle from outside the Shadow DOM via `kai-message::part(name)`.
 
 #### Composed from
 
-`Components/Message`, `Components/MessageAvatar`, `Components/MessageBody`
+`Components/Message`, `Components/MessageAvatar`, `Components/MessageBody`, `Components/TagRenderer`, `Components/CardFallback`
 
 #### Theming
 
@@ -1578,11 +1578,6 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | `maximized` | `maximized` | `undefined | false | true` | `false` | Reflects the artifact's own maximized view-state (usually driven by the protocol). |
 | `expandable` | `expandable` | `undefined | false | true` | `false` | Show the expand-to-fill button (OPT-IN). |
 | `openInTab` | `open-in-tab` | `undefined | false | true` | `false` | Show the open-in-new-tab button (OPT-IN). |
-| `noNav` | `no-nav` | `undefined | false | true` | `false` | Hide back/forward. |
-| `noReload` | `no-reload` | `undefined | false | true` | `false` | Hide reload. |
-| `noHome` | `no-home` | `undefined | false | true` | `false` | Hide home. |
-| `noPathField` | `no-path-field` | `undefined | false | true` | `false` | Hide the address field. |
-| `noTabs` | `no-tabs` | `undefined | false | true` | `false` | Hide the Preview|Code toggle. |
 | `standalone` | `standalone` | `undefined | false | true` | `false` | Standalone chrome: rounded corners + border (else square, borderless in-panel). |
 | `readonlyPath` | `readonly-path` | `undefined | false | true` | `false` | Show the address but make it read-only (visible, nav-tracking, non-editable). |
 | `displayUrl` | `display-url` | `undefined | string` | — | Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. |
@@ -1592,6 +1587,7 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-file-select` | `{ path: string }` | Fired when a file is selected. `detail.path`. |
+| `kai-history-change` | `{ url: string; urlSafe: false | true; canGoBack: false | true; canGoForward: false | true }` | The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`. |
 | `kai-maximize-change` | `{ maximized: false | true }` | Artifact's own maximize button toggled (consumer-observable; non-bubbling). |
 | `kai-maximize-intent` | `{ requested: false | true }` | The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. |
 | `kai-navigate` | `{ url: string }` | The preview navigated. `detail.url` is the raw new location. |
@@ -1612,6 +1608,16 @@ Call these on the element instance: `document.querySelector('kai-artifact').back
 | `openExternal` | `(): void` | Open the current url in a new browser tab (no-op when there's no concrete url). Named openExternal, NOT openInTab, which is a prop (toolbar button visibility). |
 | `maximize` | `(): void` | Enter the maximized view-state (fires kai-maximize-change{maximized:true}). Named maximize, NOT maximized, which is a prop. |
 | `restore` | `(): void` | Exit the maximized view-state (fires kai-maximize-change{maximized:false}). |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `toolbar` | replace | Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host's `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). `url` is display text (the raw, real url, never `displayUrl`); use it as an href, src or window.open target only when `urlSafe` is true. |
+| `toolbar-start` | inject | Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled). |
+| `toolbar-end` | inject | Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled). |
 
 #### Composed from
 
@@ -2148,7 +2154,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
-| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | Badge style; `default` is the muted pill. |
+| `variant` | `variant` | `undefined | "default" | "count" | "citation" | "outline"` | `'default'` | Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. |
 
 #### Slots
 
@@ -3011,9 +3017,9 @@ A single-select pill track (a segmented / toggle group). Set `options` as a JS p
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
-| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence state, which sets the colour. Default `new`. |
+| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline" | "working" | "idle" | "done" | "error" | "blocked"` | `'new'` | Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. |
 | `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring; off by default and never under prefers-reduced-motion. |
-| `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative. |
+| `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative, except agent tones, which default to their word. |
 | `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | Size token. Defaults to `'sm'`. |
 
 #### Styleable parts
@@ -3631,6 +3637,8 @@ The corner launcher: a floating button pinned to a viewport corner, with a panel
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
 | `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
+| `topOpen` | `top-open` | `undefined | false | true` | — | Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy. |
+| `bottomOpen` | `bottom-open` | `undefined | false | true` | — | Drives the `bottom` band directly, the same way as `topOpen`. |
 
 #### Slots
 
