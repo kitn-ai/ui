@@ -19,19 +19,21 @@ export function patternStory(html: string, js: string) {
 
     onMount(() => {
       const added: [string, EventListenerOrEventListenerObject][] = [];
-      const original = document.addEventListener;
-      document.addEventListener = ((type: string, fn: EventListenerOrEventListenerObject, opts?: unknown) => {
+      // Held in a local so the teardown below never resolves the global by name.
+      const doc = document;
+      const original = doc.addEventListener;
+      doc.addEventListener = ((type: string, fn: EventListenerOrEventListenerObject, opts?: unknown) => {
         added.push([type, fn]);
-        original.call(document, type, fn, opts as AddEventListenerOptions);
-      }) as typeof document.addEventListener;
+        original.call(doc, type, fn, opts as AddEventListenerOptions);
+      }) as typeof doc.addEventListener;
 
       const code = js.replace(/^import\s+['"]@kitn\.ai\/ui\/web-components['"];?$/m, '');
       const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
       import(/* @vite-ignore */ url).finally(() => {
-        document.addEventListener = original;
+        doc.addEventListener = original;
         URL.revokeObjectURL(url);
       });
-      onCleanup(() => added.forEach(([type, fn]) => document.removeEventListener(type, fn)));
+      onCleanup(() => added.forEach(([type, fn]) => doc.removeEventListener(type, fn)));
     });
     return host;
   };
