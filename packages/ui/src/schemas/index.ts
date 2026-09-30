@@ -191,6 +191,8 @@ export {
   CARD_TOOL_DESCRIPTIONS,
   UnsupportedCardToolSchemaError,
   cardTools,
+  PLAN_TOOL_DESCRIPTION,
+  planTool,
   toAnthropicTools,
   toJsonSchemaTools,
   toOpenAITools,
@@ -209,6 +211,12 @@ export type {
   ToolProvider,
   UnsupportedCardTool,
 } from './tool-defs';
+
+// The plan tool's other half. `planTool` (above) hands the model `kai_plan`; these are what a tool
+// loop and a thread reader need beside it, and all of them are pure (no DOM, no Solid), so they
+// are as server-safe as the rest of this entry. See ../primitives/plan.
+export { PLAN_TOOL_NAME, isPlanTool, validatePlan, planFromMessages } from '../primitives/plan';
+export type { PlanItem, PlanItemStatus, PlanValidation } from '../primitives/plan';
 
 // The registry: "these are the card types THIS app renders", written once and threaded
 // to both ends (`chat.cardTypes = cards.tags` on the client, `cardTools(cards, …)` on
