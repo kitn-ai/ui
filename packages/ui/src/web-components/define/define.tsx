@@ -352,6 +352,17 @@ const attributeNotifiers = new WeakMap<HTMLElement, () => void>();
  * its default. Installed on the prototype BEFORE define(), like the other patches,
  * because the registry snapshots lifecycle callbacks.
  */
+/** A declared default handed to an instance must not be the shared one: `messages: []`
+ *  mutated on one element would otherwise show up on every element reset to it. Arrays
+ *  and plain objects get a shallow copy; scalars, functions and class instances pass. */
+function freshDefault(value: unknown): unknown {
+  if (Array.isArray(value)) return value.slice();
+  if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+    return { ...(value as object) };
+  }
+  return value;
+}
+
 function installAttributeRemovalReset(proto: object, defaults: Record<string, unknown>): void {
   const byAttr = new Map<string, string>();
   for (const key of Object.keys(defaults)) byAttr.set(toAttr(key), key);
@@ -366,7 +377,7 @@ function installAttributeRemovalReset(proto: object, defaults: Record<string, un
     if (!(this as { __initialized?: boolean }).__initialized) return;
     const key = byAttr.get(name);
     if (newValue === null && key !== undefined && this[key] !== defaults[key]) {
-      this[key] = defaults[key];
+      this[key] = freshDefault(defaults[key]);
     }
     attributeNotifiers.get(this)?.();
   };

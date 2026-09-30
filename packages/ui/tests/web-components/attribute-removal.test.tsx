@@ -23,6 +23,12 @@ defineWebComponent<{ label?: string; loud?: boolean }>(
   ),
 );
 
+defineWebComponent<{ items?: unknown[]; opts?: Record<string, unknown> }>(
+  'kai-test-removal-shared',
+  { items: [], opts: {} },
+  (props) => <span>{JSON.stringify(props.items)}</span>,
+);
+
 const mount = (html: string) => {
   document.body.innerHTML = html;
   return document.body.firstElementChild as HTMLElement & Record<string, unknown>;
@@ -109,5 +115,22 @@ describe('kai-prompt-dock top-open through attributes', () => {
     await tick();
     await tick();
     expect(band(el).dataset.state).toBe('open');
+  });
+});
+
+describe('reset hands out a fresh copy of an array or object default', () => {
+  it('a mutated default on one element does not leak to another', async () => {
+    document.body.innerHTML =
+      '<kai-test-removal-shared id="x" items="[1]"></kai-test-removal-shared><kai-test-removal-shared id="y" items="[2]"></kai-test-removal-shared>';
+    await tick();
+    const x = document.getElementById('x') as HTMLElement & { items: unknown[] };
+    const y = document.getElementById('y') as HTMLElement & { items: unknown[] };
+    x.removeAttribute('items');
+    y.removeAttribute('items');
+    await tick();
+    expect(x.items).toEqual([]);
+    expect(x.items).not.toBe(y.items);
+    x.items.push('leak');
+    expect(y.items).toEqual([]);
   });
 });
