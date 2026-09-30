@@ -55,9 +55,9 @@ const CDN_PIN = `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${version}/dist/`;
 const LOCAL_MARKERS = ['/blocks/kit/', '/blocks/local/'];
 // The footer, in the words copy-blocks.mjs writes, for both modes. The local
 // one must not ship; the production one must.
-const LOCAL_FOOTER = previewSource({ KAI_BLOCKS_KIT: 'local' }, version).footer;
-const CDN_FOOTER = previewSource({}, version).footer;
-// The footer is rendered by the blocks island, so the only place it can reach
+const LOCAL_FOOTER = previewSource({ KAI_BLOCKS_KIT: 'local' }, version).patternsFooter;
+const CDN_FOOTER = previewSource({}, version).patternsFooter;
+// The footer is rendered by the patterns island, so the only place it can reach
 // is that island's bundle: a built /_astro chunk. Scoping the footer checks
 // there is what keeps a guide sentence about the local mode from turning a
 // docs edit into a red preview-source gate with a misleading message.
@@ -122,14 +122,14 @@ export function check(files, { cdnPin, localMarkers, localFooter, cdnFooter }) {
   const localFooterHit = chunks.find((f) => f.content.includes(localFooter));
   if (localFooterHit) {
     problems.push(
-      `${localFooterHit.path} carries the LOCAL footer text ("${localFooter}"). The deployed page must say it is previewing the published kit, because that is what it is doing and the claim is the whole point of the production preview.`,
+      `${localFooterHit.path} carries the LOCAL footer text ("${localFooter}"). The deployed patterns page must say its CDN form pins the published kit, because that is what it does and the claim is the whole point of the production build.`,
     );
   }
 
   const footer = chunks.find((f) => f.content.includes(cdnFooter));
   if (!footer) {
     problems.push(
-      `no built /_astro chunk carries the production footer ("${cdnFooter}"). The footer states the preview source in words and the deployed one must say the published kit.`,
+      `no built /_astro chunk carries the production footer ("${cdnFooter}"). The patterns footer states what a pattern installs and which kit its CDN form pins, and the deployed one must name the published version.`,
     );
   }
 

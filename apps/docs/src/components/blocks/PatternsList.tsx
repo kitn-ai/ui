@@ -5,7 +5,7 @@
  * adds a card here with nothing to edit.
  */
 import { createResource, For, Match, Switch, type JSX } from 'solid-js';
-import { addPatternCommandFor, patternInstallDir, patternsUrl, previewFooter, type PatternItem } from '../../lib/blocks-source';
+import { addPatternCommandFor, patternInstallDir, patternsUrl, patternsFooter, type PatternItem } from '../../lib/blocks-source';
 
 async function loadPatterns(): Promise<PatternItem[]> {
   const res = await fetch(patternsUrl());
@@ -58,10 +58,10 @@ export default function PatternsList(): JSX.Element {
         {(list) => (
           <>
             <PatternCards items={list()} />
-            {/* Which kit the CDN forms on this page pin, in words. The deployed page
-                must say it is the published kit (verify:preview reads this chunk). */}
+            {/* What a pattern installs and which kit its CDN form pins, in words
+                (verify:preview reads this chunk). */}
             <p data-testid="preview-footer" class="mx-auto w-full max-w-6xl px-4 pb-8 text-xs text-ink-3">
-              {previewFooter()}
+              {patternsFooter()}
             </p>
           </>
         )}

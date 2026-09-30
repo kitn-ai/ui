@@ -71,7 +71,12 @@ export function previewUrl(id: string): string {
     : `${BLOCKS_PREVIEW.previewDir}/${id}.cdn.html`;
 }
 
-/** The words the footer says. One definition, generated from KAI_BLOCKS_KIT. */
+/** The words the patterns page footer says. One definition, generated from KAI_BLOCKS_KIT. */
+export function patternsFooter(): string {
+  return BLOCKS_PREVIEW.patternsFooter;
+}
+
+/** The words the blocks footer says. One definition, generated from KAI_BLOCKS_KIT. */
 export function previewFooter(): string {
   return BLOCKS_PREVIEW.footer;
 }

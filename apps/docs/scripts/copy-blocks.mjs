@@ -52,6 +52,7 @@ export function previewSource(env, version) {
       mode: 'cdn',
       previewDir: '/blocks/r',
       footer: `previewing @kitn.ai/ui@${version} from jsDelivr`,
+      patternsFooter: `Patterns install as plain HTML and JS. The CDN form pins @kitn.ai/ui@${version}.`,
     };
   }
   if (raw === 'local') {
@@ -59,6 +60,7 @@ export function previewSource(env, version) {
       mode: 'local',
       previewDir: '/blocks/local',
       footer: 'previewing the local build of packages/ui/dist',
+      patternsFooter: 'Patterns install as plain HTML and JS. This build points the CDN form at the local packages/ui/dist.',
     };
   }
   throw new Error(
@@ -156,7 +158,7 @@ function main() {
       '// run against, decided once from KAI_BLOCKS_KIT.',
       "// The annotation is deliberate and `as const` is wrong here: a literal type",
       "// for `mode` makes the island's `mode === 'local'` comparison a TS2367.",
-      "export const BLOCKS_PREVIEW: { mode: 'cdn' | 'local'; previewDir: string; footer: string } =",
+      "export const BLOCKS_PREVIEW: { mode: 'cdn' | 'local'; previewDir: string; footer: string; patternsFooter: string } =",
       '  ' + JSON.stringify(source, null, 2).split('\n').join('\n  ') + ';',
       '',
     ].join('\n'),
