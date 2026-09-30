@@ -189,7 +189,7 @@ export { WorkspaceShell, type WorkspaceShellProps, type WorkspaceShellController
 // atom), same tier as AudioVisualizer above.
 export { Captions } from './components/captions/captions';
 export type { CaptionsProps, CaptionSegment, CaptionsVariant } from './components/captions/captions';
-export { createConversationItemsController, readConversationItemId } from './components/conversation/conversation-list';
+export { createConversationItemsController, readConversationItemId, conversationRowsOf } from './components/conversation/conversation-list';
 export type { ConversationItemsController, ConversationItemsControllerOptions } from './components/conversation/conversation-list';
 // Panel / PanelHeader / PanelBody / PanelFooter — the widget panel chrome as
 // public parts. Behind `<kai-panel>` /
