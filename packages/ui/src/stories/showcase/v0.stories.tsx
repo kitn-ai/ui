@@ -589,7 +589,7 @@ export const V0: Story = {
     );
   },
   // The composed Preview|Code toggle has to follow the tab it sets itself.
-  play: async ({ canvasElement }) => {
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const art = canvasElement.querySelector('kai-artifact') as HTMLElement;
     const tab = (name: string) => art.querySelector(`[slot="toolbar"] [role="tab"]:nth-child(${name === 'Preview' ? 1 : 2})`) as HTMLElement;
     await waitFor(() => expect(tab('Preview')).not.toBeNull());
