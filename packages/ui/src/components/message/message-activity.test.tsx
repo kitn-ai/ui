@@ -39,6 +39,25 @@ describe('MessageBody renders reasoning and tool runs as the activity line', () 
     expect(container.textContent).not.toContain('web_search');
   });
 
+  it('a realistic hand-written turn reads by kind, naming only what failed', () => {
+    const hand = (name: string, id: string, extra: Record<string, unknown> = {}) =>
+      tool(name, id, { kind: 'generic', ...extra });
+    const { container } = body([
+      say('Intro'),
+      { type: 'reasoning', text: 'thinking', timing: { startedAt: 0, endedAt: 5000 } },
+      hand('web_search', 'c1'),
+      hand('fetch_url', 'c2', { state: 'output-error', errorText: 'boom' }),
+      hand('read_file', 'c3'),
+      say('Middle'),
+      hand('get_weather', 'c4'),
+      say('End'),
+    ]);
+    expect(lines(container).map((l) => l.textContent)).toEqual([
+      'Thought for 5s · Searched the web · Read a file · fetch_url failed',
+      'Used get_weather',
+    ]);
+  });
+
   it('consecutive reasoning and tool parts are ONE line', () => {
     const { container } = body([think(), tool('web_search', 'c1'), tool('read_file', 'c2')]);
     expect(lines(container)).toHaveLength(1);
