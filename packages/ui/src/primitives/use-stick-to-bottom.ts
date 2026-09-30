@@ -48,7 +48,8 @@ export function useStickToBottom() {
     : () => {};
 
   function onNewContent() {
-    if (shouldStick) {
+    // One pending scroll is enough: a burst of mutations in a frame must not queue a scroll each.
+    if (shouldStick && pendingFrame === undefined) {
       pendingFrame = requestAnimationFrame(() => {
         pendingFrame = undefined;
         scrollToBottom('instant');
@@ -56,14 +57,65 @@ export function useStickToBottom() {
     }
   }
 
+  /**
+   * Size, not mutation, covers what the MutationObserver cannot see: rows an app projects
+   * through a `<slot>` live in the light DOM, and the text they stream lives in their own
+   * shadow roots, so none of it mutates this subtree, yet it moves the scroll height.
+   *
+   * The ROWS are observed, not the content column: that column is `min-h-full` in a flex
+   * scroller and shrinks back to the viewport while its rows overflow, so its own size never
+   * changes (measured). A slot has no box, so its assigned elements stand in for it.
+   *
+   * It pins synchronously: resize callbacks run after layout and before paint, so the scroll
+   * lands in the growth's own frame. A rAF would paint one unpinned frame per update.
+   */
+  function onResize() {
+    if (shouldStick) scrollToBottom('instant');
+  }
+
   function ref(el: HTMLElement) {
     containerEl = el;
     el.addEventListener('scroll', checkIfAtBottom, { passive: true });
-    const observer = new MutationObserver(onNewContent);
+    const observer = new MutationObserver(() => {
+      onNewContent();
+      syncObserved();
+    });
     observer.observe(el, { childList: true, subtree: true, characterData: true });
+    const resizer = typeof ResizeObserver === 'function' ? new ResizeObserver(onResize) : undefined;
+    const observed = new Set<Element>();
+    /** Everything whose height is the scroller's scroll height: the scroller's children (the
+     *  column), the column's children, and, for a slot, the elements assigned to it. */
+    function targets(): Set<Element> {
+      const out = new Set<Element>();
+      const add = (n: Element) => {
+        if (n instanceof HTMLSlotElement) for (const a of n.assignedElements({ flatten: true })) out.add(a);
+        else out.add(n);
+      };
+      for (const c of el.children) {
+        out.add(c);
+        for (const r of c.children) add(r);
+      }
+      return out;
+    }
+    function syncObserved() {
+      if (!resizer) return;
+      const next = targets();
+      for (const c of observed) {
+        if (!next.has(c)) { resizer.unobserve(c); observed.delete(c); }
+      }
+      for (const c of next) {
+        if (!observed.has(c)) { observed.add(c); resizer.observe(c); }
+      }
+    }
+    // A slot's assignment changes without touching this subtree (an app appends a row to
+    // its own light DOM), and `slotchange` is the one signal that says so.
+    el.addEventListener('slotchange', syncObserved);
+    syncObserved();
     onCleanup(() => {
       el.removeEventListener('scroll', checkIfAtBottom);
+      el.removeEventListener('slotchange', syncObserved);
       observer.disconnect();
+      resizer?.disconnect();
       if (pendingFrame !== undefined) {
         cancelFrame(pendingFrame);
         pendingFrame = undefined;
