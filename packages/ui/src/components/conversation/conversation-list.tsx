@@ -45,19 +45,46 @@ export function readConversationItemId(el: Element): string {
   return el.getAttribute('conversation-id') ?? el.id;
 }
 
+/** Whether `el` sits inside another `kai-conversation-item` (its `menu` region, a preview in
+ *  a popover, or any other slot). Such an item is never a row of the container. */
+function insideRowMenu(el: Element, boundary: Element): boolean {
+  for (let n = el.parentElement; n && n !== boundary; n = n.parentElement) {
+    if (n.localName === 'kai-conversation-item') return true;
+  }
+  return false;
+}
+
+/** The rows of a `kai-conversations` item-mode container: every descendant
+ *  `kai-conversation-item` in document order, EXCLUDING one inside another row (its menu or
+ *  any other slot: a preview is not a row) and, unless `includeClosed`, one inside a closed
+ *  `<details>` between it and the host (a closed folder's rows are not reachable, so arrows
+ *  skip them). A folder's own `<summary>` is never a row. */
+export function conversationRowsOf(host: Element, includeClosed = false): HTMLElement[] {
+  const all = [...host.querySelectorAll<HTMLElement>('kai-conversation-item')];
+  return all.filter((el) => {
+    if (insideRowMenu(el, host)) return false;
+    if (includeClosed) return true;
+    for (let n = el.parentElement; n && n !== host; n = n.parentElement) {
+      if (n.localName === 'details' && !(n as HTMLDetailsElement).open) return false;
+    }
+    return true;
+  });
+}
+
 /** Whether a `<kai-conversation-item>` is STANDALONE, outside the management
  *  of a `<kai-conversations>` container, and therefore activates ITSELF:
  *  the facade makes its row body a
  *  tabbable button and fires `kai-select` on click / Enter / Space. Derived
- *  from the container's own membership rule, not from mere ancestry: item mode
- *  queries `:scope > kai-conversation-item` (direct children only), so an item
- *  wrapped in another element inside a container is standalone too; the
- *  container's controller never stamps or activates it. Inside a container
- *  (a direct child), the parent-item contract is the ONLY activation
+ *  from the container's own membership rule (`conversationRowsOf`): item mode takes every
+ *  descendant item, folders included, so an item nested anywhere inside a container is
+ *  managed, except one inside another row (its menu region), which is standalone.
+ *  Inside a container, the parent-item contract is the ONLY activation
  *  path: the container dispatches `kai-conversation-select` and owns roving
  *  tabindex, and the item fires nothing of its own. */
 export function isStandaloneConversationItem(el: Element): boolean {
-  return el.parentElement?.localName !== 'kai-conversations';
+  const host = el.parentElement?.closest('kai-conversations');
+  if (!host) return true;
+  return insideRowMenu(el, host);
 }
 
 export interface ConversationItemsControllerOptions {
@@ -91,7 +118,8 @@ export interface ConversationItemsController {
  * control inside the row) is `createRovingTabList` (`primitives/roving-tab-list.ts`),
  * which is public so an application arranging its own rows gets the same keyboard. What
  * stays here is the conversation row's own rule:
- *
+ * - rows may be nested (`conversationRowsOf`): a row in an open `<details>` folder is a row;
+ *   one in a closed folder or inside another row's menu is not;
  * - a row is a `kai-conversation-item` host, identified by `readConversationItemId`, and
  *   its activation node is its shadow body (see `bodyOf`);
  * - selection flows container to item: exactly one item's body node is
