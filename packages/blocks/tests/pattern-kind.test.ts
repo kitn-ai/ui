@@ -129,10 +129,48 @@ describe('pattern kind: rejections carry a named error', () => {
   });
 });
 
+describe('pattern html references are cross-checked against the manifest', () => {
+  it('rejects a script the html loads that files[] does not list', () => {
+    const html = { name: 'plant.html', content: '<kai-button>x</kai-button>\n<script type="module" src="./plant.js"></script>\n<script type="module" src="./ghost.js"></script>' };
+    const { errors } = discoverPatterns([planted([html, JS], OK_FILES)]);
+    expect(errors.join('\n')).toMatch(/plant\/plant\.html: references "\.\/ghost\.js" but files\[\] does not list it/);
+  });
+
+  it('rejects a stylesheet the html links that files[] does not list', () => {
+    const html = { name: 'plant.html', content: '<link rel="stylesheet" href="./ghost.css">\n<script type="module" src="./plant.js"></script>' };
+    const { errors } = discoverPatterns([planted([html, JS], OK_FILES)]);
+    expect(errors.join('\n')).toMatch(/references "\.\/ghost\.css" but files\[\] does not list it/);
+  });
+
+  it('rejects a listed js file the html never references', () => {
+    const html = { name: 'plant.html', content: '<kai-button>x</kai-button>' };
+    const { errors } = discoverPatterns([planted([html, JS], OK_FILES)]);
+    expect(errors.join('\n')).toMatch(/files\[\] lists "plant\.js" but plant\.html never references it/);
+  });
+
+  it('rejects a listed css file the html never links', () => {
+    const { errors } = discoverPatterns([
+      planted([HTML, JS, { name: 'plant.css', content: '' }], [...OK_FILES, { path: 'plant.css', type: 'css' }]),
+    ]);
+    expect(errors.join('\n')).toMatch(/files\[\] lists "plant\.css" but plant\.html never references it/);
+  });
+
+  it('ignores absolute and CDN urls, and accepts a matching link', () => {
+    const html = {
+      name: 'plant.html',
+      content: '<link rel="stylesheet" href="https://cdn.example/x.css"><link rel="stylesheet" href="./plant.css"><script type="module" src="./plant.js"></script>',
+    };
+    const { errors } = discoverPatterns([
+      planted([html, JS, { name: 'plant.css', content: '' }], [...OK_FILES, { path: 'plant.css', type: 'css' }]),
+    ]);
+    expect(errors).toEqual([]);
+  });
+});
+
 describe('pattern contract checks', () => {
   const nonscalar = { 'kai-thread': ['messages'] };
   const check = (html: string, ts = JS.content) => {
-    const { patterns, errors } = discoverPatterns([planted([{ name: 'plant.html', content: html }, { name: 'plant.js', content: ts }], OK_FILES)]);
+    const { patterns, errors } = discoverPatterns([planted([{ name: 'plant.html', content: `${html}\n<script type="module" src="./plant.js"></script>` }, { name: 'plant.js', content: ts }], OK_FILES)]);
     expect(errors).toEqual([]);
     return checkPatternContracts(patterns[0], nonscalar);
   };

@@ -820,6 +820,33 @@ export function validatePatternManifest(raw: unknown, dirName: string, fileNames
   return errors;
 }
 
+/**
+ * The page and the manifest must agree about which sibling files exist. A page
+ * that loads `./x.js` the manifest does not list installs a page pointing at a
+ * file that was never written; a listed script or stylesheet the page never
+ * references installs a file nothing uses. Absolute and protocol URLs are the
+ * page's own business and are skipped.
+ */
+function crossCheckPatternReferences(dirName: string, htmlPath: string, html: string, manifest: PatternManifest): string[] {
+  const errors: string[] = [];
+  const referenced = new Set<string>();
+  for (const tag of html.matchAll(/<(?:script|link)\b[^>]*>/gi)) {
+    const ref = /\b(?:src|href)\s*=\s*["']([^"']+)["']/i.exec(tag[0])?.[1];
+    if (ref === undefined || /^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(ref)) continue;
+    const file = ref.replace(/^\.\//, '');
+    referenced.add(file);
+    if (!manifest.files.some((f) => f.path === file)) {
+      errors.push(`${dirName}/${htmlPath}: references "${ref}" but files[] does not list it`);
+    }
+  }
+  for (const entry of manifest.files) {
+    if (entry.type !== 'html' && !referenced.has(entry.path)) {
+      errors.push(`${dirName}: files[] lists "${entry.path}" but ${htmlPath} never references it`);
+    }
+  }
+  return errors;
+}
+
 /** Parse + validate every scanned pattern directory. A pattern with errors is
  *  excluded from the result rather than half-loaded. */
 export function discoverPatterns(sources: readonly RawBlockSource[]): { patterns: Pattern[]; errors: string[] } {
@@ -848,6 +875,7 @@ export function discoverPatterns(sources: readonly RawBlockSource[]): { patterns
             );
           }
         }
+        errs.push(...crossCheckPatternReferences(src.dirName, entry.path, html, manifest));
       }
     }
     if (errs.length) { errors.push(...errs); continue; }
