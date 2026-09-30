@@ -298,7 +298,7 @@ const mock = createMockResponder({
 
 I/O-free pure folds over `ChatMessage[]`. No client, no fetch — you own the transport; these functions own the array-identity discipline the elements re-render on.
 
-Every export (75, derived from `dist/state/index.d.ts`):
+Every export (82, derived from `dist/state/index.d.ts`):
 
 | Export | Kind | Module |
 |---|---|---|
@@ -373,6 +373,13 @@ Every export (75, derived from `dist/state/index.d.ts`):
 | `PlanItem` | type | `../primitives/plan` |
 | `PlanItemStatus` | type | `../primitives/plan` |
 | `PlanValidation` | type | `../primitives/plan` |
+| `pendingQuestions` | value | `questions` |
+| `answerQuestions` | value | `questions` |
+| `settlePendingQuestions` | value | `questions` |
+| `approvalQuestion` | value | `questions` |
+| `threadRows` | value | `questions` |
+| `isOneClick` | value | `questions` |
+| `ThreadRow` | type | `questions` |
 | `ToolKind` | type | `../primitives/tool-classify` |
 | `classifyTool` | value | `../primitives/tool-classify` |
 | `CardEnvelope` | type | `../primitives/card-contract` |
