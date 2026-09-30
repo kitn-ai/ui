@@ -23,15 +23,15 @@ A0–A7 (ChatApp rename, tag registry, preset-parts lint, root theme via light-d
 
 ## In flight when this was written (check their branches)
 
-- **B5** `feat/comp-b5` — kai-plan inside the prompt input (done, commit d4f647ff) — **verifier running**; merge if PASS. It branched BEFORE G1, so after merging, re-run `build:api` and re-measure `lint:llms-size` (G1 lowered the ceiling to 331 KiB).
+- **B5 MERGED** (fba517b9 + regen 9e82a9ea): kai-plan inside the prompt input; verified. It also fixed K5(a) code-block bare cancelAnimationFrame and K5(b) cn-merge touch-* (merger now resolves right-to-left like tailwind-merge). llms-full 332,657 B vs 331 KiB ceiling (6.1 KiB headroom).
 - **T1** `feat/comp-t1` — root-cause the flaky `upgrade-props` "kai-menu disconnected" test and `promptinput` cold-start flakes (10-run proof).
 - **P2** `feat/comp-p2` — retire PromptDock/kai-prompt-dock; migrate Claude Code/Codex labs + guides.
 
 ## Next, in order (task graph from the amended plans)
 
-1. **K5 small fixes** (base is RED in CI on these — do first): (a) `teardown-without-dom-globals` flags bare `cancelAnimationFrame` at `components/code-block/code-block.tsx:119` (from K4) — use the guarded bound capture like `create-tween`/`MeasuredPresence`; (b) `cn-merge.drift` random tuples: `touch-pan-x … touch-none` — cn-merge drops `pan-x`, tailwind-merge keeps it; fix the cn-merge table; (c) make `gen-llms.mjs` refuse to run standalone (it still writes a thinner file standalone — pre-existing CLAUDE.md pitfall).
+1. **K5 small fix** — (a) and (b) DONE in B5. Remaining: (c) only. Historical notes: (a) `teardown-without-dom-globals` flags bare `cancelAnimationFrame` at `components/code-block/code-block.tsx:119` (from K4) — use the guarded bound capture like `create-tween`/`MeasuredPresence`; (b) `cn-merge.drift` random tuples: `touch-pan-x … touch-none` — cn-merge drops `pan-x`, tailwind-merge keeps it; fix the cn-merge table; (c) make `gen-llms.mjs` refuse to run standalone (it still writes a thinner file standalone — pre-existing CLAUDE.md pitfall).
 2. **C3** — the answer receipt as a user bubble via `threadRows` (C1) in message/thread/chat-app. Serialize `chat-app.tsx` after B5.
-3. **C4** — kai-chat wiring: panel replaces the composer when `pendingQuestions`, "Let's chat" → `settlePendingQuestions` + composer back + `kai-questions-waiting` "Reopen"; plan collapses while the panel is open; handle the `slot="composer"` custom-composer case (B5 gap: no plan there).
+3. **C4** — kai-chat wiring: panel replaces the composer when `pendingQuestions`, "Let's chat" → `settlePendingQuestions` + composer back + `kai-questions-waiting` "Reopen"; plan collapses while the panel is open; handle the `slot="composer"` custom-composer case (B5 gap: no plan there) — B5 verifier recommends a `kai-chat` `plan` slot (preferred) or read-only `el.plan` + `kai-plan-change`; docs must say a custom composer opts out of the automatic plan. No aria-live on the plan summary (noisy while streaming).
 4. **C5a/b/c** — remove confirm/choice/tasks/form CARD types across kit, schemas, scripts, MCP, docs, examples, spikes (~132 files; `kai-form` element stays). Parallel after C4.
 5. **C6 / B6** — scaffolder emitted `renderPart` + Solid starter + docs composition-first; export `groupMessageParts` (B3 left it unexported; B6 needs it).
 6. **C-live** (rules above).
