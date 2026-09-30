@@ -729,7 +729,7 @@ export function checkBlockContracts(
 // ================================================================ patterns
 //
 // The PATTERN tier (composition round, spec A section 7): a small copyable
-// composition of PLAIN web components -- one .html page, at most one .ts
+// composition of PLAIN web components -- one .html page, at most one .js
 // script, optional .css. A pattern has no controller, no binding grammar and
 // no generated framework forms, which is what separates it from a block. It
 // lives at `packages/blocks/patterns/<id>/` beside `blocks/`, and the same
@@ -737,11 +737,11 @@ export function checkBlockContracts(
 // `kai-` contract checks are written once.
 
 /** The file types a pattern may ship, and the extension each must carry. */
-const PATTERN_FILE_TYPES: Readonly<Record<string, string>> = { html: '.html', ts: '.ts', css: '.css' };
+const PATTERN_FILE_TYPES: Readonly<Record<string, string>> = { html: '.html', js: '.js', css: '.css' };
 
 export interface PatternFileEntry {
   path: string;
-  type: 'html' | 'ts' | 'css';
+  type: 'html' | 'js' | 'css';
 }
 
 export interface PatternManifest {
@@ -791,21 +791,23 @@ export function validatePatternManifest(raw: unknown, dirName: string, fileNames
     return errors;
   }
   const seen = new Set<string>();
-  const count = { html: 0, ts: 0, css: 0 };
+  const count = { html: 0, js: 0, css: 0 };
   for (const f of m.files) {
     if (!isRecord(f) || typeof f.path !== 'string' || typeof f.type !== 'string') {
       errors.push(`${dirName}: each files[] entry needs string "path" and "type"`);
       continue;
     }
     if (f.path.endsWith('.tsx')) {
-      errors.push(`${dirName}: files["${f.path}"]: .tsx is not allowed; a pattern is plain web components, so its one script is a .ts file`);
+      errors.push(`${dirName}: files["${f.path}"]: .tsx is not allowed; a pattern is plain ESM JavaScript (use JSDoc for types), so its one script is a .js file`);
+    } else if (f.path.endsWith('.ts')) {
+      errors.push(`${dirName}: files["${f.path}"]: .ts is not allowed; a pattern must run in a browser as it is, so its one script is a .js file (use JSDoc for types)`);
     }
     const ext = PATTERN_FILE_TYPES[f.type];
     if (ext === undefined) {
       errors.push(`${dirName}: files["${f.path}"] has unknown type "${f.type}" (a pattern's file types are ${Object.keys(PATTERN_FILE_TYPES).join(', ')})`);
     } else {
       count[f.type as keyof typeof count] += 1;
-      if (!f.path.endsWith('.tsx') && !f.path.endsWith(ext)) errors.push(`${dirName}: files["${f.path}"] is type "${f.type}" but does not end in ${ext}`);
+      if (!/\.tsx?$/.test(f.path) && !f.path.endsWith(ext)) errors.push(`${dirName}: files["${f.path}"] is type "${f.type}" but does not end in ${ext}`);
     }
     if (seen.has(f.path)) errors.push(`${dirName}: files[] lists "${f.path}" twice`);
     seen.add(f.path);
@@ -814,7 +816,7 @@ export function validatePatternManifest(raw: unknown, dirName: string, fileNames
     if (pathProblem) errors.push(`${dirName}: files["${f.path}"] ${pathProblem}`);
   }
   if (count.html !== 1) errors.push(`${dirName}: exactly one "html" file is required, found ${count.html}`);
-  if (count.ts > 1) errors.push(`${dirName}: at most one "ts" file is allowed, found ${count.ts}; a pattern is one page and one script`);
+  if (count.js > 1) errors.push(`${dirName}: at most one "js" file is allowed, found ${count.js}; a pattern is one page and one script`);
   return errors;
 }
 

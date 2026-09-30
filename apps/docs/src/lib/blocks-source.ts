@@ -120,7 +120,7 @@ export interface PatternItem {
   kind: 'pattern';
   title: string;
   description: string;
-  files: { path: string; type: 'html' | 'ts' | 'css' }[];
+  files: { path: string; type: 'html' | 'js' | 'css' }[];
 }
 
 /** The derived pattern index the prebuild copies into public/. */

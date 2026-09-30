@@ -1,6 +1,6 @@
 /**
  * The pattern tier's registry kind. A pattern is a small copyable composition
- * of plain web components: one .html, at most one .ts, optional .css. No
+ * of plain web components: one .html, at most one .js, optional .css. No
  * controller, no binding grammar, no generated framework forms.
  *
  * Each rule is watched failing on a planted manifest or page, and the error
@@ -56,11 +56,11 @@ function planted(
   };
 }
 
-const HTML = { name: 'plant.html', content: '<kai-button>Hi</kai-button>\n<script type="module" src="./plant.ts"></script>' };
-const TS = { name: 'plant.ts', content: "import '@kitn.ai/ui/web-components';\n" };
+const HTML = { name: 'plant.html', content: '<kai-button>Hi</kai-button>\n<script type="module" src="./plant.js"></script>' };
+const JS = { name: 'plant.js', content: "import '@kitn.ai/ui/web-components';\n" };
 const OK_FILES = [
   { path: 'plant.html', type: 'html' },
-  { path: 'plant.ts', type: 'ts' },
+  { path: 'plant.js', type: 'js' },
 ];
 
 describe('pattern kind: the directory scan', () => {
@@ -74,26 +74,26 @@ describe('pattern kind: the directory scan', () => {
   });
 
   it('accepts a well-formed planted pattern (so the rejections below are not vacuous)', () => {
-    const { patterns, errors } = discoverPatterns([planted([HTML, TS], OK_FILES)]);
+    const { patterns, errors } = discoverPatterns([planted([HTML, JS], OK_FILES)]);
     expect(errors).toEqual([]);
     expect(patterns).toHaveLength(1);
   });
 });
 
 describe('pattern kind: rejections carry a named error', () => {
-  it('more than one .ts file', () => {
+  it('more than one .js file', () => {
     const { errors } = discoverPatterns([
       planted(
-        [HTML, TS, { name: 'extra.ts', content: '' }],
-        [...OK_FILES, { path: 'extra.ts', type: 'ts' }],
+        [HTML, JS, { name: 'extra.js', content: '' }],
+        [...OK_FILES, { path: 'extra.js', type: 'js' }],
       ),
     ]);
-    expect(errors.join('\n')).toMatch(/at most one "ts" file/);
+    expect(errors.join('\n')).toMatch(/at most one "js" file/);
   });
 
   it('a .tsx file', () => {
     const { errors } = discoverPatterns([
-      planted([HTML, { name: 'plant.tsx', content: '' }], [{ path: 'plant.html', type: 'html' }, { path: 'plant.tsx', type: 'ts' }]),
+      planted([HTML, { name: 'plant.tsx', content: '' }], [{ path: 'plant.html', type: 'html' }, { path: 'plant.tsx', type: 'js' }]),
     ]);
     expect(errors.join('\n')).toMatch(/\.tsx is not allowed/);
   });
@@ -105,12 +105,12 @@ describe('pattern kind: rejections carry a named error', () => {
     ['a hash binding', '<kai-button #ref="x">Hi</kai-button>'],
     ['a star directive', '<kai-button *for="i">Hi</kai-button>'],
   ])('%s in the html', (_label, html) => {
-    const { errors } = discoverPatterns([planted([{ name: 'plant.html', content: html }, TS], OK_FILES)]);
+    const { errors } = discoverPatterns([planted([{ name: 'plant.html', content: html }, JS], OK_FILES)]);
     expect(errors.join('\n')).toMatch(/plant\/plant\.html: template binding syntax/);
   });
 
   it('a manifest with no html page, or two', () => {
-    const none = discoverPatterns([planted([TS], [{ path: 'plant.ts', type: 'ts' }])]);
+    const none = discoverPatterns([planted([JS], [{ path: 'plant.js', type: 'js' }])]);
     expect(none.errors.join('\n')).toMatch(/exactly one "html" file/);
     const two = discoverPatterns([
       planted(
@@ -131,8 +131,8 @@ describe('pattern kind: rejections carry a named error', () => {
 
 describe('pattern contract checks', () => {
   const nonscalar = { 'kai-thread': ['messages'] };
-  const check = (html: string, ts = TS.content) => {
-    const { patterns, errors } = discoverPatterns([planted([{ name: 'plant.html', content: html }, { name: 'plant.ts', content: ts }], OK_FILES)]);
+  const check = (html: string, ts = JS.content) => {
+    const { patterns, errors } = discoverPatterns([planted([{ name: 'plant.html', content: html }, { name: 'plant.js', content: ts }], OK_FILES)]);
     expect(errors).toEqual([]);
     return checkPatternContracts(patterns[0], nonscalar);
   };
@@ -168,14 +168,14 @@ describe('pattern index, item JSON and rendering', () => {
 
   it('renders files verbatim under src/patterns/<id>/', () => {
     const files = renderPattern(hello);
-    expect(files.map((f) => f.target).sort()).toEqual(['src/patterns/hello-pattern/hello-pattern.html', 'src/patterns/hello-pattern/hello-pattern.ts']);
+    expect(files.map((f) => f.target).sort()).toEqual(['src/patterns/hello-pattern/hello-pattern.html', 'src/patterns/hello-pattern/hello-pattern.js']);
     for (const f of files) expect(f.content).toBe(hello.files.get(f.path));
   });
 
   it('the cdn form rewrites ONLY the kit import line', () => {
     const files = renderPattern(hello, { cdn: { version: '9.9.9' } });
-    const ts = files.find((f) => f.path === 'hello-pattern.ts')!;
-    const before = (hello.files.get('hello-pattern.ts') as string).split('\n');
+    const ts = files.find((f) => f.path === 'hello-pattern.js')!;
+    const before = (hello.files.get('hello-pattern.js') as string).split('\n');
     const after = ts.content.split('\n');
     expect(after).toHaveLength(before.length);
     const changed = after.filter((line, i) => line !== before[i]);
@@ -185,7 +185,7 @@ describe('pattern index, item JSON and rendering', () => {
   });
 
   it('the cdn form refuses a kit entry outside the proven set, by name', () => {
-    const bad = { ...hello, files: new Map(hello.files).set('hello-pattern.ts', "import '@kitn.ai/ui';\n") };
+    const bad = { ...hello, files: new Map(hello.files).set('hello-pattern.js', "import '@kitn.ai/ui';\n") };
     expect(() => renderPattern(bad, { cdn: { version: '9.9.9' } })).toThrow(/root "@kitn\.ai\/ui" export/);
   });
 });

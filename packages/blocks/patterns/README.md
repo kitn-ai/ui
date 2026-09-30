@@ -16,17 +16,17 @@ with `"kind": "pattern"`:
   "description": "One sentence, plain punctuation.",
   "files": [
     { "path": "hello-pattern.html", "type": "html" },
-    { "path": "hello-pattern.ts", "type": "ts" }
+    { "path": "hello-pattern.js", "type": "js" }
   ]
 }
 ```
 
-`name` equals the directory name. `type` is `html`, `ts` or `css`.
+`name` equals the directory name. `type` is `html`, `js` or `css`.
 
 ## Authoring rules
 
-- **Shape.** Exactly one `.html` page, at most one `.ts` script, optional
-  `.css`. No `.tsx`, no template binding syntax (`.prop=`, `:prop=`, `@event=`,
+- **Shape.** Exactly one `.html` page, at most one `.js` script (plain ESM; use JSDoc for types), optional
+  `.css`. No `.ts` or `.tsx` (it must run in a browser as it is, and a TypeScript project adopts a `.js` file without friction), no template binding syntax (`.prop=`, `:prop=`, `@event=`,
   `#ref=`, `*directive=`), no controller, no generated framework forms. The
   registry rejects each with a named error.
 - **Length.** 50 to 200 lines in total. Shorter is a snippet that belongs in a

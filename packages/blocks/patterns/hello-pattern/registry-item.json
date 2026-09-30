@@ -5,6 +5,6 @@
   "description": "The smallest pattern: one kai-button and one script that listens for its click. Used as the fixture the pattern tier's tests run against.",
   "files": [
     { "path": "hello-pattern.html", "type": "html" },
-    { "path": "hello-pattern.ts", "type": "ts" }
+    { "path": "hello-pattern.js", "type": "js" }
   ]
 }

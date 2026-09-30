@@ -554,9 +554,7 @@ export function planPattern(pattern: Pattern, opts: { cdn: boolean; kitRange: st
   const plan: AddPlan = { files: [], dependencies: {}, docs: [], notes: [] };
   planFiles(renderPattern(pattern, opts.cdn ? { cdn: { version: opts.kitVersion } } : {}), plan);
   if (opts.cdn) {
-    plan.notes.push(
-      `${pattern.name}: no project here, so the script's @kitn.ai/ui import is pinned to jsDelivr. The script is TypeScript: serve it through a dev server that strips types (Vite does), or delete the annotations.`,
-    );
+    plan.notes.push(`${pattern.name}: no project here, so the script's @kitn.ai/ui import is pinned to jsDelivr; open ${pattern.name}.html in a browser as it is.`);
   } else {
     plan.dependencies['@kitn.ai/ui'] = opts.kitRange;
     plan.notes.push(`${pattern.name}: copied verbatim under src/patterns/${pattern.name}/. Import or open its .html through your dev server.`);

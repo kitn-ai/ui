@@ -62,7 +62,7 @@ describe('add <pattern>', () => {
     const { code, err } = await run(dir, ['hello-pattern']);
     expect(err).toEqual([]);
     expect(code).toBe(0);
-    for (const file of ['hello-pattern.html', 'hello-pattern.ts']) expect(await written(dir, file)).toBe(await authored(file));
+    for (const file of ['hello-pattern.html', 'hello-pattern.js']) expect(await written(dir, file)).toBe(await authored(file));
     const pkg = JSON.parse(await readFile(path.join(dir, 'package.json'), 'utf8'));
     expect(pkg.dependencies['@kitn.ai/ui']).toBe(KIT_RANGE);
   });
@@ -72,14 +72,14 @@ describe('add <pattern>', () => {
     const { code, out } = await run(dir, ['hello-pattern']);
     expect(code).toBe(0);
     expect(await written(dir, 'hello-pattern.html')).toBe(await authored('hello-pattern.html'));
-    const before = (await authored('hello-pattern.ts')).split('\n');
-    const after = (await written(dir, 'hello-pattern.ts')).split('\n');
+    const before = (await authored('hello-pattern.js')).split('\n');
+    const after = (await written(dir, 'hello-pattern.js')).split('\n');
     expect(after).toHaveLength(before.length);
     const changed = after.map((line, i) => [line, before[i]]).filter(([a, b]) => a !== b);
     expect(changed).toHaveLength(1);
     expect(changed[0][0]).toContain(`@kitn.ai/ui@${KIT_VERSION}/dist/kai.es.js`);
-    // Decided loudly: the note says the script is TypeScript.
     expect(out.join('\n')).toMatch(/pinned to jsDelivr/);
+    expect(out.join('\n')).not.toMatch(/TypeScript/);
   });
 
   it('refuses to overwrite, listing the files', async () => {
@@ -121,7 +121,7 @@ describe('add <pattern>', () => {
       description: 'From a URL.',
       files: [
         { path: 'hello-pattern.html', type: 'html', content: '<kai-button>x</kai-button>' },
-        { path: 'hello-pattern.ts', type: 'ts', content: "import '@kitn.ai/ui/web-components';\n" },
+        { path: 'hello-pattern.js', type: 'js', content: "import '@kitn.ai/ui/web-components';\n" },
       ],
     };
     const { code, err } = await run(dir, ['https://example.test/r/hello-pattern.json'], { fetchJson: async () => item });
