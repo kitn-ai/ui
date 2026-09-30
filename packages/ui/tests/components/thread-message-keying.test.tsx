@@ -69,34 +69,35 @@ function streamingThread(): { messages: Accessor<ChatMessage[]>; stream: Assista
   return { messages, stream };
 }
 
-/** The tool panel's disclosure trigger, found the way the browser harness finds
- *  it: a button with `aria-controls` carrying the tool name. */
+/** The disclosure of the activity line a tool call lives in (one line per run of reasoning and
+ *  tool parts), found by its `aria-controls`, the same hop the browser harness makes. */
 function toolTrigger(container: HTMLElement, toolName: string): HTMLElement {
-  const found = [...container.querySelectorAll<HTMLElement>('button[aria-controls]')].find((b) =>
+  const found = [...container.querySelectorAll<HTMLElement>('[data-kai-activity] > button[aria-controls]')].find((b) =>
     (b.textContent ?? '').includes(toolName),
   );
-  if (!found) throw new Error(`no disclosure trigger for the ${toolName} tool is rendered`);
+  if (!found) throw new Error(`no activity line for the ${toolName} tool is rendered`);
   return found;
 }
 
-/** The PANEL a trigger controls, resolved through `aria-controls` — the same
- *  hop the browser harness makes.
+/** The step list a trigger controls, resolved through `aria-controls`.
  *
- *  Identity is asserted on the panel, not on the trigger: `CollapsibleTrigger`
- *  renders through an `as={...}` callback that reads `open()`, so toggling
- *  legitimately re-creates the trigger element. The panel div is stable across a
- *  toggle and is replaced ONLY by a remount, which is exactly the distinction
- *  under test. Its `id` is a `createUniqueId()` value, so a rebuilt row cannot
- *  even be found by the old id — the lookup returns null and the identity
- *  assertion fails loudly. */
+ *  Identity is asserted on the list, not on the trigger: the list is stable across a toggle
+ *  of a step and is replaced ONLY by a remount, which is exactly the distinction under test.
+ *  Its `id` is a `createUniqueId()` value, so a rebuilt row cannot even be found by the old
+ *  id: the lookup returns null and the identity assertion fails loudly. The list exists only
+ *  while the line is open, so `null` means closed. */
 function panelOf(container: HTMLElement, contentId: string): HTMLElement | null {
   return container.querySelector<HTMLElement>(`[id="${contentId}"]`);
 }
 
-/** A Collapsible marks its open panel with `data-expanded` (and drops it when
- *  closed) — the attribute half of the `grid-rows-[1fr]` layout the user sees. */
+/** The line is open while its step list is in the DOM. */
 function isOpen(panel: HTMLElement | null): boolean {
-  return !!panel?.hasAttribute('data-expanded');
+  return !!panel;
+}
+
+/** A step's own disclosure, inside the opened list. */
+function stepTrigger(container: HTMLElement): HTMLElement {
+  return container.querySelector<HTMLElement>('li[data-kai-step] [data-kai-step-trigger]')!;
 }
 
 /** Open the streaming assistant turn: some prose, then a tool call whose
@@ -123,11 +124,13 @@ function assertSurvivesDeltas(container: HTMLElement, stream: AssistantStream) {
   const trigger = toolTrigger(container, 'get_weather');
   const contentId = trigger.getAttribute('aria-controls');
   expect(contentId, 'the tool disclosure must expose aria-controls').toBeTruthy();
-  const panelBefore = panelOf(container, contentId!);
-  expect(isOpen(panelBefore), 'the tool panel starts closed').toBe(false);
+  expect(isOpen(panelOf(container, contentId!)), 'the line starts closed').toBe(false);
 
   fireEvent.click(trigger);
-  expect(isOpen(panelOf(container, contentId!)), 'clicking the trigger must open the panel').toBe(true);
+  const panelBefore = panelOf(container, contentId!);
+  expect(isOpen(panelBefore), 'clicking the trigger must open the step list').toBe(true);
+  fireEvent.click(stepTrigger(container));
+  expect(stepTrigger(container)).toHaveAttribute('aria-expanded', 'true');
 
   keepStreaming(stream);
 
@@ -141,7 +144,8 @@ function assertSurvivesDeltas(container: HTMLElement, stream: AssistantStream) {
     panelOf(container, contentId!),
     'the panel element itself was replaced — the row did not survive the deltas',
   ).toBe(panelBefore);
-  expect(isOpen(panelOf(container, contentId!)), 'the panel opened mid-stream must still be open').toBe(true);
+  expect(isOpen(panelOf(container, contentId!)), 'the line opened mid-stream must still be open').toBe(true);
+  expect(stepTrigger(container), 'the step the reader opened must still be open').toHaveAttribute('aria-expanded', 'true');
 
   // Still-mounted must not mean frozen: the row has to keep reading its new
   // content through the accessor, or we traded one bug for a worse one.
@@ -164,6 +168,9 @@ describe('ChatApp — message list keying under a live stream', () => {
 
     const row = container.querySelector<HTMLElement>('[part="row"]');
     expect(row, 'the assistant row must render').toBeTruthy();
+    // Reasoning text lives in the step's detail: open the line and the step to read it.
+    fireEvent.click(container.querySelector<HTMLElement>('[data-kai-activity] > button')!);
+    fireEvent.click(stepTrigger(container));
 
     stream.appendReasoning(' is usually wet.');
     stream.appendText('It rains.');
@@ -183,9 +190,9 @@ describe('ChatApp — message list keying under a live stream', () => {
 
     const trigger = toolTrigger(container, 'get_weather');
     const contentId = trigger.getAttribute('aria-controls')!;
-    const panelBefore = panelOf(container, contentId);
     fireEvent.click(trigger);
-    expect(isOpen(panelOf(container, contentId))).toBe(true);
+    const panelBefore = panelOf(container, contentId);
+    expect(isOpen(panelBefore)).toBe(true);
 
     // Load-earlier-messages: an older turn arrives at the FRONT of the list.
     setMessages((prev) => [

@@ -1,4 +1,4 @@
-import { type JSX, For, Index, Switch, Match, createMemo, createSignal, splitProps, Show } from "solid-js";
+import { type JSX, For, Index, Switch, Match, createMemo, createSignal, createEffect, splitProps, Show } from "solid-js";
 import { Tooltip } from "../tooltip/tooltip";
 import { Copy, Check } from "lucide-solid";
 import { cn } from "../../utils/cn";
@@ -7,10 +7,12 @@ import { Button } from "../button/button";
 import { actionIcon, BUILTIN_ACTION_LABEL } from "../action-icons/action-icons";
 import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../../web-components/chat/chat-types";
 import { useChatConfig, textClass } from "../../primitives/chat-config";
-import { Reasoning, ReasoningTrigger, ReasoningContent } from "../reasoning/reasoning";
+import { Activity } from "../activity/activity";
+import { TagRenderer } from "../renderer/tag-renderer";
+import { resolveRenderer, type RendererMap } from "../../primitives/renderer-registry";
+import { activityStepsFromParts } from "../../primitives/activity";
+import { ASK_TOOL_NAME } from "../../primitives/questions";
 import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from "../chat/thread-density";
-import { Loader } from "../loader/loader";
-import { Tool } from "../tool/tool";
 import {
   Attachments,
   Attachment,
@@ -350,6 +352,15 @@ export interface MessageBodyProps {
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
+  // `cardTypes` keeps the cards; this swaps the rest. A `card:` key is refused LOUDLY (see
+  // `warnCardRendererKeys`) because the card layer has its own registry and a second, silent
+  // one would make `renderers['card:x']` look wired while drawing nothing.
+  // NOT `.part`: `Element.part` is the platform's shadow-part token list, and assigning an
+  // object to it stringifies into the `part` attribute and keeps nothing. So a `text` element
+  // gets `.messagePart`; `tool`/`reasoning` elements render one activity step and get `.step`;
+  // a `source`/`file` element gets the whole run as `.parts`.
+  /** Custom elements for parts, keyed `tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`. */
+  renderers?: RendererMap;
   // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
   // one looks like. `createCardRegistry(...).validationSchemas` is exactly this shape.
   // Without it the kit validates its own seven built-ins and leaves the consumer's own
@@ -415,43 +426,77 @@ export interface MessageBodyProps {
   imagePreview?: AttachmentImagePreview;
 }
 
-/** One render group over an ordered `parts` array. Two part types collapse runs:
+/** One render group over an ordered `parts` array. Three part types collapse runs:
  *  consecutive `file` parts become a single `'files'` group so they share one
  *  `<Attachments>` row (matching the pre-parts layout) instead of each opening
- *  its own, and consecutive `source` parts become a single `'sources'` group so
+ *  its own, consecutive `source` parts become a single `'sources'` group so
  *  the N citations one search produced are ONE wrapped row rather than N stacked
- *  rows. Every other part is its own `'single'` group. Pure and order-preserving:
+ *  rows, and consecutive `reasoning` and `tool` parts become one `'activity'`
+ *  group, which renders as ONE quiet line. A `kai_ask` call joins the run it sits
+ *  in without splitting it (the question panel owns it; see `activityStepsForGroup`).
+ *  Every other part is its own `'single'` group. Pure and order-preserving:
  *  it only decides where the wrapper boundaries fall, never reorders or drops
  *  anything, so a group sits exactly where its parts sat in `parts`. */
 export type MessagePartGroup =
-  | { kind: 'single'; part: Exclude<MessagePart, { type: 'file' } | { type: 'source' }> }
+  | { kind: 'single'; part: Exclude<MessagePart, { type: 'file' } | { type: 'source' } | { type: 'reasoning' } | { type: 'tool' }> }
   | { kind: 'files'; parts: Extract<MessagePart, { type: 'file' }>[] }
-  | { kind: 'sources'; parts: Extract<MessagePart, { type: 'source' }>[] };
+  | { kind: 'sources'; parts: Extract<MessagePart, { type: 'source' }>[] }
+  | { kind: 'activity'; parts: Extract<MessagePart, { type: 'reasoning' | 'tool' }>[] };
+
+type ActivityGroup = Extract<MessagePartGroup, { kind: 'activity' }>;
+type RunKind = 'files' | 'sources' | 'activity';
+const RUN_OF: Record<string, RunKind | undefined> = { file: 'files', source: 'sources', reasoning: 'activity', tool: 'activity' };
 
 export function groupMessageParts(parts: MessagePart[]): MessagePartGroup[] {
   const groups: MessagePartGroup[] = [];
   for (const part of parts) {
-    if (part.type === 'file') {
+    const run = RUN_OF[part.type];
+    if (run) {
       const last = groups[groups.length - 1];
-      if (last?.kind === 'files') {
-        groups[groups.length - 1] = { kind: 'files', parts: [...last.parts, part] };
+      if (last?.kind === run) {
+        groups[groups.length - 1] = { kind: run, parts: [...last.parts, part] } as MessagePartGroup;
         continue;
       }
-      groups.push({ kind: 'files', parts: [part] });
+      groups.push({ kind: run, parts: [part] } as MessagePartGroup);
       continue;
     }
-    if (part.type === 'source') {
-      const last = groups[groups.length - 1];
-      if (last?.kind === 'sources') {
-        groups[groups.length - 1] = { kind: 'sources', parts: [...last.parts, part] };
-        continue;
-      }
-      groups.push({ kind: 'sources', parts: [part] });
-      continue;
-    }
-    groups.push({ kind: 'single', part });
+    groups.push({ kind: 'single', part } as MessagePartGroup);
   }
   return groups;
+}
+
+const warnedCardKeys = new Set<string>();
+
+/** `card:*` renderer keys are not accepted: cards keep `cardTypes`, the card layer's own registry
+ *  (the remote-card contract relies on it). Warn once per key, then ignore it. */
+function warnCardRendererKeys(map: RendererMap | undefined): void {
+  if (!map) return;
+  for (const key of Object.keys(map)) {
+    if (!key.startsWith('card:') || warnedCardKeys.has(key)) continue;
+    warnedCardKeys.add(key);
+    console.warn(
+      `[kai] renderers["${key}"] is ignored: cards are customised through \`cardTypes\` (envelope type -> custom-element tag), not \`renderers\`.`,
+    );
+  }
+}
+
+const KNOWN_PART_TYPES: ReadonlySet<string> = new Set(['text', 'reasoning', 'tool', 'card', 'source', 'file']);
+
+/** The steps one activity group shows. `kai_ask` is left out (C's question panel and answers row
+ *  own it) and a reasoning part with no text is a round-trip carrier (redacted thinking), not a
+ *  step. `reasoning: 'off'` drops reasoning steps, never tool steps. A non-final group is handed
+ *  a trailing sentinel so `activityStepsFromParts` does not read its last untimed reasoning block
+ *  as the one still being written. */
+function activityStepsForGroup(
+  parts: ActivityGroup['parts'],
+  opts: { streaming: boolean; final: boolean; reasoningMode: 'full' | 'compact' | 'off' },
+) {
+  const shown: MessagePart[] = parts.filter((p) => {
+    if (p.type === 'tool') return (p.tool as { type?: unknown } | undefined)?.type !== ASK_TOOL_NAME;
+    return opts.reasoningMode !== 'off' && p.text !== '';
+  });
+  if (!opts.final) shown.push({ type: 'text', text: '' });
+  return activityStepsFromParts(shown, { streaming: opts.streaming });
 }
 
 /** The citation chip's label. `index` when the model numbered its citations;
@@ -585,6 +630,16 @@ export function resolveActionsReveal(
   return reveal ?? (isUser ? 'hover' : 'always');
 }
 
+/** One run of `source` or `file` parts, swapped for the consumer's element when `renderers` names
+ *  one. The element gets the run as `.parts`; the built-in row shows until it is defined. */
+function RunRenderer(props: { tag: string | undefined; parts: MessagePart[]; children: JSX.Element }) {
+  return (
+    <Show when={props.tag} fallback={props.children}>
+      {(tag) => <TagRenderer tag={tag()} data={props.parts} prop="parts" fallback={props.children} />}
+    </Show>
+  );
+}
+
 /**
  * The shared message body: the message's `parts` rendered in a single ordered
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
@@ -599,6 +654,10 @@ function MessageBody(props: MessageBodyProps) {
   const groups = createMemo(() =>
     groupMessageParts(props.parts).filter((g) => !(props.hideSources === true && g.kind === 'sources')),
   );
+  createEffect(() => warnCardRendererKeys(props.renderers));
+  // The consumer's element for a part, when `renderers` names one (most specific key first).
+  const tagFor = (keys: readonly string[]) => resolveRenderer(props.renderers, keys);
+  const reasoningMode = () => props.reasoningMode ?? 'full';
   return (
     <>
       {/* before-body (inject): a per-message header above everything else. */}
@@ -620,11 +679,12 @@ function MessageBody(props: MessageBodyProps) {
        *  This only works while the children read through the accessors below: capturing
        *  `g().part` once re-freezes the row at its first delta. */}
       <Index each={groups()}>
-        {(group) => (
+        {(group, groupIndex) => (
           <Switch fallback={null}>
             <Match when={groupAs(group(), 'files')}>
               {(g) => (
-                /* `grid`, NOT `inline`. The inline chip gives an image a 20x20
+                <RunRenderer tag={tagFor(['file'])} parts={g().parts}>
+                {/* `grid`, NOT `inline`. The inline chip gives an image a 20x20
                    preview — a thumbnail nobody can read — while the 96px tile
                    and the hover-card full preview both already existed here and
                    the thread used neither.
@@ -643,7 +703,7 @@ function MessageBody(props: MessageBodyProps) {
                    VISIBLE truncated caption on every non-image tile — no hover,
                    no focus, no tap required — and the hover card is an upgrade
                    to the full name and media type rather than the only way to
-                   get either. */
+                   get either. */}
                 <Attachments variant="grid" imagePreview={props.imagePreview} class={props.isUser ? 'mb-2 ml-auto' : 'mb-2'}>
                   {/* Reference-keyed <For> is right HERE: the run's part objects
                       are carried over untouched by the folds, and an attachment
@@ -652,6 +712,7 @@ function MessageBody(props: MessageBodyProps) {
                     {(fp) => <AttachmentTile data={fp.attachment} />}
                   </For>
                 </Attachments>
+                </RunRenderer>
               )}
             </Match>
             <Match when={groupAs(group(), 'sources')}>
@@ -663,6 +724,7 @@ function MessageBody(props: MessageBodyProps) {
                 // `SourceList` is its own container, so the row is a sibling of
                 // the content part, and `part="citations"` lets a consumer target
                 // it through the shadow boundary.
+                <RunRenderer tag={tagFor(['source'])} parts={g().parts}>
                 <SourceList part="citations" class={props.isUser ? 'justify-end' : undefined}>
                   {/* Reference-keyed <For> is right HERE, as with files: the
                       run's part objects are carried over untouched by the folds. */}
@@ -678,7 +740,51 @@ function MessageBody(props: MessageBodyProps) {
                     )}
                   </For>
                 </SourceList>
+                </RunRenderer>
               )}
+            </Match>
+            <Match when={groupAs(group(), 'activity')}>
+              {(g) => {
+                // Reasoning and tool calls are ONE quiet line, not a bold panel per call.
+                // The steps are re-derived from `g().parts` on every delta (a fresh object per
+                // step), and the row stays mounted because this is an <Index>: the line's own
+                // open/closed state and the reader's expanded steps live in `Activity` and
+                // survive the stream. `renderers` swaps single STEPS (`.step`), never the line.
+                const isFinal = () => groupIndex === groups().length - 1;
+                const steps = createMemo(() =>
+                  activityStepsForGroup(g().parts, {
+                    streaming: props.isStreaming === true,
+                    final: isFinal(),
+                    reasoningMode: reasoningMode(),
+                  }),
+                );
+                const stepRenderers = () => {
+                  const map = props.renderers;
+                  if (!map) return undefined;
+                  const out: RendererMap = {};
+                  for (const k of Object.keys(map)) if (k === 'tool' || k === 'reasoning' || k.startsWith('tool:')) out[k] = map[k]!;
+                  return out;
+                };
+                // `reasoningDefaultOpen` keeps its meaning: the timeline of a run that holds reasoning
+                // is open while the turn streams and closes once it settles, until the reader toggles
+                // it, after which their choice stands. Unset, the line is uncontrolled and starts closed.
+                const [readerOpen, setReaderOpen] = createSignal<boolean | undefined>(undefined);
+                const tracksStream = () => props.reasoningDefaultOpen === true && steps().some((s) => s.kind === 'reasoning');
+                const open = () => (tracksStream() ? readerOpen() ?? (props.isStreaming === true && isFinal()) : undefined);
+                return (
+                  <Show when={steps().length > 0}>
+                    <Activity
+                      class="mb-2"
+                      steps={steps()}
+                      streaming={props.isStreaming === true}
+                      detail={reasoningMode() === 'compact' ? 'summary' : 'full'}
+                      open={open()}
+                      onOpenChange={setReaderOpen}
+                      renderers={stepRenderers()}
+                    />
+                  </Show>
+                );
+              }}
             </Match>
             <Match when={groupAs(group(), 'single')}>
               {(g) => {
@@ -687,85 +793,54 @@ function MessageBody(props: MessageBodyProps) {
                 // through here for the new content to land. `partAs` does the
                 // type test and the narrowing cast in one read (see its note).
                 const part = () => g().part;
-                const reasoning = () => partAs(part(), 'reasoning');
-                // A reasoning part with NO text is a round-trip carrier, not
-                // something to show. Anthropic's redacted_thinking blocks carry
-                // an opaque blob with no readable text, and the block assembled
-                // at content_block_stop carries the verbatim payload the encoder
-                // must echo back. Both are empty-text parts that MUST stay in
-                // `parts` (the encoder needs them, in order) and must not render
-                // a blank disclosure.
-                const carrierOnly = () => { const r = reasoning(); return r !== false && r.text === ''; };
-                const shownReasoning = () => { const r = reasoning(); return r !== false && r.text !== '' && r; };
                 return (
-                  <Switch fallback={null}>
+                  <Switch
+                    fallback={
+                      // A part this build does not know (a newer writer's variant, a corrupt
+                      // save) is SHOWN as what it is, never dropped: decide loudly.
+                      <Show when={!KNOWN_PART_TYPES.has(String((part() as { type?: unknown }).type))}>
+                        <p class="mb-2 text-caption text-muted-foreground" data-kai-unknown-part="">
+                          Unsupported content ({String((part() as { type?: unknown }).type).slice(0, 40)})
+                        </p>
+                      </Show>
+                    }
+                  >
                     <Match when={partAs(part(), 'text')}>
-                      {(p) => (
-                        <MessageContent
-                          part="bubble content"
-                          markdown={props.markdown}
-                          class={props.isUser
-                            // Content token, not the brand token: `--color-primary`
-                            // is the documented consumer brand override
-                            // (theme.css `--kai-color-primary`), so toking message
-                            // TEXT to it means every consumer that brands primary
-                            // gets brand-colored message text. `text-foreground` is
-                            // already `MessageContent`'s base color (matches the
-                            // assistant path's `bg-transparent p-0`, which carries
-                            // no color override and falls through to the same
-                            // base) — dropping `text-primary` here just lets that
-                            // base apply on the user bubble too.
-                            ? 'bg-muted max-w-[85%] rounded-2xl px-4 py-2'
-                            : 'bg-transparent p-0'}
-                        >
-                          {p().text}
-                        </MessageContent>
-                      )}
-                    </Match>
-                    <Match when={carrierOnly()}>{null}</Match>
-                    <Match when={shownReasoning()}>
                       {(p) => {
-                        // Default 'full' is the pre-existing DISPLAY MODE byte
-                        // for byte; the OPEN behavior no longer auto-opens while
-                        // streaming by default. `reasoningDefaultOpen` reproduces
-                        // the old always-auto-opens behavior when set.
-                        const mode = () => props.reasoningMode ?? 'full';
+                        const content = () => (
+                          <MessageContent
+                            part="bubble content"
+                            markdown={props.markdown}
+                            class={props.isUser
+                              // Content token, not the brand token: `--color-primary`
+                              // is the documented consumer brand override
+                              // (theme.css `--kai-color-primary`), so toking message
+                              // TEXT to it means every consumer that brands primary
+                              // gets brand-colored message text. `text-foreground` is
+                              // already `MessageContent`'s base color (matches the
+                              // assistant path's `bg-transparent p-0`, which carries
+                              // no color override and falls through to the same
+                              // base) — dropping `text-primary` here just lets that
+                              // base apply on the user bubble too.
+                              ? 'bg-muted max-w-[85%] rounded-2xl px-4 py-2'
+                              : 'bg-transparent p-0'}
+                          >
+                            {p().text}
+                          </MessageContent>
+                        );
                         return (
-                          <Switch fallback={null}>
-                            <Match when={mode() === 'full'}>
-                              <Reasoning
-                                class="mb-2 w-full"
-                                isStreaming={props.isStreaming}
-                                defaultOpen={props.reasoningDefaultOpen}
-                                openOnStream={props.reasoningDefaultOpen}
-                              >
-                                <ReasoningTrigger>{p().label ?? 'Reasoning'}</ReasoningTrigger>
-                                <ReasoningContent markdown>{p().text}</ReasoningContent>
-                              </Reasoning>
-                            </Match>
-                            {/* 'compact': the same "Thinking…" shimmer the full
-                                disclosure's trigger shows while streaming — no
-                                <Reasoning>/<ReasoningContent>, so there is no
-                                expandable detail and nothing left once the part
-                                settles (isStreaming false → this Match doesn't
-                                fire, matching 'off'). 'off' never reaches here:
-                                its Match doesn't fire either. */}
-                            <Match when={mode() === 'compact' && props.isStreaming}>
-                              <Loader variant="text-shimmer" text={p().label ?? 'Reasoning'} class="mb-3" />
-                            </Match>
-                          </Switch>
+                          <Show when={tagFor(['text'])} fallback={content()}>
+                            {(tag) => <TagRenderer tag={tag()} data={p()} prop="messagePart" fallback={content()} />}
+                          </Show>
                         );
                       }}
-                    </Match>
-                    <Match when={partAs(part(), 'tool')}>
-                      {(p) => <Tool toolPart={p().tool} class="mb-2 w-full" />}
                     </Match>
                     <Match when={partAs(part(), 'card')}>
                       {(p) => <CardRenderer envelope={p().envelope} types={props.cardTypes} schemas={props.cardSchemas} hostElement={props.cardHostElement} />}
                     </Match>
-                    {/* No `source` match here on purpose: source parts never
-                        reach a 'single' group — they are collapsed into a
-                        'sources' run above and rendered as one citation row. */}
+                    {/* No `source`, `reasoning` or `tool` match here on purpose: sources
+                        collapse into a 'sources' run, and reasoning and tool parts into an
+                        'activity' run, each above. */}
                   </Switch>
                 );
               }}

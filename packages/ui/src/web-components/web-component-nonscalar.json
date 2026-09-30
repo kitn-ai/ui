@@ -35,6 +35,7 @@
     "kindIcons",
     "messages",
     "models",
+    "renderers",
     "store",
     "suggestions",
     "tools",
@@ -102,7 +103,8 @@
   "kai-message": [
     "cardSchemas",
     "cardTypes",
-    "message"
+    "message",
+    "renderers"
   ],
   "kai-model-switcher": [
     "models"
@@ -184,7 +186,8 @@
   "kai-thread": [
     "cardSchemas",
     "cardTypes",
-    "messages"
+    "messages",
+    "renderers"
   ],
   "kai-toast-region": [
     "target",

@@ -1,11 +1,11 @@
 ---
 title: Tool calls & reasoning
-description: Render an agent's thinking trace and tool invocations inline in a message, progressing through the four-state tool lifecycle.
+description: Render an agent's thinking trace and tool invocations inline in a message as one quiet activity line, and swap how any step renders.
 ---
 
 import ChatDemo from '../../../components/ChatDemo.tsx';
 
-<p class="kai-lede">Agents think before they act and invoke tools to get things done. `reasoning` and `tool` parts in a message's `parts` array bring both inline — one part per tool call, updated in place as the agent streams its output.</p>
+<p class="kai-lede">Agents think before they act and invoke tools to get things done. `reasoning` and `tool` parts in a message's `parts` array bring both inline — one part per tool call, updated in place as the agent streams its output. Each run of them renders as one quiet line ("Thought for 6s · Searched the web") that opens to a timeline of steps; a step opens to its arguments and result.</p>
 
 <ChatDemo client:only="solid" chatTitle="Research Agent" placeholder="Ask the agent anything…" messages={[
   { id: 'u1', role: 'user', parts: [{ type: 'text', text: 'What is the current price of NVDA stock and its 52-week range?' }] },
@@ -151,16 +151,43 @@ chat.loading = false;
 
 The ergonomic path is `createAssistantStream` from `@kitn.ai/ui/state`: its `upsertTool(toolCallId, patch)` and `appendReasoning(delta)` handle the part-lookup and new-reference plumbing above for you.
 
-**Tool lifecycle — four states:**
+**Tool lifecycle — four states.** The `state` field drives the step's status in the activity line:
 
-| `state` | Rendered as | When to set it |
+| `state` | Step shows | When to set it |
 |---|---|---|
-| `input-streaming` | Spinning loader, "Processing" badge | Tool call chunk received; input is still arriving |
-| `input-available` | Settings icon, "Ready" badge | Input complete; tool is executing |
-| `output-available` | Check icon, "Completed" badge | Tool returned successfully |
-| `output-error` | X icon, "Error" badge + `errorText` | Tool threw or returned an error |
+| `input-streaming` | Running: the line shimmers while the turn streams | Tool call chunk received; input is still arriving |
+| `input-available` | Running | Input complete; tool is executing |
+| `output-available` | Done, with its duration when the part carries `timing` | Tool returned successfully |
+| `output-error` | Failed: the line names it, the step shows `errorText` | Tool threw or returned an error |
 
-**`reasoning`** is a `{ type: 'reasoning', text, label? }` part — append tokens to `text` as they stream in. The block auto-expands while reasoning is in progress if you use `<kai-reasoning streaming>` directly; via `<kai-chat>` or `<kai-message>` the block is collapsible once complete.
+A call that never settles and is not streaming any more reads as interrupted, not done. Consecutive `reasoning` and `tool` parts are one line; text between them splits the runs, so an interleaved turn gets several lines in part order.
+
+**`reasoning`** is a `{ type: 'reasoning', text, label? }` part — append tokens to `text` as they stream in. It is a step of the activity line, and its text shows when that step is opened. On `<kai-chat>` the `reasoning` property maps onto the line: `'full'` (default) is the expandable line, `'compact'` is the line alone with no disclosure, `'off'` hides reasoning steps and keeps tool steps. `reasoning-open` seeds the timeline open.
+
+## Swap how a part renders
+
+`renderers` on `<kai-chat>`, `<kai-thread>` and `<kai-message>` maps a key to a custom-element tag. Set it as a JS property. The most specific key wins.
+
+| Key | Your element gets |
+|---|---|
+| `tool:<name>` (e.g. `tool:web_search`) | `el.step`: that one step, in place of its row in the timeline |
+| `tool` | `el.step`, for every tool step without a more specific key |
+| `reasoning` | `el.step`, for a reasoning step |
+| `text` | `el.messagePart`: the `{ type: 'text', text }` part, in place of the markdown |
+| `source`, `file` | `el.parts`: the whole run, in place of the citations row or the attachment grid |
+
+```js
+class SearchStep extends HTMLElement {
+  set step(s) {
+    this.textContent = `Searched for ${s.input?.query ?? '…'}`;
+  }
+}
+customElements.define('search-step', SearchStep);
+
+chat.renderers = { 'tool:web_search': 'search-step' };
+```
+
+Only the keyed step changes; the line, its summary and every other step stay built in. A tag that is not a valid custom-element name, or never gets defined within two seconds, falls back to the built-in rendering with one console warning. Cards are not in this map: they keep `cardTypes`, and a `card:` key warns once and is ignored. The data your element receives is model output, so render it as text.
 
 **`<kai-thinking-bar>`** is the pre-reasoning status bar — show it before the first reasoning token arrives. It fires `kai-stop` when the user clicks "Answer now" (requires `stoppable`):
 
@@ -178,7 +205,7 @@ The ergonomic path is `createAssistantStream` from `@kitn.ai/ui/state`: its `ups
 
 - **[Drop-in chat](/examples/drop-in-chat/)** — the full `kai-submit` streaming loop.
 - **[`kai-message` reference](/components/message/)** — complete `ChatMessage` shape, `actionsReveal`, `proseSize`.
-- **[`kai-tool` reference](/components/tool/)** — `tool` property shape, `open` flag, state tokens.
-- **[`kai-reasoning` reference](/components/reasoning/)** — `streaming` auto-expand, `kai-open-change`.
+- **[`kai-tool` reference](/components/tool/)** — the standalone tool panel: `tool` property shape, `open` flag, state tokens. Threads no longer use it.
+- **[`kai-reasoning` reference](/components/reasoning/)** — the standalone reasoning disclosure.
 - **[`kai-thinking-bar` reference](/components/thinking-bar/)** — `text`, `stoppable`, `kai-stop`.
 - **[Compose your own shell](/patterns/compose-your-own/)** — lay out the thread and composer without `<kai-chat>`.

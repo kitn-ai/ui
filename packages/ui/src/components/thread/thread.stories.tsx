@@ -185,6 +185,53 @@ export const Interleaved: Story = {
 ]} />`),
 };
 
+/** A tool-only turn streams: the line shows the live step with the shimmer, then settles to
+ *  its summary. Reasoning and tool parts are ONE quiet line, in part order. Click to run it. */
+export const ToolRunStreaming: Story = {
+  ...src(`<Thread
+  messages={[
+    user,
+    { id: 'a1', role: 'assistant', parts: [
+      { type: 'reasoning', text: 'Search first.', timing: { startedAt: 0, endedAt: 2000 } },
+      { type: 'tool', tool: { type: 'web_search', toolCallId: 'tc1', state: 'input-available', input: { query: 'solid signals' } } },
+    ] },
+  ]}
+  loading
+/>`),
+  render: () => {
+    const tool = (state: 'input-available' | 'output-available') => ({
+      type: 'tool' as const,
+      tool: {
+        type: 'web_search', kind: 'search' as const, state, toolCallId: 'tc1', input: { query: 'solid signals' },
+        ...(state === 'output-available' ? { output: { results: 3 }, timing: { startedAt: 0, endedAt: 1200 } } : {}),
+      },
+    });
+    const user = textMessage('user', 'Look up Solid signals.', { id: 'u1' });
+    const [messages, setMessages] = createSignal<ChatMessage[]>([user]);
+    const [loading, setLoading] = createSignal(false);
+    const run = () => {
+      setLoading(true);
+      setMessages([user, { id: 'a1', role: 'assistant', parts: [{ type: 'reasoning', text: 'Search first.', timing: { startedAt: 0, endedAt: 2000 } }, tool('input-available')] }]);
+      setTimeout(() => {
+        setMessages([user, { id: 'a1', role: 'assistant', parts: [{ type: 'reasoning', text: 'Search first.', timing: { startedAt: 0, endedAt: 2000 } }, tool('output-available'), { type: 'text', text: 'Signals are reactive values.' }] }]);
+        setLoading(false);
+      }, 1800);
+    };
+    return (
+      <ChatConfig>
+        <div style={{ height: '320px' }} class="flex flex-col overflow-hidden rounded-lg border border-border">
+          <div class="shrink-0 border-b border-border p-2">
+            <button type="button" class="rounded-md bg-primary px-3 py-1 text-sm text-primary-foreground" onClick={run}>
+              Run the tool turn
+            </button>
+          </div>
+          <Thread messages={messages()} loading={loading()} />
+        </div>
+      </ChatConfig>
+    );
+  },
+};
+
 /** Streaming: hand the thread a NEW array reference per chunk and it sticks to the
  *  bottom. Click to simulate a token stream. */
 export const Streaming: Story = {

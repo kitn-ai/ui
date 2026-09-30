@@ -108,7 +108,7 @@ describe('createMessageFeedback', () => {
       });
 
       fb.handleAction(m, 'copy');
-      expect(writeText).toHaveBeenCalledWith('AB');
+      expect(writeText).toHaveBeenCalledWith('A\n\nB');
       dispose();
     });
   });

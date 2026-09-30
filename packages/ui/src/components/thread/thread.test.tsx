@@ -182,7 +182,7 @@ describe('Thread stick-to-bottom', () => {
 });
 
 describe('Thread reasoning parts', () => {
-  it('renders a reasoning disclosure when the part has text', () => {
+  it('renders the activity line for a reasoning part with text', () => {
     const messages: ChatMessage[] = [
       {
         id: 'a1',
@@ -194,7 +194,7 @@ describe('Thread reasoning parts', () => {
       },
     ];
     const { container } = render(() => <Thread messages={messages} />);
-    expect(container.textContent ?? '').toContain('Thinking');
+    expect(container.querySelector('[data-kai-activity]')!.textContent).toContain('Thought');
   });
 
   it('renders NOTHING for a reasoning part with empty text', () => {
@@ -220,7 +220,7 @@ describe('Thread reasoning parts', () => {
     ];
     const { container } = render(() => <Thread messages={messages} />);
     const text = container.textContent ?? '';
-    expect(text).not.toContain('Thinking');
+    expect(container.querySelector('[data-kai-activity]')).toBeNull();
     expect(text).toContain('Done.');
   });
 
@@ -236,6 +236,10 @@ describe('Thread reasoning parts', () => {
       },
     ];
     const { container } = render(() => <Thread messages={messages} />);
+    // Only the second block is a step: the empty one is a carrier and never a row.
+    fireEvent.click(container.querySelector('[data-kai-activity] > button')!);
+    expect(container.querySelectorAll('li[data-kai-step]')).toHaveLength(1);
+    fireEvent.click(container.querySelector('[data-kai-step-trigger]')!);
     expect(container.textContent ?? '').toContain('Second block.');
   });
 });

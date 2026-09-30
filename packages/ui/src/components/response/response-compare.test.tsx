@@ -349,10 +349,10 @@ describe('ResponseCompare — collapsed view reuses MessageBody', () => {
     ));
     // markdown renders asynchronously → wait for the <strong>
     await waitFor(() => expect(container.querySelector('strong')?.textContent).toBe('bold'));
-    // reasoning label present
-    expect(getByText('Why')).toBeInTheDocument();
-    // tool type rendered (the Tool component shows the tool name)
-    expect(getByText(/search/i)).toBeInTheDocument();
+    // reasoning and the tool call are ONE activity line (MessageBody's, not a panel per call)
+    const line = container.querySelector('[data-kai-activity]');
+    expect(line?.textContent).toContain('Thought');
+    expect(line?.textContent).toContain('Searched');
   });
 });
 

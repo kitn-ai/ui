@@ -6,8 +6,9 @@
  * The pre-19f auto-open/auto-close behavior (the exact path that regressed in
  * the field: .superpowers/sdd/2026-08-20-rung-3/latency-debug/report.md) is
  * now opt-in via `reasoningOpen` on `<kai-chat>`, forwarded to ChatApp's
- * `reasoningOpen` -> message.tsx's `reasoningDefaultOpen` -> Reasoning's
- * `defaultOpen`/`openOnStream` (src/components/message/message.tsx, src/web-components/chat/chat.tsx).
+ * `reasoningOpen` -> message.tsx's `reasoningDefaultOpen` -> the activity line's controlled
+ * `open` (src/components/message/message.tsx, src/web-components/chat/chat.tsx). Since B3
+ * reasoning is a step of the ONE activity line rather than its own disclosure.
  */
 import '../../src/web-components/chat/chat';
 import type { ChatMessage } from '../../src/web-components/chat/chat-types';
@@ -31,17 +32,15 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
+// Reasoning is a step of the one activity line, so the line's button is the disclosure.
 const reasoningTrigger = (el: HTMLElement) =>
-  Array.from(el.shadowRoot!.querySelectorAll('button')).find((b) =>
-    (b.textContent ?? '').includes('Reasoning'),
-  ) as HTMLButtonElement | undefined;
+  (el.shadowRoot!.querySelector('[data-kai-activity] > button') ?? undefined) as HTMLButtonElement | undefined;
 
 const reasoningOpen = (el: HTMLElement) =>
   reasoningTrigger(el)?.getAttribute('aria-expanded') === 'true';
 
-// TextShimmer renders with this animation class; the disclosure trigger swaps
-// its plain label for a shimmering one while `isStreaming` (see
-// src/components/reasoning/reasoning.tsx / text-shimmer.tsx).
+// TextShimmer renders with this animation class; the activity line swaps its plain label for a
+// shimmering one while a step runs (see src/components/activity/activity.tsx / text-shimmer.tsx).
 const reasoningShimmering = (el: HTMLElement) =>
   !!reasoningTrigger(el)?.querySelector('[class*="animate-"]');
 
@@ -73,6 +72,11 @@ test('default: the reasoning chip stays CLOSED while the last assistant message 
   el.messages = next;
   await flush();
   expect(reasoningOpen(el)).toBe(false);
+  // The text is in the step's detail: open the line and the step to read it.
+  reasoningTrigger(el)!.click();
+  await flush();
+  (el.shadowRoot!.querySelector('[data-kai-step-trigger]') as HTMLButtonElement).click();
+  await flush();
   expect(el.shadowRoot!.textContent).toContain('Rayleigh scattering');
 
   el.remove();
@@ -105,6 +109,8 @@ test('opt-in via reasoningOpen: the panel is OPEN while the last assistant messa
   el.messages = next;
   await flush();
   expect(reasoningOpen(el)).toBe(true);
+  (el.shadowRoot!.querySelector('[data-kai-step-trigger]') as HTMLButtonElement).click();
+  await flush();
   expect(el.shadowRoot!.textContent).toContain('Rayleigh scattering');
 
   el.remove();

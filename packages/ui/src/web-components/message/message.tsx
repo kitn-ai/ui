@@ -101,6 +101,13 @@ interface Props extends Record<string, unknown> {
   // wrapper inlines it instead of emitting an unresolved named type.
   /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
   cardTypes?: Record<string, string>;
+  // Part renderers. A plain string map for the same reason as `cardTypes`. Cards are NOT
+  // accepted here (a `card:` key warns once and is ignored): they keep `cardTypes`.
+  // A `text` element gets the part as `.messagePart` (not `.part`, which is the platform's
+  // shadow-part token list); a tool or reasoning element renders ONE activity step and gets
+  // `.step`; a `source` or `file` element gets the whole run as `.parts`.
+  /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+  renderers?: Record<string, string>;
   // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
   // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
   // Without it the kit validates its own seven built-ins and leaves the consumer's own
@@ -174,6 +181,7 @@ defineWebComponent<Props, Events>('kai-message', {
   avatarFallback: undefined,
   avatar: undefined,
   cardTypes: undefined,
+  renderers: undefined,
   cardSchemas: undefined,
 }, (props, { dispatch, flag, element, expose }) => {
   const outer = useChatConfig();
@@ -316,6 +324,7 @@ defineWebComponent<Props, Events>('kai-message', {
     <MessageBody
       parts={composed() ? [] : msg().parts}
       cardTypes={cardComponentsFromTags(props.cardTypes, (props as { theme?: string }).theme)}
+      renderers={props.renderers}
       cardSchemas={props.cardSchemas}
       /* Card parts emit off THIS element as the bubbling `kai-card` event. */
       cardHostElement={element}

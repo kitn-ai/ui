@@ -199,3 +199,40 @@ describe('a huge tool name in the summary', () => {
     expect(summarizeActivity(steps).split(' · ')).toHaveLength(2);
   });
 });
+
+describe('a realistic turn hand-written with kind: "generic"', () => {
+  // Apps build parts by hand, and `kind: 'generic'` is what ToolPart's own docs show. "generic" means
+  // "not classified", so the tool NAME still decides; an explicit kind of any other value wins.
+  const tool = (type: string, toolCallId: string, extra: Record<string, unknown> = {}): MessagePart => ({
+    type: 'tool',
+    tool: { type, toolCallId, kind: 'generic', state: 'output-available', input: {}, output: {}, ...extra } as never,
+  });
+  const turn: MessagePart[] = [
+    { type: 'text', text: 'Intro' },
+    { type: 'reasoning', text: 'thinking', timing: { startedAt: 0, endedAt: 5000 } },
+    tool('web_search', 'c1'),
+    tool('fetch_url', 'c2', { state: 'output-error', errorText: 'boom' }),
+    tool('read_file', 'c3'),
+    { type: 'text', text: 'Middle' },
+    tool('get_weather', 'c4'),
+    { type: 'text', text: 'End' },
+  ];
+  const run1 = turn.slice(1, 5) as MessagePart[];
+  const run2 = turn.slice(6, 7) as MessagePart[];
+
+  it('summarises by kind, not by tool name', () => {
+    const settled = activityStepsFromParts(run1).filter((st) => st.status !== 'error');
+    expect(summarizeActivity(settled)).toBe('Thought for 5s · Searched the web · Read a file');
+    expect(summarizeActivity(activityStepsFromParts(run2))).toBe('Used get_weather');
+  });
+
+  it('counts consecutive calls of one kind', () => {
+    const steps = activityStepsFromParts([tool('web_search', 'a'), tool('web_search', 'b'), tool('web_search', 'c'), tool('read_file', 'd'), tool('read_file', 'e')]);
+    expect(summarizeActivity(steps)).toBe('Searched the web 3 times · Read 2 files');
+  });
+
+  it('an explicit non-generic kind still wins over the name', () => {
+    const steps = activityStepsFromParts([tool('web_search', 'a', { kind: 'fetch' })]);
+    expect(steps[0]!.toolKind).toBe('fetch');
+  });
+});

@@ -17,7 +17,7 @@ import type { ConversationStore } from '../../primitives/conversation-store';
 
 type Props = Omit<ChatAppProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
-  | 'onMessageAction' | 'onToolSelect' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
+  | 'onMessageAction' | 'onToolSelect' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'renderers' | 'messages'
   | 'accept' | 'onAttachmentsRejected'
   // `conversations`/`store` are re-declared below (own doc comments, matching
   // this element's own attribute/property conventions) rather than left to
@@ -89,6 +89,13 @@ type Props = Omit<ChatAppProps,
     // wrapper inlines it instead of emitting an unresolved named type.
     /** Card type → custom-element tag overrides/additions, merged over the built-ins. JS property: `el.cardTypes`. */
     cardTypes?: Record<string, string>;
+    // Part renderers. A plain string map for the same reason as `cardTypes`. Cards are NOT
+    // accepted here (a `card:` key warns once and is ignored): they keep `cardTypes`.
+    // A `text` element gets the part as `.messagePart` (not `.part`, which is the platform's
+    // shadow-part token list); a tool or reasoning element renders ONE activity step and gets
+    // `.step`; a `source` or `file` element gets the whole run as `.parts`.
+    /** Part renderers: a key (`tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`) mapped to a custom-element tag. JS property. */
+    renderers?: Record<string, string>;
     // The companion of `cardTypes`: `cardTypes` says what DRAWS a card, this says what
     // a VALID one looks like. `createCardRegistry(...).validationSchemas` is this shape.
     // Without it the kit validates its own seven built-ins and leaves the consumer's own
@@ -212,7 +219,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
   // No default, deliberately: an omitted value keys the reveal to each message's own role
   // (see `resolveActionsReveal`), which a default here would override with an explicit one.
-  actionsReveal: undefined, cardTypes: undefined, cardSchemas: undefined, accept: undefined,
+  actionsReveal: undefined, cardTypes: undefined, renderers: undefined, cardSchemas: undefined, accept: undefined,
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
@@ -332,6 +339,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     assistantActions={props.assistantActions as (ChatMessageAction | CustomAction)[] | undefined}
     hideSources={flag('hideSources')}
     cardTypes={cardComponentsFromTags(props.cardTypes as Record<string, string> | undefined, (props as { theme?: string }).theme)}
+    renderers={props.renderers as Record<string, string> | undefined}
     cardSchemas={props.cardSchemas as Record<string, object> | undefined}
     conversations={flag('conversations')}
     store={props.store as ConversationStore | undefined}

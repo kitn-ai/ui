@@ -8,6 +8,7 @@ import { Loader } from '../loader/loader';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 import type { ProseSize } from '../../primitives/chat-config';
 import type { CardComponentMap } from '../card/card-registry';
+import type { RendererMap } from '../../primitives/renderer-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { AttachmentImagePreview } from '../attachments/attachments';
 import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from '../chat/thread-density';
@@ -40,6 +41,8 @@ export interface ThreadProps {
   /** Add/override card type -> component entries, forwarded to `CardRenderer`
    *  for `card` parts. */
   cardTypes?: CardComponentMap;
+  /** Custom elements for parts, keyed `tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`. Forwarded to every `MessageBody`; cards keep `cardTypes`. */
+  renderers?: RendererMap;
   // The companion of `cardTypes`: that says what DRAWS a card, this says what a
   // VALID one looks like. Without it the kit checks its own seven built-ins and
   // leaves a consumer's own card type unchecked.
@@ -180,6 +183,9 @@ export function Thread(props: ThreadProps) {
                       <MessageBody
                         parts={m().parts}
                         cardTypes={props.cardTypes}
+                        renderers={props.renderers}
+                        // The same rule as the chat: streaming = the ONE loading signal, on the last assistant row.
+                        isStreaming={props.loading === true && m().role === 'assistant' && i() === props.messages.length - 1}
                         cardSchemas={props.cardSchemas}
                         cardHostElement={props.cardHostElement}
                         imagePreview={props.imagePreview}

@@ -91,7 +91,9 @@ export function activityStepsFromParts(parts: MessagePart[], opts: { streaming?:
         status: t.state === 'output-error' ? 'error' : isSettled(t) ? 'done' : streaming ? 'running' : 'interrupted',
         ...(isPlanTool(name) ? { label: PLAN_STEP_LABEL } : {}),
         toolName: name,
-        toolKind: t.kind ?? classifyTool(name),
+        // `generic` is what a hand-written part says when it did not classify the call, so the name
+        // still decides; any other explicit kind is the app's word and wins.
+        toolKind: t.kind && t.kind !== 'generic' ? t.kind : classifyTool(name),
         ...(isObject(t.input) ? { input: t.input } : {}),
         ...(isObject(t.output) ? { output: t.output } : {}),
         ...(typeof t.errorText === 'string' ? { errorText: t.errorText } : {}),

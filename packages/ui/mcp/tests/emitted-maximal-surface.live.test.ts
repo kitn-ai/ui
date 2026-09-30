@@ -402,22 +402,30 @@ describe('the EMITTED maximal surface really composes, end to end', () => {
       // Scoped to the thread's own rendered nodes rather than the whole shadow
       // root: kai-chat adopts a stylesheet AND the composer injects a <style>
       // block, so an unscoped textContent match can be satisfied by CSS text.
-      const rendered = [...chatEl.shadowRoot!.children]
-        .filter((el) => el.tagName !== 'STYLE')
-        .map((el) => el.textContent ?? '')
-        .join(' ');
+      const renderedText = () =>
+        [...chatEl.shadowRoot!.children]
+          .filter((el) => el.tagName !== 'STYLE')
+          .map((el) => el.textContent ?? '')
+          .join(' ');
+      // The reasoning and the tool call are ONE quiet activity line, not a panel per call.
+      const line = chatEl.shadowRoot!.querySelector('[data-kai-activity]');
+      expect(line, 'the reasoning and tool parts did not render as an activity line').toBeTruthy();
+      expect(line!.textContent).toContain('Thought');
+      expect(line!.textContent).toContain('Searched');
+      // The detail is one click away: open the line, then each step, and read what the
+      // model said, what it was asked, and what `runTool` returned.
+      (line!.querySelector(':scope > button') as HTMLButtonElement).click();
+      await new Promise((r) => setTimeout(r, 0));
+      for (const trigger of chatEl.shadowRoot!.querySelectorAll<HTMLButtonElement>('[data-kai-step-trigger]')) trigger.click();
+      await new Promise((r) => setTimeout(r, 0));
+      const rendered = renderedText();
       expect(rendered, 'the reasoning part never reached the thread').toContain(
         'The user wants current data, so I should search.',
       );
-      // The tool panel's own rendering of the call: the model's argument, the
-      // result `runTool` returned, and the provider's call id.
-      expect(rendered, 'the tool panel did not render the model input').toContain(
-        'query: kitn ui release notes',
-      );
-      expect(rendered, 'the tool panel did not render the tool result').toContain(
+      expect(rendered, 'the activity step did not render the model input').toContain('kitn ui release notes');
+      expect(rendered, 'the activity step did not render the tool result').toContain(
         'No search backend wired up yet. Query: kitn ui release notes',
       );
-      expect(rendered).toContain('call_s1');
       expect(rendered, 'the final answer never reached the thread').toContain(
         'Here is what I found in the release notes.',
       );

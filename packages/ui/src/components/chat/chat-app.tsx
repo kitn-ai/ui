@@ -18,6 +18,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 import type { ProseSize } from '../../primitives/chat-config';
 import type { ModelOption } from '../../types';
 import type { CardComponentMap } from '../card/card-registry';
+import type { RendererMap } from '../../primitives/renderer-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { JSX } from 'solid-js';
 import { mostRecentSummary, type ConversationStore } from '../../primitives/conversation-store';
@@ -56,6 +57,8 @@ export interface ChatAppProps {
   messages: ChatMessage[];
   /** Adds or overrides the component that draws a `card` part, keyed by card type. */
   cardTypes?: CardComponentMap;
+  /** Custom elements for parts, keyed `tool:<name>`, `tool`, `reasoning`, `text`, `source`, `file`. Forwarded to every `MessageBody`; cards keep `cardTypes`. */
+  renderers?: RendererMap;
   // The companion of `cardTypes`: that says what DRAWS a card, this says what a VALID
   // one looks like. Without it the kit validates only its own built-ins and leaves your
   // own card type unchecked.
@@ -781,6 +784,7 @@ export function ChatApp(props: ChatAppProps) {
                             reasoningDefaultOpen={props.reasoningOpen}
                             imagePreview={props.imagePreview}
                             cardTypes={props.cardTypes}
+                            renderers={props.renderers}
                             cardSchemas={props.cardSchemas}
                             cardHostElement={props.cardHostElement}
                             isUser={m().role === 'user'}
