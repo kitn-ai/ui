@@ -63,7 +63,16 @@
 // the typed React wrapper down with it. Referencing named types from one definitions section is
 // the structural fix (see the integration report); until it lands, 350 KiB (358,400) is ~3%
 // headroom over the measurement, the same margin the raises above used.
-const MAX_LLMS_FULL_BYTES = 350 * 1024;
+// 2026-09-30 LOWERED: 350 -> 331 KiB. Measured 329,172 bytes at 105 elements (was 348,489 before
+// the change below, -19,317). The generator now prints a structural type that recurs ONCE, in a
+// "Shared types" section (22 types, derived from the types the checker expanded and the names the
+// public entry exports; see lib/llms-shared-types.mjs), and the rows refer to it by exported name
+// (`ChatMessage[]`, `MessagePart`). That is the structural fix the raise above said was pending:
+// the `MessagePart` union had been inlined in four rows and `store`/`messages`/`message`/`data`
+// were a tenth of the file. Nothing was dropped, every definition is still in the file. 331 KiB
+// (338,944) is ~3% headroom over the measurement, the same margin the raises above used, so the
+// next new element pays for itself instead of being absorbed by repeated type text.
+const MAX_LLMS_FULL_BYTES = 331 * 1024;
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently

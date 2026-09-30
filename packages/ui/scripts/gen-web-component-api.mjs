@@ -80,7 +80,32 @@ const IMPORTABLE = new Set(Object.keys(IMPORTS));
 
 // renderType/membersOf/isScalar/jsdocOf live in _ts-helpers.mjs; membersOf here
 // reads a Props/Events *type node*.
-const { membersOfNode: membersOf, renderType, isScalar, jsdocOf } = createTsHelpers(program, checker, { importable: IMPORTABLE });
+// Every named type renderType expands, recorded so llms-full.txt can print a recurring
+// one ONCE under its real name. Only names the PUBLIC entry exports qualify (an agent
+// can `import type` them), matched by symbol identity. Observation only: renderType's output is unchanged.
+const publicNameBySymbol = new Map();
+for (const exp of entrySym ? checker.getExportsOfModule(entrySym) : []) {
+  let target = exp;
+  try { if (exp.flags & ts.SymbolFlags.Alias) target = checker.getAliasedSymbol(exp); } catch { continue; }
+  // A symbol exported twice keeps its first (alphabetical) name, so the choice is stable.
+  if (!(target.flags & (ts.SymbolFlags.Interface | ts.SymbolFlags.TypeAlias | ts.SymbolFlags.Class))) continue;
+  if (!publicNameBySymbol.has(target) || exp.name < publicNameBySymbol.get(target)) publicNameBySymbol.set(target, exp.name);
+}
+const namedTypeSightings = new Map(); // public name -> { variants: Map<rendered, minDepth> }
+const { membersOfNode: membersOf, renderType, isScalar, jsdocOf } = createTsHelpers(program, checker, {
+  importable: IMPORTABLE,
+  onNamedType: ({ sym, rendered, depth }) => {
+    // By SYMBOL, not by name: chat-types.ts declares a citation `Source` interface that
+    // is NOT the `Source` component the entry exports, and the entry ships the citation
+    // as `MessageSource`. The name an agent can import is the one the entry gives THIS
+    // symbol, whatever the declaration calls it.
+    const name = publicNameBySymbol.get(sym);
+    if (!name) return;
+    let e = namedTypeSightings.get(name);
+    if (!e) namedTypeSightings.set(name, (e = { variants: new Map() }));
+    e.variants.set(rendered, Math.min(depth, e.variants.get(rendered) ?? Infinity));
+  },
+});
 
 // ---- unhandled AST kinds are FATAL, never skipped ---------------------------
 // The extractors below each walk a hand-picked set of node kinds and build their
@@ -890,10 +915,24 @@ function tagToClass(tag) {
   return tag.split('-').map((s) => s[0].toUpperCase() + s.slice(1)).join('') + 'Element';
 }
 
+// Named types seen during expansion, as plain data: { Name: [rendered variants] }, the
+// shallowest (most complete) variant first. Travels in the CEM (`kaiNamedTypes`) as well
+// as in memory so the standalone `gen-llms.mjs` fallback reproduces the same llms-full.txt
+// instead of writing a fatter one.
+const namedTypes = Object.fromEntries(
+  [...namedTypeSightings]
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([name, e]) => [
+      name,
+      [...e.variants].sort((x, y) => x[1] - y[1] || y[0].length - x[0].length || (x[0] < y[0] ? -1 : 1)).map(([r]) => r),
+    ]),
+);
+
 // ---- emit custom-elements.json ----
 const cem = {
   schemaVersion: '1.0.0',
   readme: '',
+  kaiNamedTypes: namedTypes,
   modules: [{
     kind: 'javascript-module',
     path: 'dist/kai.es.js',
@@ -1027,7 +1066,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   }
   // Generate llms.txt / llms-full.txt from the same in-memory model (one parse).
   const { generate } = await import('./gen-llms.mjs');
-  generate(elements);
+  generate(elements, { namedTypes });
   // Regenerate docs/web-components.md tables between <!-- spec:TAG --> markers.
   const { writeWebComponentsMd } = await import('./gen-web-components-md.mjs');
   writeWebComponentsMd(root, elements);

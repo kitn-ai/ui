@@ -187,7 +187,7 @@ export const cleanEmittedType = (type, optional) => {
   return t.trim();
 };
 
-export function createTsHelpers(program, checker, { importable = new Set() } = {}) {
+export function createTsHelpers(program, checker, { importable = new Set(), onNamedType = null } = {}) {
   const isScalar = (t) => {
     if (t.isUnion?.()) return t.types.every(isScalar);
     const F = ts.TypeFlags;
@@ -384,6 +384,30 @@ export function createTsHelpers(program, checker, { importable = new Set() } = {
   // The path is copied per branch (`new Set(seen)`), so a type used by two
   // sibling props is NOT mistaken for a cycle — only a true ancestor triggers it.
   function renderType(type, decl, seen = new Set()) {
+    const out = renderTypeRaw(type, decl, seen);
+    if (onNamedType) noteNamedType(type, out, seen);
+    return out;
+  }
+
+  // Reports every NAMED, non-lib, non-generic type `renderType` just expanded, with
+  // the exact string it produced. The expansion erases the name (the .d.ts has to be
+  // self-contained), and llms-full.txt wants the name back: it prints a type that
+  // recurs once, under its own name, instead of inline in every row. Observation
+  // only -- this never changes what renderType returns, so the .d.ts, the CEM and
+  // the React wrappers are byte-identical with or without a listener.
+  function noteNamedType(type, rendered, seen) {
+    const sym = type.aliasSymbol || type.getSymbol();
+    const name = sym?.getName();
+    if (!name || name === '__type' || name === '__object' || isLibSym(sym)) return;
+    // `Foo<string>` and `Foo<number>` share a name and differ in shape, so a name
+    // alone would be a wrong answer for one of them.
+    if (type.aliasTypeArguments?.length) return;
+    if (type.flags & ts.TypeFlags.Object && type.objectFlags & ts.ObjectFlags.Reference
+      && checker.getTypeArguments(type).length) return;
+    onNamedType({ name, sym, rendered, depth: seen.size });
+  }
+
+  function renderTypeRaw(type, decl, seen = new Set()) {
     if (type.isUnion()) {
       // De-dup on the BARE form, then wrap, so two identical function arms collapse
       // into one rather than differing by punctuation.

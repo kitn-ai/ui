@@ -150,6 +150,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 ## Docs
 
 - Web component reference (all 105 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Shared types (every structural type the reference tables name instead of repeating: `ChatMessage`, `MessagePart`, `ConversationStore`, …, each defined once): the "Shared types" section of llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt

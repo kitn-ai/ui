@@ -27,6 +27,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 // which nothing else in this file needs.
 import { toolKindUnion } from './_ts-helpers.mjs';
 import { buildProgrammaticSection } from './gen-llms-programmatic.mjs';
+import { planSharedTypes, renderSharedTypes } from './lib/llms-shared-types.mjs';
 // The icon roster, derived from the NAMED_ICONS map in src/components/icon/icon.tsx — the
 // SAME extraction docs/web-components.md's icon-roster region uses (P-8), so
 // the two artifacts cannot disagree about what resolves.
@@ -450,14 +451,36 @@ export const FULL_ONLY_SECTIONS = [
     key: 'Web component reference',
     pointer: (count) =>
       `- Web component reference (all ${count} web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt`,
-    render: ({ count, webComponentSection }) =>
+    render: ({ count, webComponentSection, hasSharedTypes }) =>
       [
         `## Web component reference (${count} web components, generated from custom-elements.json)`,
         '',
-        'Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.',
+        'Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.' +
+          (hasSharedTypes
+            ? ' A type written by its exported name (`ChatMessage[]`, `MessagePart`, …) is defined once in the "Shared types" section at the end of this reference.'
+            : ''),
         '',
         webComponentSection,
       ].join('\n'),
+  },
+  {
+    key: 'Shared types',
+    pointer: () =>
+      '- Shared types (every structural type the reference tables name instead of repeating: `ChatMessage`, `MessagePart`, `ConversationStore`, …, each defined once): the "Shared types" section of llms-full.txt',
+    render: ({ sharedTypesMarkdown }) => {
+      // Loud, not quiet: no named types means the generator was not handed the
+      // checker's sightings (a stale dist/custom-elements.json with no
+      // `kaiNamedTypes`, or an api run that stopped recording them) and the rows
+      // would be printed inline again, silently writing the fatter file.
+      if (!sharedTypesMarkdown) {
+        throw new Error(
+          'gen-llms: no shared types were planned. Run `npm run build:api` (it records the named types ' +
+            'into dist/custom-elements.json as `kaiNamedTypes` and passes them in); a standalone run against a ' +
+            'manifest built before that field existed cannot produce llms-full.txt.',
+        );
+      }
+      return sharedTypesMarkdown;
+    },
   },
   {
     key: 'Programmatic layer',
@@ -505,6 +528,7 @@ const FULL_BODY_ORDER = [
   'Programmatic layer',
   'Icon roster',
   'Web component reference',
+  'Shared types',
 ];
 
 /**
@@ -619,12 +643,32 @@ function fromManifest(cem) {
   });
 }
 
-export function generate(webComponentsInput) {
-  const els = webComponentsInput ? fromElements(webComponentsInput) : fromManifest(
-    JSON.parse(readFileSync(resolve(root, 'dist/custom-elements.json'), 'utf8')),
-  );
+export function generate(webComponentsInput, { namedTypes } = {}) {
+  let els;
+  let named = namedTypes;
+  if (webComponentsInput) {
+    els = fromElements(webComponentsInput);
+  } else {
+    const cem = JSON.parse(readFileSync(resolve(root, 'dist/custom-elements.json'), 'utf8'));
+    els = fromManifest(cem);
+    // Written by gen-web-component-api.mjs beside the declarations. Without it the
+    // standalone run would print every type inline and write a FATTER file.
+    named ??= cem.kaiNamedTypes;
+  }
   els.sort((a, b) => a.tag.localeCompare(b.tag));
   const count = els.length;
+
+  // Recurring structural types: printed once in "Shared types", named in the rows.
+  // Decided over every type string the tables will print, so the set is a function of
+  // the types themselves (see lib/llms-shared-types.mjs), and applied in place.
+  const typeSlots = els.flatMap((el) => [
+    ...el.props.map((p) => [p, 'type']),
+    ...el.events.map((e) => [e, 'detail']),
+    ...el.methods.flatMap((m) => [[m, 'params'], [m, 'returns']]),
+  ]).filter(([o, k]) => typeof o[k] === 'string' && o[k]);
+  const plan = planSharedTypes(named, typeSlots.map(([o, k]) => o[k]));
+  for (const [o, k] of typeSlots) o[k] = plan.rewrite(o[k]);
+  const sharedTypesMarkdown = renderSharedTypes(plan.definitions);
 
   const webComponentSection = els.map(renderElement).join('\n\n');
   // Derived from dist/state/*.d.ts + dist/wire/*.d.ts — the layer a builder
@@ -634,6 +678,8 @@ export function generate(webComponentsInput) {
     count,
     webComponentSection,
     programmaticMarkdown: programmatic.markdown,
+    hasSharedTypes: sharedTypesMarkdown !== null,
+    sharedTypesMarkdown,
     icons: iconNames(root),
   };
 
