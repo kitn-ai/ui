@@ -2148,7 +2148,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined | "default" | "count" | "citation"` | `'default'` | Badge style; `default` is the muted pill. |
+| `variant` | `variant` | `undefined | "default" | "count" | "citation" | "outline"` | `'default'` | Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. |
 
 #### Slots
 
@@ -3011,9 +3011,9 @@ A single-select pill track (a segmented / toggle group). Set `options` as a JS p
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline"` | `'new'` | Presence state, which sets the colour. Default `new`. |
+| `status` | `status` | `undefined | "new" | "online" | "busy" | "away" | "offline" | "working" | "idle" | "done" | "error" | "blocked"` | `'new'` | Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. |
 | `pulse` | `pulse` | `undefined | false | true` | `false` | Animated ping ring; off by default and never under prefers-reduced-motion. |
-| `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative. |
+| `label` | `label` | `undefined | string` | — | Accessible name; without it the dot is decorative, except agent tones, which default to their word. |
 | `size` | `size` | `undefined | "sm" | "md"` | `'sm'` | Size token. Defaults to `'sm'`. |
 
 #### Styleable parts

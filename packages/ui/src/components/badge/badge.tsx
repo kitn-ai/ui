@@ -7,6 +7,7 @@ const badgeVariants = cva('inline-flex items-center justify-center rounded-pill 
     variant: {
       default: 'bg-muted text-muted-foreground px-2 py-0.5',
       count: 'bg-muted text-muted-foreground h-5 px-1.5',
+      outline: 'border border-input bg-transparent text-foreground px-2 py-0.5',
       citation: 'bg-primary text-primary-foreground px-1.5 py-0.5 cursor-pointer',
     },
   },

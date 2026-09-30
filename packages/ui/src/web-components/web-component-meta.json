@@ -788,12 +788,12 @@
       },
       {
         "name": "variant",
-        "type": "undefined | \"default\" | \"count\" | \"citation\"",
+        "type": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\"",
         "optional": true,
         "scalar": true,
-        "description": "Badge style; `default` is the muted pill.",
+        "description": "Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border.",
         "default": "'default'",
-        "displayType": "undefined | \"default\" | \"count\" | \"citation\""
+        "displayType": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\""
       }
     ],
     "events": [],
@@ -9468,12 +9468,12 @@
       },
       {
         "name": "status",
-        "type": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\"",
+        "type": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\" | \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\"",
         "optional": true,
         "scalar": true,
-        "description": "Presence state, which sets the colour. Default `new`.",
+        "description": "Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`.",
         "default": "'new'",
-        "displayType": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\""
+        "displayType": "undefined | \"new\" | \"online\" | \"busy\" | \"away\" | \"offline\" | \"working\" | \"idle\" | \"done\" | \"error\" | \"blocked\""
       },
       {
         "name": "pulse",
@@ -9489,7 +9489,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Accessible name; without it the dot is decorative.",
+        "description": "Accessible name; without it the dot is decorative, except agent tones, which default to their word.",
         "displayType": "undefined | string"
       },
       {

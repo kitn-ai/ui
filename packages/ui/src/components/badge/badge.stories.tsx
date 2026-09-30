@@ -18,8 +18,8 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'count', 'citation'],
-      description: 'Visual style: neutral label, numeric count pill, or clickable citation marker.',
+      options: ['default', 'count', 'citation', 'outline'],
+      description: 'Visual style: neutral label, numeric count pill, clickable citation marker, or bordered outline.',
       table: { defaultValue: { summary: 'default' } },
     },
     children: {
@@ -62,12 +62,18 @@ export const Citation: Story = {
   ...src(`<Badge variant="citation">1</Badge>`),
 };
 
+export const Outline: Story = {
+  args: { variant: 'outline', children: 'Needs you' },
+  ...src(`<Badge variant="outline">Needs you</Badge>`),
+};
+
 /** All variants side by side (showcase, not driven by controls). */
 export const AllVariants: Story = {
   render: () => (
     <div class="flex items-center gap-3">
       <Badge variant="default">Default</Badge>
       <Badge variant="count">5</Badge>
+      <Badge variant="outline">Outline</Badge>
       <Badge variant="citation">1</Badge>
       <Badge variant="citation">2</Badge>
       <Badge variant="citation">3</Badge>

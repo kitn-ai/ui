@@ -289,8 +289,8 @@ export const Avatar = /*#__PURE__*/ createWebComponent<AvatarProps, KaiAvatarEle
 );
 
 export interface BadgeProps extends WebComponentProps {
-  /** Badge style; `default` is the muted pill. */
-  variant?: "default" | "count" | "citation";
+  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
+  variant?: "default" | "count" | "citation" | "outline";
 }
 
 export const Badge = /*#__PURE__*/ createWebComponent<BadgeProps, KaiBadgeElement>(
@@ -2131,11 +2131,11 @@ export const Sources = /*#__PURE__*/ createWebComponent<SourcesProps, KaiSources
 );
 
 export interface StatusProps extends WebComponentProps {
-  /** Presence state, which sets the colour. Default `new`. */
-  status?: "new" | "online" | "busy" | "away" | "offline";
+  /** Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. */
+  status?: "new" | "online" | "busy" | "away" | "offline" | "working" | "idle" | "done" | "error" | "blocked";
   /** Animated ping ring; off by default and never under prefers-reduced-motion. */
   pulse?: boolean;
-  /** Accessible name; without it the dot is decorative. */
+  /** Accessible name; without it the dot is decorative, except agent tones, which default to their word. */
   label?: string;
   /** Size token. Defaults to `'sm'`. */
   size?: "sm" | "md";
