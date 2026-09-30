@@ -1,55 +1,6 @@
 {
   "webComponents": [
     {
-      "tag": "kai-agent-card",
-      "description": "One agent's state at a glance in a multi-agent workspace; the focused agent belongs in the thread or the panel.",
-      "props": [
-        {
-          "name": "theme",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "name",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "active",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "needsAttention",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "status",
-          "scalar": false,
-          "optional": true,
-          "fn": false
-        }
-      ],
-      "events": [
-        "kai-activate",
-        "kai-menu"
-      ],
-      "methods": [],
-      "parts": [
-        "status",
-        "menu"
-      ],
-      "composedFrom": [
-        "AgentCard"
-      ],
-      "tokens": []
-    },
-    {
       "tag": "kai-artifact",
       "description": "A framed viewer for a generated artifact: a sandboxed preview beside its source.",
       "props": [

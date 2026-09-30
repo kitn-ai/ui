@@ -9,7 +9,6 @@
 // For eager all-registration call registerAll() or import '@kitn.ai/ui/web-components'.
 import { createWebComponent, registerAll, type WebComponentProps } from './runtime';
 import type {
-  KaiAgentCardElement,
   KaiArtifactElement,
   KaiAttachmentsElement,
   KaiAudioVisualizerElement,
@@ -121,28 +120,6 @@ export type {
 } from './use-kai-chat';
 export { useVoiceInput } from './use-voice-input';
 
-
-export interface AgentCardProps extends WebComponentProps {
-  /** The agent's name, the primary label. Attribute: `name`. */
-  name?: string;
-  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
-  active?: boolean;
-  /** Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
-  needsAttention?: boolean;
-  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
-  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
-  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
-  onActivate?: (event: CustomEvent) => void;
-  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
-  onMenu?: (event: CustomEvent) => void;
-}
-
-export const AgentCard = /*#__PURE__*/ createWebComponent<AgentCardProps, KaiAgentCardElement>(
-  'kai-agent-card',
-  ["theme","name","active","needsAttention","status"],
-  { onActivate: 'kai-activate', onMenu: 'kai-menu' },
-  () => import('@kitn.ai/ui/web-components/agent-card'),
-);
 
 export interface ArtifactProps extends WebComponentProps {
   /** URL the preview iframe frames. Consumer-controlled. */

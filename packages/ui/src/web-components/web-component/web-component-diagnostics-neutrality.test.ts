@@ -34,7 +34,7 @@ import {
   type KaiDiagnosticEvent,
 } from '../../wire/diagnostics';
 import '../conversation/conversation-list';
-import '../agent-card/agent-card';
+import '../menu/menu';
 import '../badge/badge';
 
 afterEach(() => {
@@ -161,19 +161,19 @@ describe('a subscriber changes nothing about how an element behaves', () => {
     expect(to.dom).toBe(without.dom);
   });
 
-  it('kai-agent-card — an object prop, set correctly and then as an attribute', () => {
+  it('kai-menu — an array prop, set correctly and then as an attribute', () => {
     // The attribute violation gets its own element, and the reason is itself a
     // finding: on `kai-conversations` the string reaching the facade throws
     // `(local.groups ?? []).map is not a function` out of a Solid computation,
     // an uncaught TypeError with no attribution to the consumer's mistake — the
     // very failure `array-prop-as-attribute` exists to explain, and one this
-    // change does not (and cannot) prevent. `kai-agent-card` reads `status`
+    // change does not (and cannot) prevent. `kai-menu` reads `items`
     // defensively, so the misuse is survivable and the comparison stays about
     // neutrality rather than about who crashes first.
-    const { without, with: to, events } = withAndWithout('kai-agent-card', (el) => {
-      el.setAttribute('name', 'Scout');
-      el.status = { tone: 'working', label: 'Working' };
-      el.setAttribute('status', '[object Object]'); // array-prop-as-attribute
+    const { without, with: to, events } = withAndWithout('kai-menu', (el) => {
+      el.setAttribute('label', 'Scout');
+      el.items = [{ id: 'rename', label: 'Rename' }];
+      el.setAttribute('items', '[object Object]'); // array-prop-as-attribute
     });
 
     expect(

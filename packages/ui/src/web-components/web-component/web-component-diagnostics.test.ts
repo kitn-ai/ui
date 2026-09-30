@@ -28,7 +28,7 @@ import { classifyAttributeValue } from './web-component-diagnostics';
 import type { WebComponentViolationEvent } from './diagnostic-events';
 import { assertElementEventsVocabulary } from '../../../tests/helpers/web-component-event-vocabulary';
 import '../conversation/conversation-list';
-import '../agent-card/agent-card';
+import '../menu/menu';
 import '../chat/chat';
 
 const TAG = 'kai-conversations';
@@ -117,28 +117,28 @@ describe('web-component.violation — array prop set as an HTML attribute', () =
     // Connected, on an element that tolerates a junk prop, so the assertion can
     // go all the way to what the PROPERTY ended up holding — this case is only
     // interesting because the value really does arrive intact.
-    const el = document.createElement('kai-agent-card') as HTMLElement & Record<string, unknown>;
+    const el = document.createElement('kai-menu') as unknown as HTMLElement & Record<string, unknown>;
     document.body.appendChild(el);
-    el.setAttribute('status', '{"tone":"working"}');
+    el.setAttribute('items', '[{"id":"a","label":"A"}]');
 
     expect(violations()).toHaveLength(0);
     // JSON.parse succeeded, so the property holds a real object, not a string.
     // Reporting this would be reporting correct code.
-    expect(typeof el.status).toBe('object');
+    expect(Array.isArray(el.items)).toBe(true);
   });
 
   it('fires on a CONNECTED, rendering element (not only on a detached one)', () => {
-    const el = document.createElement('kai-agent-card') as HTMLElement & Record<string, unknown>;
+    const el = document.createElement('kai-menu') as unknown as HTMLElement & Record<string, unknown>;
     document.body.appendChild(el);
     expect(el.shadowRoot).toBeTruthy(); // the facade really did render
 
-    el.setAttribute('status', '[object Object]');
+    el.setAttribute('items', '[object Object]');
 
     expect(violations()).toHaveLength(1);
     expect(violations()[0]).toMatchObject({
       kind: 'array-prop-as-attribute',
-      tag: 'kai-agent-card',
-      prop: 'status',
+      tag: 'kai-menu',
+      prop: 'items',
       valuePreview: '[object Object]',
     });
   });

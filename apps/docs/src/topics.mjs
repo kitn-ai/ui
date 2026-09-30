@@ -187,6 +187,7 @@ export const topics = [
     items: [
       { label: 'Patterns', slug: 'patterns' },
       { label: 'Button and popover menu', slug: 'patterns/popover-menu' },
+      { label: 'Agent card', slug: 'patterns/agent-card' },
       { label: 'Resizable split', slug: 'patterns/resizable-split' },
       { label: 'Empty & first-run state', slug: 'patterns/empty-state' },
       { label: 'Tool calls & reasoning', slug: 'patterns/tool-reasoning' },

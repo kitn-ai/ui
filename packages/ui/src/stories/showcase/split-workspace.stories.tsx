@@ -9,7 +9,6 @@ import {
   type LucideProps,
 } from 'lucide-solid';
 import '../../web-components/register/register'; // every kai-* element used below
-import { type AgentStatus, type AgentStatusTone } from '../../components/agent-card/agent-card';
 import { cn } from '../../utils/cn';
 import type { KaiNavItem } from '../../components/nav/nav';
 import type { KaiCommandItem } from '../../web-components/command/command';
@@ -35,8 +34,8 @@ import { toast, configureToasts } from '../../primitives/toast-store';
 //                 active agent's `Pane`. Columns/groups are LAYOUT regions, never
 //                 status lanes. The default tier.
 //   • FOCUS     — one large `Pane` (the focused agent) beside a vertical RAIL of
-//                 `AgentCard`s; clicking a card promotes it to focus.
-//   • LIST      — a full-width column of `AgentCard`s for scanning many agents.
+//                 agent cards (the `agent-card` pattern); clicking a card promotes it to focus.
+//   • LIST      — a full-width column of agent cards for scanning many agents.
 //
 // Editor-group tabs use a SPACE-EFFICIENT design: each tab leads with a small
 // tone-colored badge carrying the agent's keyboard NUMBER — the color encodes
@@ -111,7 +110,7 @@ type El = HTMLElement & Record<string, unknown>;
 // ── Left rail: workspaces with counts ───────────────────────────────────────
 // kai-nav is a flat list; `meta` renders the right-aligned muted count. A
 // `warning`-tone `status` dot (amber, pulsing) flags a workspace whose agents are
-// waiting on you — the same attention vocabulary the Pane/AgentCard treatment uses
+// waiting on you — the same attention vocabulary the Pane and agent-card treatment uses
 // — so you can spot which workspace needs you without opening it. The amber dot
 // sits beside the neutral count, not in place of it. The current workspace ("Acme
 // App") holds Cleo + Nova (both needsAttention); "Mobile App" carries one too to
@@ -141,7 +140,13 @@ const SAMPLE_FILES = [
 
 // ── The agent fleet ─────────────────────────────────────────────────────────
 // One model shared by every view: the same status vocabulary the `Pane` and
-// `AgentCard` primitives consume (working | idle | done | error | blocked).
+// `kai-status` consume (working | idle | done | error | blocked).
+type AgentStatusTone = 'working' | 'idle' | 'done' | 'error' | 'blocked';
+interface AgentStatus {
+  tone: AgentStatusTone;
+  label?: string;
+  pulse?: boolean;
+}
 interface Agent {
   id: string;
   name: string;

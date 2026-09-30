@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 100 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 99 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 100 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 99 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 100 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 99 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -997,39 +997,9 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (100 web components, generated from custom-elements.json)
+## Web component reference (99 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
-
-### `kai-agent-card` / `AgentCard`
-
-One agent's state at a glance in a multi-agent workspace; the focused agent belongs in the thread or the panel.
-
-**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
-
-| Property | Attribute | Type | Description |
-|---|---|---|---|
-| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color mode (`auto` follows prefers-color-scheme). |
-| `name` | `name` | `undefined \| string` | The agent's name, the primary label. Attribute: `name`. |
-| `active` | `active` | `undefined \| false \| true` | Selected / focused state: highlighted border + surface. Attribute: `active`. |
-| `needsAttention` | `needs-attention` | `undefined \| false \| true` | Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. |
-| `status` | — | `undefined \| { tone: "working" \| "idle" \| "done" \| "error" \| "blocked"; label?: undefined \| string; pulse?: undefined \| false \| true }` | Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. |
-
-**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
-
-| Event | `detail` type | Description |
-|---|---|---|
-| `kai-activate` | `CustomEvent` | The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. |
-| `kai-menu` | `CustomEvent` | The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). |
-
-**Styleable parts** (restyle from outside via `kai-agent-card::part(name)`):
-
-| Part | Description |
-|---|---|
-| `::part(status)` | The leading tone-colored status dot. — `kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }` |
-| `::part(menu)` | The trailing overflow ("...") menu button. — `kai-agent-card::part(menu) { opacity: 1 }` |
-
----
 
 ### `kai-artifact` / `Artifact`
 
