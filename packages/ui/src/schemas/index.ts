@@ -257,3 +257,5 @@ export type { CardTagMap } from '../primitives/card-tags';
 // re-deriving them (a guard with its own copy of the table proves nothing).
 export { ANTHROPIC_STRICT, OPENAI_STRICT, checkProviderSubset, providerSubsets } from './provider-subsets';
 export type { KeywordRule, KeywordStatus, ProviderSubset, StrictProviderId, SubsetViolation } from './provider-subsets';
+export { resolveRenderer, isValidCustomElementName } from '../primitives/renderer-registry';
+export type { RendererMap } from '../primitives/renderer-registry';

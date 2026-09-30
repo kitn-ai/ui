@@ -475,3 +475,5 @@ export type {
 // after this block was written, and prop-types-exported.test.ts caught it, which
 // is the point of deriving that list from the facades rather than maintaining it.
 export type { ShaderSpec } from './components/audio-visualizer/index';
+export { resolveRenderer, isValidCustomElementName } from './primitives/renderer-registry';
+export type { RendererMap } from './primitives/renderer-registry';

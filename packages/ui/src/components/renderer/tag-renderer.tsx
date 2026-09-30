@@ -1,0 +1,66 @@
+import { createMemo, createSignal, createEffect, onCleanup, Show, type JSX } from 'solid-js';
+import { isValidCustomElementName } from '../../primitives/renderer-registry';
+
+export interface TagRendererProps<T> {
+  /** The custom-element tag to create. */
+  tag: string;
+  /** Assigned to `element[prop]` as a JS property, re-assigned whenever it changes. */
+  data: T;
+  /** The property name `data` is assigned to. */
+  prop: string;
+  /** Rendered when the tag is invalid or never gets defined. */
+  fallback: JSX.Element;
+  /** Optional hook to set further properties/attributes on the same element, re-run reactively. */
+  apply?: (el: HTMLElement) => void;
+}
+
+const DEFINE_TIMEOUT_MS = 2000;
+const warned = new Set<string>();
+
+function warnOnce(key: string, message: string): void {
+  if (warned.has(key)) return;
+  warned.add(key);
+  console.warn(message);
+}
+
+/** Renders `data` through a consumer's custom element: the element is created once per tag,
+ *  `data` is assigned as a property, and the built-in `fallback` shows instead when the tag
+ *  is invalid or is not defined within 2s (each warned once, never silent). */
+export function TagRenderer<T>(props: TagRendererProps<T>): JSX.Element {
+  const valid = createMemo(() => {
+    if (isValidCustomElementName(props.tag)) return true;
+    warnOnce(
+      `invalid:${props.tag}`,
+      `[kai] renderer tag "${props.tag}" is not a valid custom-element name; rendering the built-in view instead.`,
+    );
+    return false;
+  });
+  const [timedOut, setTimedOut] = createSignal(false);
+  createEffect(() => {
+    const tag = props.tag;
+    setTimedOut(false);
+    if (!valid() || customElements.get(tag)) return;
+    const timer = setTimeout(() => {
+      if (customElements.get(tag)) return;
+      warnOnce(
+        `undefined:${tag}`,
+        `[kai] renderer tag "${tag}" is not defined after 2s; rendering the built-in view instead. Register it with customElements.define.`,
+      );
+      setTimedOut(true);
+    }, DEFINE_TIMEOUT_MS);
+    onCleanup(() => clearTimeout(timer));
+    void customElements.whenDefined(tag).then(() => clearTimeout(timer));
+  });
+  const el = createMemo(() => (valid() ? document.createElement(props.tag) : undefined));
+  createEffect(() => {
+    const node = el();
+    if (!node) return;
+    (node as unknown as Record<string, unknown>)[props.prop] = props.data;
+    props.apply?.(node);
+  });
+  return (
+    <Show when={valid() && !timedOut()} fallback={props.fallback}>
+      {el()}
+    </Show>
+  );
+}
