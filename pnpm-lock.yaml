@@ -10,6 +10,11 @@ overrides:
   vitest: 4.1.2
   postcss: 8.5.26
 
+patchedDependencies:
+  component-register@0.8.8:
+    hash: eb1b28472e897df0d2bc177726992ade6d9701476c0b32cdf8cb963f54b90e67
+    path: patches/component-register@0.8.8.patch
+
 importers:
 
   .:
@@ -12724,7 +12729,7 @@ snapshots:
 
   compare-versions@6.1.1: {}
 
-  component-register@0.8.8: {}
+  component-register@0.8.8(patch_hash=eb1b28472e897df0d2bc177726992ade6d9701476c0b32cdf8cb963f54b90e67): {}
 
   concurrently@10.0.3:
     dependencies:
@@ -16076,7 +16081,7 @@ snapshots:
 
   solid-element@1.9.1(solid-js@1.9.13):
     dependencies:
-      component-register: 0.8.8
+      component-register: 0.8.8(patch_hash=eb1b28472e897df0d2bc177726992ade6d9701476c0b32cdf8cb963f54b90e67)
       solid-js: 1.9.13
 
   solid-js@1.9.13:
