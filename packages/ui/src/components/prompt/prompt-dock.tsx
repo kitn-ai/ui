@@ -91,8 +91,10 @@ function Band(props: {
     }
     // A band that is already open on first paint must not animate in from nothing.
     measure();
+    // Bound at setup: a teardown path must not resolve a DOM global by bare name.
+    const cancel = cancelAnimationFrame;
     const raf = requestAnimationFrame(() => setReady(true));
-    onCleanup(() => cancelAnimationFrame(raf));
+    onCleanup(() => cancel(raf));
     if (typeof ResizeObserver === 'function') {
       const ro = new ResizeObserver(() => {
         if (open()) measure();
@@ -128,7 +130,12 @@ function Band(props: {
         ref={measured}
         style={{ [props.name === 'top' ? 'padding-bottom' : 'padding-top']: '0.375rem' }}
       >
-        <div part={props.name} class={cn(LIP_BASE, props.class)}>{content() ?? held()}</div>
+        {/* Literal `part` values: the parts registry checks the source for them. */}
+        {props.name === 'top' ? (
+          <div part="top" class={cn(LIP_BASE, props.class)}>{content() ?? held()}</div>
+        ) : (
+          <div part="bottom" class={cn(LIP_BASE, props.class)}>{content() ?? held()}</div>
+        )}
       </div>
     </div>
   );
