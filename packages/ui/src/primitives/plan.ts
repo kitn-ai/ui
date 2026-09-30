@@ -71,6 +71,12 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 /**
  * Validate a `kai_plan` input. Total: it never throws, whatever it is handed.
  *
+ * NO SIZE CAP, on purpose: not on the number of items, and not on an id or a label. How much plan is
+ * too much is the app's decision (it lands on a token budget or a screen, not in the kit), so an app
+ * that wants a limit checks `items.length` and the label lengths itself and answers the call with
+ * an error. What the kit does decide is display: clamping what is drawn is the renderer's job (see `truncateForDisplay`), and the error
+ * text never echoes more than a short excerpt of a value.
+ *
  * Schema-driven (`plan.schema.json` through the kit's own validator) plus the two rules a schema
  * cannot say here: ids are unique, and a label is not whitespace. Unknown properties are ignored,
  * as in JSON Schema, but never copied into the result.

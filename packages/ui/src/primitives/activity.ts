@@ -126,12 +126,31 @@ export interface ActivityLabel {
   live: (name?: string) => string;
 }
 
+/** Longest tool name the summary line will carry, in UTF-16 code units. */
+export const MAX_DISPLAY_NAME = 80;
+
+/**
+ * A string cut for DISPLAY, with a visible ellipsis when it was cut. A tool name is model output and
+ * has no length limit, so the summary line never carries one whole; the full name stays on the
+ * step (`toolName`) for whoever wants it. Never splits a surrogate pair. Total: a non-string is
+ * `''`, and a `max` that is not a positive number falls back to {@link MAX_DISPLAY_NAME}.
+ */
+export function truncateForDisplay(text: string, max: number = MAX_DISPLAY_NAME): string {
+  if (typeof text !== 'string') return '';
+  const limit = Number.isFinite(max) && max > 0 ? Math.floor(max) : MAX_DISPLAY_NAME;
+  if (text.length <= limit) return text;
+  let cut = text.slice(0, limit);
+  const last = cut.charCodeAt(cut.length - 1);
+  if (last >= 0xd800 && last <= 0xdbff) cut = cut.slice(0, -1);
+  return `${cut}…`;
+}
+
 const times = (base: string, n: number): string => (n > 1 ? `${base} ${n} times` : base);
 const isWebTool = (name?: string): boolean => name !== undefined && /web/i.test(name);
 
 const usedTool: ActivityLabel = {
   done: (n, name) => (isPlanTool(name ?? '') ? times('Updated the plan', n) : times(name ? `Used ${name}` : 'Used a tool', n)),
-  live: (name) => (isPlanTool(name ?? '') ? 'Updating the plan…' : name ? `Using ${name}…` : 'Working…'),
+  live: (name) => (isPlanTool(name ?? '') ? 'Updating the plan…' : name ? `Using ${name}${name.endsWith('…') ? '' : '…'}` : 'Working…'),
 };
 
 /**
@@ -168,6 +187,9 @@ const groupKey = (s: ActivityStep): string => {
   return kind === 'generic' || kind === 'mcp' ? `${kind}:${s.toolName ?? ''}` : kind;
 };
 
+/** A tool name as the summary shows it: cut for display, and `undefined` when there is none. */
+const shown = (name: string | undefined): string | undefined => (name ? truncateForDisplay(name) : undefined);
+
 /**
  * The one line for a run of steps.
  *
@@ -181,7 +203,7 @@ export function summarizeActivity(steps: ActivityStep[], opts: { streaming?: boo
   if (steps.length === 0) return '';
   if (opts.streaming) {
     const live = [...steps].reverse().find((s) => s.status === 'running');
-    if (live) return ACTIVITY_LABELS[labelKey(live)].live(live.toolName);
+    if (live) return ACTIVITY_LABELS[labelKey(live)].live(shown(live.toolName));
   }
   const phrases: string[] = [];
   let i = 0;
@@ -191,9 +213,10 @@ export function summarizeActivity(steps: ActivityStep[], opts: { streaming?: boo
     while (j < steps.length && groupKey(steps[j]) === key) j++;
     const group = steps.slice(i, j);
     const first = group[0];
+    const name = shown(first.toolName);
     let phrase = first.status === 'interrupted'
-      ? interruptedLabel(group.length, first.toolName || undefined)
-      : ACTIVITY_LABELS[labelKey(first)].done(group.length, first.toolName);
+      ? interruptedLabel(group.length, name)
+      : ACTIVITY_LABELS[labelKey(first)].done(group.length, name);
     if (first.kind === 'reasoning') {
       const timed = group.every((s) => s.startedAt !== undefined && s.endedAt !== undefined);
       if (timed) {

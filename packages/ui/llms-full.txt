@@ -298,7 +298,7 @@ const mock = createMockResponder({
 
 I/O-free pure folds over `ChatMessage[]`. No client, no fetch — you own the transport; these functions own the array-identity discipline the elements re-render on.
 
-Every export (72, derived from `dist/state/index.d.ts`):
+Every export (75, derived from `dist/state/index.d.ts`):
 
 | Export | Kind | Module |
 |---|---|---|
@@ -360,6 +360,9 @@ Every export (72, derived from `dist/state/index.d.ts`):
 | `activityStepsFromParts` | value | `../primitives/activity` |
 | `summarizeActivity` | value | `../primitives/activity` |
 | `formatDuration` | value | `../primitives/activity` |
+| `interruptedLabel` | value | `../primitives/activity` |
+| `truncateForDisplay` | value | `../primitives/activity` |
+| `MAX_DISPLAY_NAME` | value | `../primitives/activity` |
 | `ACTIVITY_LABELS` | value | `../primitives/activity` |
 | `ActivityStep` | type | `../primitives/activity` |
 | `ActivityLabel` | type | `../primitives/activity` |

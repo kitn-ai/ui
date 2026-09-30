@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { activityStepsFromParts, summarizeActivity, formatDuration, ACTIVITY_LABELS } from './activity';
+import { activityStepsFromParts, summarizeActivity, formatDuration, truncateForDisplay, MAX_DISPLAY_NAME, ACTIVITY_LABELS } from './activity';
 import type { MessagePart } from '../web-components/chat/chat-types';
 
 const R = (text: string, t?: [number, number?]): MessagePart => ({ type: 'reasoning', text, ...(t ? { timing: { startedAt: t[0], endedAt: t[1] } } : {}) });
@@ -157,5 +157,45 @@ describe('ACTIVITY_LABELS', () => {
     expect(ACTIVITY_LABELS.generic.done(1, 'kai_plan')).toBe('Updated the plan');
     expect(ACTIVITY_LABELS.generic.done(2, 'kai_plan')).toBe('Updated the plan 2 times');
     expect(ACTIVITY_LABELS.generic.live('kai_plan')).toBe('Updating the plan…');
+  });
+});
+
+describe('truncateForDisplay', () => {
+  it('leaves a short string alone and cuts a long one with a visible ellipsis', () => {
+    expect(truncateForDisplay('web_search')).toBe('web_search');
+    expect(truncateForDisplay('x'.repeat(MAX_DISPLAY_NAME))).toBe('x'.repeat(MAX_DISPLAY_NAME));
+    const cut = truncateForDisplay('x'.repeat(MAX_DISPLAY_NAME + 1));
+    expect(cut).toBe(`${'x'.repeat(MAX_DISPLAY_NAME)}…`);
+    expect(truncateForDisplay('abcdef', 3)).toBe('abc…');
+  });
+  it('never splits a surrogate pair', () => {
+    const cut = truncateForDisplay('😀'.repeat(10), 3);
+    expect(cut.endsWith('…')).toBe(true);
+    expect(cut).not.toMatch(/[\uD800-\uDBFF]…$/);
+  });
+  it('is total: a non-string is empty, a bad max falls back to the default', () => {
+    expect(truncateForDisplay(undefined as never)).toBe('');
+    expect(truncateForDisplay('abc', NaN)).toBe('abc');
+  });
+});
+
+describe('a huge tool name in the summary', () => {
+  const huge = 'a'.repeat(1_000_000);
+  it('is truncated with a visible marker in every phrase that names the tool, but kept whole on the step', () => {
+    const settled = activityStepsFromParts([T(huge, 'output-available')]);
+    expect(settled[0].toolName).toHaveLength(1_000_000);
+    const line = summarizeActivity(settled);
+    expect(line).toBe(`Used ${'a'.repeat(MAX_DISPLAY_NAME)}…`);
+    const interrupted = summarizeActivity(activityStepsFromParts([T(huge, 'input-available')]));
+    expect(interrupted).toBe(`Called ${'a'.repeat(MAX_DISPLAY_NAME)}…, no result`);
+    const live = summarizeActivity(activityStepsFromParts([T(huge, 'input-available')], { streaming: true }), { streaming: true });
+    expect(live).toBe(`Using ${'a'.repeat(MAX_DISPLAY_NAME)}…`);
+    expect(line.length).toBeLessThan(200);
+  });
+  it('does not merge two long names that only differ after the cut', () => {
+    const a = 'n'.repeat(500) + 'A';
+    const b = 'n'.repeat(500) + 'B';
+    const steps = activityStepsFromParts([T(a, 'output-available'), T(b, 'output-available')]);
+    expect(summarizeActivity(steps).split(' · ')).toHaveLength(2);
   });
 });

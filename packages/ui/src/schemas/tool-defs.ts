@@ -637,6 +637,11 @@ export const PLAN_TOOL_DESCRIPTION =
  * const tools = [...myTools, ...cardTools({ provider: 'anthropic' }), planTool({ provider: 'anthropic' })];
  * ```
  *
+ * The schema sets NO SIZE CAP (no `maxItems`, no `maxLength`): a limit on plan size is the app's
+ * call, not the kit's. An app that wants one enforces it in the tool loop and answers the call with
+ * an error the model can read; `validatePlan` says the same. Nothing bounds the model's output but
+ * the app, so treat every label as untrusted text of any length.
+ *
  * Projected through the same code as the card tools, so it is stripped of authoring metadata the
  * same way. The host answers a call at once (`validatePlan`, then `applyToolOutput`); see
  * `primitives/plan`. Never strict: the plan schema is deliberately simple, but a strict mode this
