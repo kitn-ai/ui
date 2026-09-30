@@ -814,6 +814,7 @@ it('KNOWN_UNFIXED carries no stale entry for an already-fixed site', () => {
  */
 const UNRESOLVED_TEARDOWN_CALLBACKS = [
   'reasoning.tsx  onCleanup(dispose)',
+  'activity.tsx  onCleanup(dispose)',
   'dropdown.tsx  onCleanup(unregister)',
 ].map((entry) => {
   // The scan reports paths relative to `src/`, so build the expectation the same

@@ -52,7 +52,12 @@
 // been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
 // headroom over the measurement that the baseline and the previous raise used. If this file
 // grows again, the note above explains what to measure and what to trim first.
-const MAX_LLMS_FULL_BYTES = 324 * 1024; // 331,776
+// 2026-09-30 RAISED: 324 -> 338 KiB. Measured 336,320 bytes at 101 elements. What grew: the two
+// activity elements (kai-activity, kai-activity-step), about 4.5 KB, of which roughly 1 KB is the
+// `steps` row, which prints the whole ActivityStep union inline. Trimming lost: every other
+// cell is a real prop of new public API, and the prop docs are already one line each.
+// 338 KiB keeps the ~3% headroom over the measurement that the raises above used.
+const MAX_LLMS_FULL_BYTES = 338 * 1024; // 346,112
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently

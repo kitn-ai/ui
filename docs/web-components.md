@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 99 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 101 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 96 composable custom elements | See the full roster below |
+| + 98 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -139,6 +139,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How reasoning parts render. Default is the collapsible disclosure. |
 | `density` | `density` | `undefined | "default" | "compact"` | `'default'` | How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). |
 | `value` | — | `undefined | string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: undefined | string; promptText?: undefined | string; data?: undefined | Record<string, unknown> } })[]` | — | Value of the input: a string is controlled, a `ComposerDoc` is a one-time seed that pre-populates pills, unset is uncontrolled. |
 | `placeholder` | `placeholder` | `undefined | string` | `'Send a message...'` | Placeholder text shown in the empty input. |
@@ -151,7 +152,6 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
-| `reasoning` | `reasoning` | `undefined | "full" | "compact" | "off"` | — | How reasoning parts render. Default is the collapsible disclosure. |
 | `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
 | `chatTitle` | `chat-title` | `undefined | string` | — | Title shown at the start of the header bar. |
 | `models` | — | `undefined | { id: string; name: string; provider?: undefined | string; description?: undefined | string; group?: undefined | string }[]` | — | Model list; more than one renders a switcher in the header. |

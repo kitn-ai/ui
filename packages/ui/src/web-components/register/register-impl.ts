@@ -21,6 +21,8 @@ import '../message/message';
 import '../markdown/markdown';
 import '../code-block/code-block';
 import '../reasoning/reasoning';
+import '../activity/activity';
+import '../activity/activity-step';
 import '../tool/tool';
 // Phase 2 — header / meta
 import '../context-meter/context-meter';
