@@ -902,6 +902,16 @@ export const TAB_BAR_ITEM_PARTS: PartDef[] = [
   },
 ];
 
+/** Slots of `<kai-artifact>`: its toolbar is composed, not toggled. `toolbar` REPLACES the
+ *  built-in bar (an empty element in it means "no toolbar"); `toolbar-start`/`toolbar-end`
+ *  add controls at its ends. Read `url`, `canGoBack`, `canGoForward` and `kai-history-change`
+ *  off the host, and drive it with `back()`, `forward()`, `reload()`, `home()`, `navigate()`. */
+export const ARTIFACT_SLOTS: SlotDef[] = [
+  { name: 'toolbar', mode: 'replace', doc: 'Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host\'s `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`).' },
+  { name: 'toolbar-start', mode: 'inject', doc: 'Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled).' },
+  { name: 'toolbar-end', mode: 'inject', doc: 'Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled).' },
+];
+
 /** Slots of `<kai-row>`: the generic mobile list row.
  *  The default slot is the title; these are the named regions around it. */
 export const ROW_SLOTS: SlotDef[] = [
@@ -1021,6 +1031,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-tab-bar-item': { parts: TAB_BAR_ITEM_PARTS, children: 'The tab\'s label text (it also names the tab for assistive tech, even in icon-only mode).' },
   'kai-view-stack': { children: 'The named `<kai-view>` children: tab roots (`tab-root`) side by side behind a tab bar, the rest drill views reached by `push()`.' },
   'kai-view': { children: 'This view\'s content. It stays mounted while hidden, so switching views resets nothing.' },
+  'kai-artifact': { slots: ARTIFACT_SLOTS },
   'kai-row': { slots: ROW_SLOTS, parts: ROW_PARTS, children: 'The row title. `leading`, `subtitle` and `trailing` are the named regions around it.' },
   'kai-row-group': { parts: ROW_GROUP_PARTS, vars: ROW_GROUP_VARS, children: 'The `<kai-row>` rows, as DIRECT children: a wrapper element per row collects the divider on its own box instead. Rows are added and removed rather than hidden. A hidden row stays in the sibling chain, so the row after it paints a hairline under the frame\'s top border.' },
 };

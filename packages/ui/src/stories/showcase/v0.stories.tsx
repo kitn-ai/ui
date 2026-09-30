@@ -629,7 +629,7 @@ export const V0: Story = {
          flags; the preview is a data: blob, so display-url shows a clean,
          read-only address in the bar instead of leaking the blob. -->
     <kai-artifact src="data:text/html,..." default-tab="preview"
-                  no-nav no-home display-url="/index.html" expandable open-in-tab
+                  display-url="/index.html" expandable open-in-tab
                   iframe-title="Vesper preview" style="display:block;height:100%"></kai-artifact>
   </kai-resizable-item>
 </kai-resizable>

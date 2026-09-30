@@ -33,9 +33,9 @@ describe('argTypesFor', () => {
       expect(result['standalone']).toEqual({ control: 'boolean' });
     });
 
-    it('noNav → boolean control', () => {
+    it('expandable → boolean control', () => {
       const result = argTypesFor('kai-artifact');
-      expect(result['noNav']).toEqual({ control: 'boolean' });
+      expect(result['expandable']).toEqual({ control: 'boolean' });
     });
 
     it('src → text control (optional string)', () => {

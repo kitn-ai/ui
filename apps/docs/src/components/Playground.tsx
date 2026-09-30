@@ -24,7 +24,7 @@ const humanize = (s: string) => {
 // other element keeps the flat row.
 const BOOLEAN_GROUPS: Record<string, { label: string; props: string[] }[]> = {
   'kai-artifact': [
-    { label: 'Toolbar', props: ['noPathField', 'noTabs', 'noNav', 'noReload', 'noHome', 'openInTab'] },
+    { label: 'Toolbar', props: ['openInTab'] },
     { label: 'Behavior', props: ['expandable', 'maximized', 'standalone', 'readonlyPath'] },
   ],
 };

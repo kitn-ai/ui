@@ -1,4 +1,5 @@
 import { createSignal, onMount, onCleanup } from 'solid-js';
+import { readSlots, ARTIFACT_SLOTS } from '../slots/slots';
 import { defineWebComponent } from '../define/define';
 import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactTab } from '../../components/artifact/artifact';
 
@@ -24,16 +25,6 @@ interface Props extends Record<string, unknown> {
   expandable?: boolean;
   /** Show the open-in-new-tab button (OPT-IN). */
   openInTab?: boolean;
-  /** Hide back/forward. */
-  noNav?: boolean;
-  /** Hide reload. */
-  noReload?: boolean;
-  /** Hide home. */
-  noHome?: boolean;
-  /** Hide the address field. */
-  noPathField?: boolean;
-  /** Hide the Preview|Code toggle. */
-  noTabs?: boolean;
   /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
@@ -57,6 +48,10 @@ interface Events extends Record<string, unknown> {
   'kai-file-select': { path: string };
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'kai-maximize-change': { maximized: boolean };
+  // `url` is reported AS IT ARRIVED, exactly like `kai-navigate`, so it is NOT scheme-validated:
+  // check it with `isSafeUrl` from `@kitn.ai/ui` before rendering, storing or navigating to it.
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  'kai-history-change': { url: string; canGoBack: boolean; canGoForward: boolean };
   // Raised as a raw bubbling + composed CustomEvent (not through `dispatch`) so an
   // enclosing `<kai-resizable>` can catch it and maximize the containing panel.
   // Declared here so it is typed and reaches the generated API. Listen for it to drive
@@ -81,16 +76,23 @@ defineWebComponent<Props, Events>('kai-artifact', {
   maximized: false,
   expandable: false,
   openInTab: false,
-  noNav: false,
-  noReload: false,
-  noHome: false,
-  noPathField: false,
-  noTabs: false,
   standalone: false,
   readonlyPath: false,
   displayUrl: undefined,
 }, (props, { element, dispatch, flag, expose }) => {
   const [maximized, setMaximized] = createSignal(flag('maximized'));
+
+  // `slot="toolbar"` REPLACES the built-in toolbar, so it has to be read off the host (a native
+  // <slot> alone would leave the built-in bar rendered beside it). The observer is required, not
+  // tidy: frameworks append slotted children AFTER the element's first render.
+  const [hasToolbar, setHasToolbar] = createSignal(false);
+  onMount(() => {
+    const read = () => setHasToolbar(readSlots(element, ARTIFACT_SLOTS).toolbar);
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    onCleanup(() => observer.disconnect());
+  });
 
   // ── Imperative API (instance methods on the host) ──────────────────────────
   // Pattern C: the Artifact component owns the history stack + tab/file/maximize
@@ -125,6 +127,19 @@ defineWebComponent<Props, Events>('kai-artifact', {
     /** Exit the maximized view-state (fires kai-maximize-change{maximized:false}). */
     restore: () => controller?.restore(),
   });
+
+  // Read-only history state for a composed toolbar (`el.canGoBack` disables a custom Back
+  // button). Getters only, no setters: the stack belongs to the component. `url` is the raw
+  // current url, the same value `kai-navigate` carries, so it is NOT scheme-validated either.
+  const history = () =>
+    controller?.getHistory() ?? { url: props.src ?? '', canGoBack: false, canGoForward: false };
+  for (const [name, read] of [
+    ['url', () => history().url],
+    ['canGoBack', () => history().canGoBack],
+    ['canGoForward', () => history().canGoForward],
+  ] as const) {
+    Object.defineProperty(element, name, { get: read, configurable: true });
+  }
 
   const onMaximizeChange = (next: boolean) => {
     setMaximized(next);
@@ -170,11 +185,6 @@ defineWebComponent<Props, Events>('kai-artifact', {
           maximized={maximized()}
           expandable={flag('expandable')}
           openInTab={flag('openInTab')}
-          showNav={!flag('noNav')}
-          showReload={!flag('noReload')}
-          showHome={!flag('noHome')}
-          showPathField={!flag('noPathField')}
-          showTabs={!flag('noTabs')}
           standalone={flag('standalone')}
           readonlyPath={flag('readonlyPath')}
           displayUrl={props.displayUrl}
@@ -182,6 +192,10 @@ defineWebComponent<Props, Events>('kai-artifact', {
           onNavigate={(url) => dispatch('kai-navigate', { url })}
           onTabChange={(tab) => dispatch('kai-tab-change', { tab })}
           onFileSelect={(path) => dispatch('kai-file-select', { path })}
+          onHistoryChange={(state) => dispatch('kai-history-change', state)}
+          toolbar={hasToolbar() ? <slot name="toolbar" /> : undefined}
+          toolbarStart={<slot name="toolbar-start" />}
+          toolbarEnd={<slot name="toolbar-end" />}
           controllerRef={(c) => (controller = c)}
         />
       </div>
