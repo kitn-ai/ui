@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Command trigger</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body { margin: 0; padding: 48px 24px; font: 14px/1.4 system-ui, sans-serif; background: var(--color-background, Canvas); color: var(--color-foreground, CanvasText); }
+      .row { display: flex; align-items: center; gap: 12px; }
+      #picked { margin-top: 16px; color: var(--color-muted-foreground, GrayText); }
+    </style>
+  </head>
+  <body>
+    <!-- Any button can be the trigger; the palette does not know which one opened it. -->
+    <div class="row">
+      <kai-button id="open-search" variant="outline" icon="search">Search chats</kai-button>
+      <kai-kbd keys="Mod+K" size="sm"></kai-kbd>
+    </div>
+    <p id="picked" aria-live="polite"></p>
+
+    <kai-dialog id="palette" label="Search chats">
+      <kai-command id="cmd" placeholder="Search chats"></kai-command>
+    </kai-dialog>
+
+    <script type="module" src="./command-trigger.js"></script>
+  </body>
+</html>

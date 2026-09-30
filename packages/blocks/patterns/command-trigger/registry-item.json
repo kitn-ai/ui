@@ -1,0 +1,10 @@
+{
+  "name": "command-trigger",
+  "kind": "pattern",
+  "title": "Command trigger",
+  "description": "Any button opens a command palette in a dialog. Mod+K does too, typing filters your own list, and Escape returns focus to the button that opened it.",
+  "files": [
+    { "path": "command-trigger.html", "type": "html" },
+    { "path": "command-trigger.js", "type": "js" }
+  ]
+}

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Conversation rail</title>
+    <style>
+      /* Light and dark come from the page's color-scheme; the kai parts follow it. */
+      :root { color-scheme: light dark; }
+      body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: var(--color-background, Canvas); color: var(--color-foreground, CanvasText); }
+      kai-workspace { height: 100vh; }
+
+      /* The rail is light DOM the app owns, so these rules are plain CSS. */
+      .bar { display: flex; align-items: center; gap: 2px; padding: 12px 8px 4px 18px; }
+      .title { flex: 1; font-size: 15px; font-weight: 600; }
+      .actions { display: grid; gap: 1px; padding: 4px 8px 8px; }
+      /* Every row, folder and label shares one left edge, 18px in. */
+      .actions kai-row::part(row) { padding: 6px 10px; }
+      .section { margin: 14px 0 4px; padding: 0 10px; font-size: 12px; font-weight: 500; color: var(--color-muted-foreground, GrayText); }
+
+      /* A folder is a native disclosure; the kit keeps its own keyboard toggle. */
+      summary { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px; cursor: pointer; list-style: none; }
+      summary::-webkit-details-marker { display: none; }
+      summary:hover { background: var(--color-hover, color-mix(in srgb, currentColor 8%, transparent)); }
+      summary:focus-visible { outline: 2px solid var(--color-ring, Highlight); outline-offset: -2px; }
+      details:not([open]) .opened, details[open] .closed { display: none; }
+      details kai-conversation-item { margin-inline-start: 24px; } /* lines up with the folder name */
+
+      main { display: grid; place-content: center; height: 100%; text-align: center; }
+      main h1 { margin: 0 0 4px; font-size: 18px; }
+      main p { margin: 0; color: var(--color-muted-foreground, GrayText); }
+    </style>
+  </head>
+  <body>
+    <kai-workspace>
+      <kai-conversations slot="start" id="rail" active-id="k1" searchable="false">
+        <!-- The header slot replaces the built-in title bar with the app's own. -->
+        <div slot="header">
+          <div class="bar">
+            <span class="title">Assistant</span>
+            <kai-button id="search" variant="ghost" size="icon-sm" icon="search" label="Search chats"></kai-button>
+            <kai-button id="collapse" variant="ghost" size="icon-sm" icon="panel-left" label="Collapse sidebar"></kai-button>
+          </div>
+          <nav class="actions" id="actions" aria-label="Quick actions">
+            <kai-row interactive id="new-chat"><kai-icon slot="leading" name="square-pen"></kai-icon>New chat</kai-row>
+            <kai-row interactive id="images"><kai-icon slot="leading" name="image"></kai-icon>Images</kai-row>
+            <kai-row interactive id="scheduled"><kai-icon slot="leading" name="clock"></kai-icon>Scheduled</kai-row>
+            <kai-row interactive id="plugins"><kai-icon slot="leading" name="box"></kai-icon>Plugins</kai-row>
+          </nav>
+        </div>
+
+        <!-- The rows sit in an ARIA list, so a folder is a list item holding a list of its own,
+             and a section label is presentation. -->
+        <p class="section" role="presentation">Projects</p>
+        <div role="listitem">
+          <details open>
+            <summary><kai-icon class="closed" name="folder-closed"></kai-icon><kai-icon class="opened" name="folder-open"></kai-icon>Assistant UI</summary>
+            <div role="list">
+              <kai-conversation-item conversation-id="a1">Wiring the fetch route to the composer</kai-conversation-item>
+              <kai-conversation-item conversation-id="a2">Streaming reasoning parts into the thread without any flicker or layout shift</kai-conversation-item>
+            </div>
+          </details>
+        </div>
+        <div role="listitem">
+          <details open>
+            <summary><kai-icon class="closed" name="folder-closed"></kai-icon><kai-icon class="opened" name="folder-open"></kai-icon>Kanban board</summary>
+            <div role="list">
+              <kai-conversation-item conversation-id="k1">Broke the board into four columns</kai-conversation-item>
+            </div>
+          </details>
+        </div>
+
+        <p class="section" role="presentation">Recents</p>
+        <kai-conversation-item conversation-id="r1">Recent one: naming the export</kai-conversation-item>
+        <kai-conversation-item conversation-id="r2">Recent two: dark mode contrast</kai-conversation-item>
+      </kai-conversations>
+
+      <main>
+        <div><h1 id="heading">Broke the board into four columns</h1><p id="status">Your chat goes here.</p></div>
+      </main>
+    </kai-workspace>
+
+    <!-- The search button opens this; see command-trigger for the same shape alone. -->
+    <kai-dialog id="palette" label="Search chats">
+      <kai-command id="cmd" placeholder="Search chats"></kai-command>
+    </kai-dialog>
+
+    <script type="module" src="./conversation-rail.js"></script>
+  </body>
+</html>
