@@ -57,10 +57,14 @@ const STATIC_SIDE: Record<string, 'top' | 'bottom' | 'left' | 'right'> = {
  *  properties. A consumer can override those in CSS (e.g. `kai-coachmark {
  *  --kai-coachmark-bg: var(--color-tool-blue) }`) to recolor the bubble, arrow,
  *  and text in one place, persistently, without touching `tone`. */
+// White on the dark light-mode tool hues, but the tool hues flip BRIGHT in dark
+// (blue 70%, green 45%, red 70% lightness), where white is 2.0-2.8:1. The dark
+// foreground is the near-black the -foreground tokens use over those same hues.
+const ON_TOOL = 'light-dark(#fff, hsl(45 4% 11%))';
 const TONE_DEFAULTS = {
   primary: { bg: 'var(--color-primary)', fg: 'var(--color-primary-foreground)' },
-  info: { bg: 'var(--color-tool-blue)', fg: '#fff' },
-  success: { bg: 'var(--color-tool-green)', fg: '#fff' },
+  info: { bg: 'var(--color-tool-blue)', fg: ON_TOOL },
+  success: { bg: 'var(--color-tool-green)', fg: ON_TOOL },
   // Light amber surface + near-black foreground. --color-warning is a dark amber in
   // light mode (#935f06) and a bright amber in dark mode, both too saturated for
   // white/cream text at 85% opacity to hit 4.5:1. --color-warning-soft (14% warning
@@ -68,7 +72,7 @@ const TONE_DEFAULTS = {
   // tint in dark mode; --color-foreground (near-black in light, near-white in dark)
   // provides >10:1 on the soft surface — still >>4.5:1 at text-current/85 opacity.
   warning: { bg: 'var(--color-warning-soft)', fg: 'var(--color-foreground)' },
-  error: { bg: 'var(--color-tool-red)', fg: '#fff' },
+  error: { bg: 'var(--color-tool-red)', fg: ON_TOOL },
 } as const;
 
 // The dismiss/badge/content sub-elements derive from the bubble's foreground via

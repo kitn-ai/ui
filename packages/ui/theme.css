@@ -55,7 +55,7 @@
   --color-secondary: var(--kai-color-secondary, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%)));
   --color-secondary-foreground: var(--kai-color-secondary-foreground, light-dark(hsl(240 5.9% 10%), hsl(0 0% 98%)));
   --color-muted: var(--kai-color-muted, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%)));
-  --color-muted-foreground: var(--kai-color-muted-foreground, light-dark(hsl(240 3.8% 43%), hsl(45 4% 56%)));
+  --color-muted-foreground: var(--kai-color-muted-foreground, light-dark(hsl(240 3.8% 43%), hsl(45 4% 57%)));
   /* Subtle SURFACE — an opaque "muted panel" for things that sit OVER content
      (the prompt input, message bubbles, artifact/card headers, chips). CALCULATED
      from existing tokens — `--color-muted` blended 40% onto `--color-background`
@@ -353,7 +353,11 @@
      5.68:1 on the background, 5.22:1 on a card, 4.94:1 on --color-surface-strong,
      so it keeps AA everywhere, including the strongest muted surface. Before the
      move dark read 7.27 / 6.68 / 6.32 on the same three - brighter than light's
-     best, which is what the owner saw. Hue and saturation are untouched. */
+     best, which is what the owner saw. Hue and saturation are untouched.
+     57%, not 56% (2026-09-29): at 56% the pair on --color-muted (badge, kbd, avatar
+     fallback, embed, choice-card) measured 4.42:1, below AA, and the dark axe pass
+     caught it. One lightness step is the smallest that clears 4.5 there (4.56:1);
+     the others become 5.86 background / 5.39 card / 5.10 surface-strong. */
   /* Re-declared in the dark scope so the color-mix recomputes with the DARK
      muted/background (a derived token is computed where it's declared, not where
      it's used — see the light --color-surface for the full note). */

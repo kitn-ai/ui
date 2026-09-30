@@ -205,7 +205,7 @@ export const Codex: Story = {
           .tone-green::part(badge){ background:color-mix(in srgb, var(--color-tool-green) 16%, transparent); color:var(--color-tool-green); }
           .tone-red::part(badge){ background:color-mix(in srgb, var(--color-tool-red) 16%, transparent); color:var(--color-tool-red); }
           .tone-amber::part(badge){ background:color-mix(in srgb, var(--color-tool-amber) 18%, transparent); color:var(--color-tool-amber); }
-          .tone-purple::part(badge){ background:color-mix(in srgb, #8957e5 16%, transparent); color:#6d28d9; }
+          .tone-purple::part(badge){ background:color-mix(in srgb, #8957e5 16%, transparent); color:light-dark(#6d28d9, #c4b5fd); }
           .codex-composer::part(send){ display:none; }
         `}</style>
 
@@ -530,7 +530,7 @@ export const Codex: Story = {
   .tone-blue::part(badge){ background:color-mix(in srgb, var(--color-tool-blue) 16%, transparent); color:var(--color-tool-blue) }
   .tone-green::part(badge){ background:color-mix(in srgb, var(--color-tool-green) 16%, transparent); color:var(--color-tool-green) }
   .tone-red::part(badge){ background:color-mix(in srgb, var(--color-tool-red) 16%, transparent); color:var(--color-tool-red) }
-  .tone-purple::part(badge){ background:color-mix(in srgb, #8957e5 16%, transparent); color:#6d28d9 }
+  .tone-purple::part(badge){ background:color-mix(in srgb, #8957e5 16%, transparent); color:light-dark(#6d28d9, #c4b5fd) }
   /* the Ask/Code buttons are the submit affordance, so hide the built-in send */
   .codex-composer::part(send){ display:none }
 </style>

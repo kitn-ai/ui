@@ -384,7 +384,7 @@ export function Input(props: InputProps): JSX.Element {
       </Show>
 
       <Show when={hasHint()}>
-        <p part="hint" id={hintId} class={cn('text-xs', local.error ? 'text-destructive' : 'text-muted-foreground')}>
+        <p part="hint" id={hintId} class={cn('text-xs', local.error ? 'text-destructive-text' : 'text-muted-foreground')}>
           {local.error ?? local.hint}
         </p>
       </Show>
