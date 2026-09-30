@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
+import { expect, waitFor } from 'storybook/test';
 import { createSignal, For, Show } from 'solid-js';
 import { RotateCcw } from 'lucide-solid';
 import '../../web-components/register/register'; // every kai-* element used below
+import { composeArtifactToolbar } from './artifact-toolbar-slot';
 
 // Labs/Apps: a third dogfood — "v0", an AI app-builder UI (inspired by v0.app)
 // that stress-tests the artifact/preview pattern. It is the SPLIT shell every
@@ -25,7 +27,7 @@ import '../../web-components/register/register'; // every kai-* element used bel
 // item / kai-artifact are copied from chatgpt.stories.tsx (the canonical builder-
 // split story); the rest from t3code.stories.tsx. Per that canonical declaration,
 // kai-artifact's typed JSX surface is only `expandable` / `standalone` — every
-// other prop (src, files, defaultTab, the no-* flags, openInTab, iframeTitle,
+// other prop (src, files, defaultTab, iframeTitle,
 // displayUrl) is set as a PROPERTY in the ref callback, the kai- contract for
 // non-scalar config.
 declare module 'solid-js' {
@@ -555,13 +557,13 @@ export const V0: Story = {
               {/* The artifact fills the pane. REAL toolbar controls (rendered by
                   the element itself): refresh, expand-to-fill (maximizes this pane
                   via the kai-resizable maximize protocol), open-in-new-tab, the
-                  Preview|Code toggle, and the ADDRESS BAR. Back/forward/home are
-                  hidden via the no-* flags. The framed preview is a `data:` blob, so
+                  Preview|Code toggle, and the ADDRESS BAR. They are composed in the
+                  toolbar slot (back/forward/home left out). The framed preview is a `data:` blob, so
                   `displayUrl` shows a clean, read-only address (`/index.html`)
-                  in the bar instead of leaking the blob. Everything but `expandable`/
-                  `style` is set as a property in the ref: `src` (the framed preview),
+                  in the bar instead of leaking the blob. Everything but `style`
+                  is set as a property in the ref: `src` (the framed preview),
                   `files` (the Code tab tree + source), `defaultTab`, `iframeTitle`,
-                  `displayUrl`, and the no-* visibility flags. Solid runs the ref
+                  `displayUrl`, and the composed toolbar. Solid runs the ref
                   BEFORE the element connects, so these are present at first mount. */}
               <div class="min-h-0 flex-1">
                 <kai-artifact
@@ -572,12 +574,11 @@ export const V0: Story = {
                     a.defaultTab = 'preview';
                     a.iframeTitle = 'Vesper preview';
                     a.displayUrl = '/index.html';
-                    a.noNav = true;
-                    a.noHome = true;
-                    a.openInTab = true;
+                    // Reload · address · expand · open · Preview|Code: the built-in bar
+                    // minus back/forward/home, composed in the toolbar slot.
+                    composeArtifactToolbar(a, { reload: true, address: '/index.html', expand: true, open: true, tabs: true });
                     art = a;
                   }}
-                  expandable
                   style={{ display: 'block', height: '100%' }}
                 ></kai-artifact>
               </div>
@@ -587,6 +588,19 @@ export const V0: Story = {
       </div>
     );
   },
+  // The composed Preview|Code toggle has to follow the tab it sets itself.
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const art = canvasElement.querySelector('kai-artifact') as HTMLElement;
+    const tab = (name: string) => art.querySelector(`[slot="toolbar"] [role="tab"]:nth-child(${name === 'Preview' ? 1 : 2})`) as HTMLElement;
+    await waitFor(() => expect(tab('Preview')).not.toBeNull());
+    await expect(tab('Preview').getAttribute('aria-selected')).toBe('true');
+    tab('Code').click();
+    await waitFor(() => expect(tab('Code').getAttribute('aria-selected')).toBe('true'));
+    await expect(tab('Preview').getAttribute('aria-selected')).toBe('false');
+    // An assignment from outside the toolbar moves it too.
+    (art as HTMLElement & { tab: string }).tab = 'preview';
+    await waitFor(() => expect(tab('Preview').getAttribute('aria-selected')).toBe('true'));
+  },
   parameters: {
     docs: {
       source: {
@@ -594,8 +608,7 @@ export const V0: Story = {
         // A representative skeleton of the composition (not the full interactive
         // render). The split is kai-resizable; the right pane is a REAL kai-artifact
         // (Preview/Code toggle, sandboxed preview, file tree, open-in-tab, refresh,
-        // maximize). The version dropdown + Inspect + Deploy are labeled gaps —
-        // kai-artifact has no toolbar slot to host them.
+        // maximize), with its toolbar composed in the `toolbar` slot.
         code: `<!-- The builder split: chat (left) | preview (right), composed from
      kai-resizable + the chat + kai-artifact. -->
 <kai-resizable orientation="horizontal" style="display:block;height:100vh">
@@ -625,12 +638,16 @@ export const V0: Story = {
   <!-- RIGHT: the preview pane. A REAL kai-artifact with its own toolbar chrome. -->
   <kai-resizable-item>
     <!-- The artifact's OWN toolbar: refresh · expand (maximizes the pane) ·
-         open-in-new-tab · address bar · Preview|Code. nav/home hidden via no-*
-         flags; the preview is a data: blob, so display-url shows a clean,
-         read-only address in the bar instead of leaking the blob. -->
+         open-in-new-tab · address bar · Preview|Code, composed in the toolbar slot
+         (no back/forward/home). The preview is a data: blob, so the address field
+         shows a clean, read-only path instead of leaking the blob. -->
     <kai-artifact src="data:text/html,..." default-tab="preview"
-                  display-url="/index.html" expandable open-in-tab
-                  iframe-title="Vesper preview" style="display:block;height:100%"></kai-artifact>
+                  display-url="/index.html"
+                  iframe-title="Vesper preview" style="display:block;height:100%">
+      <!-- slot="toolbar" replaces the built-in bar: your own reload, address, expand,
+           open and Preview|Code controls. See Patterns/Artifact Toolbar. -->
+      <div slot="toolbar">…</div>
+    </kai-artifact>
   </kai-resizable-item>
 </kai-resizable>
 
