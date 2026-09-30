@@ -153,6 +153,7 @@ export const topics = [
           { slug: 'components/artifact' },
           { slug: 'components/resizable' },
           { slug: 'components/resizable-item' },
+          { slug: 'components/view-stack' },
           { slug: 'components/file-tree' },
           { slug: 'components/popover' },
           { slug: 'components/loader' },

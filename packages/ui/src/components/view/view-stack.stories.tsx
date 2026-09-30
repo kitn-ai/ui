@@ -9,14 +9,14 @@ import { componentDescription } from '../../stories/docs/web-component-controls'
 //
 // Hidden views stay MOUNTED, so switching tabs resets nothing.
 const meta = {
-  title: 'Components/ViewStack',
+  title: 'Components/Navigation/View Stack',
   component: ViewStack,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
     docs: {
       description: componentDescription([
-        'A view navigator: tabs sit side by side, and a view you enter opens on top of its tab.',
+        'The drill-in navigator `kai-chat` uses (home → thread, back). It is navigation, not a chat thread. Tabs sit side by side, and a view you enter opens on top of its tab.',
       ]),
     },
   },

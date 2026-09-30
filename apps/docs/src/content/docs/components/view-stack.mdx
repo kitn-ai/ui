@@ -1,0 +1,64 @@
+---
+title: View Stack
+description: Tab roots with views that push on top and pop back.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import PropTable from '../../../components/PropTable.astro';
+import EventTable from '../../../components/EventTable.astro';
+import SlotTable from '../../../components/SlotTable.astro';
+import MethodTable from '../../../components/MethodTable.astro';
+import Facts from '../../../components/Facts.astro';
+
+<p class="kai-tag-sub">kai-view-stack</p>
+
+<p class="kai-lede">The drill-in navigator `kai-chat` uses (home → thread, back). It is navigation, not a chat thread.</p>
+
+<Facts items={['Shadow DOM', 'Tabs plus drill-in views', 'Hidden views stay mounted', 'Deep-linkable via `view`']} />
+
+<Aside type="tip" title="When to use">
+A mobile-style navigator with a few tab roots that push detail views. For messages, use [`<kai-chat>`](/components/chat/); this renders none.
+</Aside>
+
+## Usage
+
+Children are named `<kai-view>` elements. Tab roots (`tab-root`) sit side by side behind a tab bar; every other view is a drill view reached with `push()`. A drilled view hides the tab bar and shows a back arrow; a tab root shows the tab bar and no back arrow.
+
+```html
+<kai-view-stack id="nav" style="display:block; height:600px;">
+  <kai-view name="home" tab-root>Home</kai-view>
+  <kai-view name="settings" tab-root>Settings</kai-view>
+  <kai-view name="thread">A drilled view</kai-view>
+</kai-view-stack>
+
+<script type="module">
+  import '@kitn.ai/ui/web-components';
+  const nav = document.getElementById('nav');
+  nav.addEventListener('kai-view-change', (e) => {
+    console.log(e.detail.view, e.detail.drilled);
+  });
+  nav.push('thread'); // drill in; nav.back() pops
+</script>
+```
+
+Hidden views stay mounted, so switching tabs resets nothing. Set `view` to deep-link or pick the initial view.
+
+## Slots
+
+<SlotTable tag="kai-view-stack" />
+
+## Props
+
+<PropTable tag="kai-view-stack" />
+
+## Events
+
+<EventTable tag="kai-view-stack" />
+
+## Methods
+
+<MethodTable tag="kai-view-stack" />
+
+## `kai-view`
+
+<PropTable tag="kai-view" />
