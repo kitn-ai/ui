@@ -6,6 +6,9 @@ import {
   ConversationList, CollapsedRail, createConversationItemsController, conversationRowsOf,
   type ConversationListController,
 } from '../../components/conversation/conversation-list';
+// lint-preset-parts: private rowsAreNested -- DOM-host bookkeeping over light-DOM rows that only the element form has
+// lint-preset-parts: private syncListitemRoles -- DOM-host bookkeeping over light-DOM rows that only the element form has
+import { rowsAreNested, syncListitemRoles } from '../../components/conversation/conversation-list';
 import type { ConversationRowDensity } from '../../components/conversation/conversation-item';
 import type { ConversationGroup, ConversationSummary } from '../../types';
 
@@ -114,6 +117,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
   // mean the CONSUMER owns the loop — the container skips its data rendering and
   // runs the parent-item contract over the hosts instead.
   const [itemHosts, setItemHosts] = createSignal<HTMLElement[]>([]);
+  const [nested, setNested] = createSignal(false);
   // Which composition slots (header/empty/footer) the consumer has filled.
   const [slots, setSlots] = createSignal<Record<string, boolean>>({});
   onMount(() => {
@@ -132,6 +136,12 @@ defineWebComponent<Props, Events>('kai-conversations', {
         const b = h.shadowRoot?.querySelector('[data-kai-item-body]');
         if (b && b.getAttribute('tabindex') !== '-1') b.setAttribute('tabindex', '-1');
       }
+      // A `list` holds only listitems, so rows in folders switch the region to a `group`
+      // and lose the kit-stamped listitem role; flat rows keep both exactly as before.
+      const all = conversationRowsOf(element, true);
+      const isNested = rowsAreNested(element, all);
+      syncListitemRoles(all, isNested);
+      setNested(isNested);
       setItemHosts((prev) =>
         prev.length === hosts.length && hosts.every((h, i) => h === prev[i]) ? prev : hosts,
       );
@@ -231,6 +241,7 @@ defineWebComponent<Props, Events>('kai-conversations', {
         items={itemMode() ? <slot /> : undefined}
         itemsKeyDown={itemsController.handleKeyDown}
         itemsClick={itemsController.handleClick}
+        itemsRole={nested() ? 'group' : 'list'}
         header={slots().header ? <slot name="header" /> : undefined}
         footer={slots().footer ? <slot name="footer" /> : undefined}
         empty={slots().empty ? <slot name="empty" /> : undefined}
