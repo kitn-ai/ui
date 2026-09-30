@@ -10,24 +10,18 @@
 }
 
 .agent-card {
-  --ac-border: var(--kai-color-border, var(--color-border, hsl(240 5.9% 90%)));
-  --ac-surface: var(--kai-color-surface, var(--color-surface, hsl(240 5% 98%)));
-  --ac-accent: var(--kai-color-accent, var(--color-accent, hsl(240 4.8% 95.9%)));
-  --ac-primary: var(--kai-color-primary, var(--color-primary, hsl(240 5.9% 10%)));
-  --ac-amber: var(--kai-color-tool-amber, var(--color-tool-amber, hsl(38 92% 28%)));
+  /* The kit's scheme knob, with the OS as the fallback: the same rule the kit's
+     elements follow, so `.dark` / `.light` on any ancestor moves the card too. */
+  color-scheme: var(--kai-color-scheme, light dark);
+  --ac-border: var(--kai-color-border, var(--color-border, light-dark(hsl(240 5.9% 90%), hsl(45 4% 17%))));
+  --ac-surface: var(--kai-color-surface, var(--color-surface, light-dark(hsl(240 5% 98%), hsl(45 4% 10%))));
+  --ac-accent: var(--kai-color-accent, var(--color-accent, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%))));
+  --ac-primary: var(--kai-color-primary, var(--color-primary, light-dark(hsl(240 5.9% 10%), hsl(0 0% 98%))));
+  --ac-amber: var(--kai-color-tool-amber, var(--color-tool-amber, light-dark(hsl(38 92% 28%), hsl(38 92% 50%))));
   position: relative;
   border: 1px solid var(--ac-border);
   border-radius: 0.5rem;
   background: var(--ac-surface);
-}
-@media (prefers-color-scheme: dark) {
-  .agent-card {
-    --ac-border: var(--kai-color-border, var(--color-border, hsl(45 4% 17%)));
-    --ac-surface: var(--kai-color-surface, var(--color-surface, hsl(45 4% 10%)));
-    --ac-accent: var(--kai-color-accent, var(--color-accent, hsl(45 4% 17%)));
-    --ac-primary: var(--kai-color-primary, var(--color-primary, hsl(0 0% 98%)));
-    --ac-amber: var(--kai-color-tool-amber, var(--color-tool-amber, hsl(38 92% 50%)));
-  }
 }
 
 /* Selected. The row keeps its own hover fill; the card only marks the state. */
@@ -43,19 +37,14 @@
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--ac-amber) 60%, transparent);
 }
 
-.agent-card[data-tone='working'] { --ac-tone: var(--kai-color-tool-blue, var(--color-tool-blue, hsl(217 91% 38%))); }
-.agent-card[data-tone='done'] { --ac-tone: var(--kai-color-tool-green, var(--color-tool-green, hsl(142 71% 26%))); }
-.agent-card[data-tone='error'] { --ac-tone: var(--kai-color-tool-red, var(--color-tool-red, hsl(0 72% 42%))); }
+.agent-card[data-tone='working'] { --ac-tone: var(--kai-color-tool-blue, var(--color-tool-blue, light-dark(hsl(217 91% 38%), hsl(217 91% 70%)))); }
+.agent-card[data-tone='done'] { --ac-tone: var(--kai-color-tool-green, var(--color-tool-green, light-dark(hsl(142 71% 26%), hsl(142 71% 45%)))); }
+.agent-card[data-tone='error'] { --ac-tone: var(--kai-color-tool-red, var(--color-tool-red, light-dark(hsl(0 72% 42%), hsl(0 84% 70%)))); }
 .agent-card[data-tone='blocked'] { --ac-tone: var(--ac-amber); }
-@media (prefers-color-scheme: dark) {
-  .agent-card[data-tone='working'] { --ac-tone: var(--kai-color-tool-blue, var(--color-tool-blue, hsl(217 91% 70%))); }
-  .agent-card[data-tone='done'] { --ac-tone: var(--kai-color-tool-green, var(--color-tool-green, hsl(142 71% 45%))); }
-  .agent-card[data-tone='error'] { --ac-tone: var(--kai-color-tool-red, var(--color-tool-red, hsl(0 84% 70%))); }
-}
 
 /* The status word takes the dot's hue; an idle agent keeps the muted default. */
 .agent-status-label {
-  color: var(--ac-tone, var(--kai-color-muted-foreground, var(--color-muted-foreground, hsl(240 3.8% 43%))));
+  color: var(--ac-tone, var(--kai-color-muted-foreground, var(--color-muted-foreground, light-dark(hsl(240 3.8% 43%), hsl(45 4% 56%)))));
 }
 
 .agent-status {
