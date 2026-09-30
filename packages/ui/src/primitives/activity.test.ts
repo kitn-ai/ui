@@ -53,7 +53,7 @@ describe('summarizeActivity', () => {
   it('collapses same-kind runs into counts and adds durations when timed', () => {
     const s = activityStepsFromParts([R('a', [0, 6000]), T('web_search', 'output-available'), T('read_file', 'output-available'), T('read_file', 'output-available')]);
     expect(summarizeActivity(s)).toMatch(/^Thought for 6s · Searched( the web)? · .*2/);
-    expect(summarizeActivity(s)).toBe('Thought for 6s · Searched the web · Used read_file 2 times');
+    expect(summarizeActivity(s)).toBe('Thought for 6s · Searched the web · Read 2 files');
   });
   it('omits durations without timing', () => {
     expect(summarizeActivity(activityStepsFromParts([R('a')]))).toBe('Thought');
@@ -64,15 +64,16 @@ describe('summarizeActivity', () => {
   });
   it('does not merge different generic tools, or tools separated by another kind', () => {
     const s = activityStepsFromParts([T('read_file', 'output-available'), T('list_dir', 'output-available'), T('web_search', 'output-available'), T('read_file', 'output-available')]);
-    expect(summarizeActivity(s)).toBe('Used read_file · Used list_dir · Searched the web · Used read_file');
+    expect(summarizeActivity(s)).toBe('Read a file · Used list_dir · Searched the web · Read a file');
   });
   it('counts kinds: pages, files, commands, images and the plan', () => {
     const s = activityStepsFromParts([
       T('fetch_url', 'output-available'), T('fetch_url', 'output-available'), T('fetch_url', 'output-available'),
+      T('cat_file', 'output-available'),
       T('edit_file', 'output-available'), T('write_file', 'output-available'),
       T('bash', 'output-available'), T('image_gen', 'output-available'), T('kai_plan', 'output-available'),
     ]);
-    expect(summarizeActivity(s)).toBe('Read 3 pages · Edited 2 files · Ran a command · Generated an image · Updated the plan');
+    expect(summarizeActivity(s)).toBe('Read 3 pages · Read a file · Edited 2 files · Ran a command · Generated an image · Updated the plan');
   });
   it('streaming form names the live step', () => {
     expect(summarizeActivity(activityStepsFromParts([T('web_search', 'input-available')], { streaming: true }), { streaming: true })).toMatch(/…$/);
@@ -127,6 +128,7 @@ describe('ACTIVITY_LABELS', () => {
       'file-change': ['Edited a file', 'Edited 3 files', 'Edited a file', 'Editing…', 'Editing…'],
       command: ['Ran a command', 'Ran 3 commands', 'Ran a command', 'Running…', 'Running…'],
       image: ['Generated an image', 'Generated 3 images', 'Generated an image', 'Generating an image…', 'Generating an image…'],
+      'file-read': ['Read a file', 'Read 3 files', 'Read a file', 'Reading…', 'Reading…'],
       mcp: ['Used a tool', 'Used a tool 3 times', 'Used my_tool', 'Working…', 'Using my_tool…'],
       generic: ['Used a tool', 'Used a tool 3 times', 'Used my_tool', 'Working…', 'Using my_tool…'],
     });

@@ -52,7 +52,7 @@ export interface RawOrigin {
 }
 
 /** Semantic classification of a tool call, used to pick a rendering. */
-export type ToolKind = 'command' | 'file-change' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
+export type ToolKind = 'command' | 'file-change' | 'file-read' | 'search' | 'fetch' | 'mcp' | 'image' | 'generic';
 
 /** A tool-call part rendered by <kai-tool>. */
 export interface ToolPart {

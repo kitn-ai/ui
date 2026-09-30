@@ -125,6 +125,7 @@ export const ACTIVITY_LABELS: Record<ToolKind | 'reasoning', ActivityLabel> = {
     live: (name) => (isWebTool(name) ? 'Searching the web…' : 'Searching…'),
   },
   fetch: { done: (n) => (n > 1 ? `Read ${n} pages` : 'Read a page'), live: () => 'Reading…' },
+  'file-read': { done: (n) => (n > 1 ? `Read ${n} files` : 'Read a file'), live: () => 'Reading…' },
   'file-change': { done: (n) => (n > 1 ? `Edited ${n} files` : 'Edited a file'), live: () => 'Editing…' },
   command: { done: (n) => (n > 1 ? `Ran ${n} commands` : 'Ran a command'), live: () => 'Running…' },
   image: { done: (n) => (n > 1 ? `Generated ${n} images` : 'Generated an image'), live: () => 'Generating an image…' },
