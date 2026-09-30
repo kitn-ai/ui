@@ -131,23 +131,6 @@ export declare const toast: {
 /** Configure the imperative `toast()` singleton — call once at app start. */
 export declare function configureToasts(config: ToastConfig): void;
 
-export interface KaiAgentCardElement extends HTMLElement {
-  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
-  theme?: "light" | "dark" | "auto";
-  /** The agent's name, the primary label. Attribute: `name`. */
-  name?: string;
-  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
-  active?: boolean;
-  /** Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
-  needsAttention?: boolean;
-  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
-  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
-  addEventListener<K extends keyof KaiAgentCardElementEventMap>(type: K, listener: (this: KaiAgentCardElement, ev: KaiAgentCardElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
-  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
-  removeEventListener<K extends keyof KaiAgentCardElementEventMap>(type: K, listener: (this: KaiAgentCardElement, ev: KaiAgentCardElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
-  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
-}
-
 export interface KaiArtifactElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
@@ -2353,13 +2336,6 @@ export interface KaiWorkspaceElement extends HTMLElement {
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
-export interface KaiAgentCardElementEventMap extends HTMLElementEventMap {
-  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
-  'kai-activate': CustomEvent;
-  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
-  'kai-menu': CustomEvent;
-}
-
 export interface KaiArtifactElementEventMap extends HTMLElementEventMap {
   /** Fired when a file is selected. `detail.path`. */
   'kai-file-select': CustomEvent<{ path: string }>;
@@ -2820,7 +2796,6 @@ export interface KaiWorkspaceElementEventMap extends HTMLElementEventMap {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'kai-agent-card': KaiAgentCardElement;
     'kai-artifact': KaiArtifactElement;
     'kai-attachments': KaiAttachmentsElement;
     'kai-audio-visualizer': KaiAudioVisualizerElement;
@@ -2926,7 +2901,6 @@ declare global {
 declare global {
   interface HTMLElementEventMap {
     'kai-action': CustomEvent<{ id: string; label: string }>;
-    'kai-activate': CustomEvent;
     'kai-active-change': CustomEvent<{ id: string | undefined }>;
     'kai-aside-resize': CustomEvent<{ side: "start" | "end"; width: number }>;
     'kai-aside-toggle': CustomEvent<{ side: "start" | "end"; collapsed: boolean }>;
@@ -2960,7 +2934,6 @@ declare global {
     'kai-maximize': CustomEvent<{ maximized: boolean }>;
     'kai-maximize-intent': CustomEvent<{ requested: boolean }>;
     'kai-maximize-state': CustomEvent<{ maximized: boolean }>;
-    'kai-menu': CustomEvent;
     'kai-message-action': CustomEvent<{ messageId: string; action: string; state?: undefined | "on" | "off" }>;
     'kai-model-change': CustomEvent<{ modelId: string }>;
     'kai-nav-item-action': CustomEvent<{ value: string; action?: undefined | { icon: string; label: string } }>;
@@ -3011,7 +2984,6 @@ interface KaiElementJsxProps {
 declare module 'react' {
   namespace JSX {
     interface IntrinsicElements {
-      'kai-agent-card': KaiElementJsxProps;
       'kai-artifact': KaiElementJsxProps;
       'kai-attachments': KaiElementJsxProps;
       'kai-audio-visualizer': KaiElementJsxProps;
@@ -3113,19 +3085,6 @@ declare module 'react' {
       'kai-workspace': KaiElementJsxProps;
     }
   }
-}
-
-export interface KaiAgentCardElementProps {
-  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
-  theme?: "light" | "dark" | "auto";
-  /** The agent's name, the primary label. Attribute: `name`. */
-  name?: string;
-  /** Selected / focused state: highlighted border + surface. Attribute: `active`. */
-  active?: boolean;
-  /** Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. */
-  needsAttention?: boolean;
-  /** Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. */
-  status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean };
 }
 
 export interface KaiArtifactElementProps {
@@ -4761,13 +4720,6 @@ export interface KaiWorkspaceElementProps {
   compact?: boolean;
 }
 
-export interface KaiAgentCardElementEvents {
-  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
-  onKaiActivate?: (event: CustomEvent) => void;
-  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
-  onKaiMenu?: (event: CustomEvent) => void;
-}
-
 export interface KaiArtifactElementEvents {
   /** Fired when a file is selected. `detail.path`. */
   onKaiFileSelect?: (event: CustomEvent<{ path: string }>) => void;
@@ -5385,8 +5337,6 @@ export type KaiVueElement<Props, Events> = new () => {
 
 declare module 'vue' {
   interface GlobalComponents {
-    'kai-agent-card': KaiVueElement<KaiAgentCardElementProps, KaiAgentCardElementEvents>;
-    KaiAgentCard: KaiVueElement<KaiAgentCardElementProps, KaiAgentCardElementEvents>;
     'kai-artifact': KaiVueElement<KaiArtifactElementProps, KaiArtifactElementEvents>;
     KaiArtifact: KaiVueElement<KaiArtifactElementProps, KaiArtifactElementEvents>;
     'kai-attachments': KaiVueElement<KaiAttachmentsElementProps, KaiAttachmentsElementEvents>;
@@ -5586,13 +5536,6 @@ declare module 'vue' {
     'kai-workspace': KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
     KaiWorkspace: KaiVueElement<KaiWorkspaceElementProps, KaiWorkspaceElementEvents>;
   }
-}
-
-export interface KaiAgentCardElementSvelteEvents {
-  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
-  'onkai-activate'?: (event: CustomEvent) => void;
-  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
-  'onkai-menu'?: (event: CustomEvent) => void;
 }
 
 export interface KaiArtifactElementSvelteEvents {
@@ -6212,7 +6155,6 @@ export type KaiSvelteElement<Props, Events> = Partial<Props> & Events & KaiEleme
 declare global {
   namespace svelteHTML {
     interface IntrinsicElements {
-      'kai-agent-card': KaiSvelteElement<KaiAgentCardElementProps, KaiAgentCardElementSvelteEvents>;
       'kai-artifact': KaiSvelteElement<KaiArtifactElementProps, KaiArtifactElementSvelteEvents>;
       'kai-attachments': KaiSvelteElement<KaiAttachmentsElementProps, KaiAttachmentsElementSvelteEvents>;
       'kai-audio-visualizer': KaiSvelteElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSvelteEvents>;
@@ -6314,13 +6256,6 @@ declare global {
       'kai-workspace': KaiSvelteElement<KaiWorkspaceElementProps, KaiWorkspaceElementSvelteEvents>;
     }
   }
-}
-
-export interface KaiAgentCardElementSolidEvents {
-  /** The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. */
-  'on:kai-activate'?: (event: CustomEvent) => void;
-  /** The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). */
-  'on:kai-menu'?: (event: CustomEvent) => void;
 }
 
 export interface KaiArtifactElementSolidEvents {
@@ -6965,7 +6900,6 @@ export type KaiSolidElement<Props, Events> = Partial<Props> & Events & KaiElemen
 declare module 'solid-js/jsx-runtime' {
   namespace JSX {
     interface IntrinsicElements {
-      'kai-agent-card': KaiSolidElement<KaiAgentCardElementProps, KaiAgentCardElementSolidEvents>;
       'kai-artifact': KaiSolidElement<KaiArtifactElementProps, KaiArtifactElementSolidEvents>;
       'kai-attachments': KaiSolidElement<KaiAttachmentsElementProps, KaiAttachmentsElementSolidEvents>;
       'kai-audio-visualizer': KaiSolidElement<KaiAudioVisualizerElementProps, KaiAudioVisualizerElementSolidEvents>;

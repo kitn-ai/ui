@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 100 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 99 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 97 composable custom elements | See the full roster below |
+| + 96 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.
@@ -3170,48 +3170,6 @@ Themed by the global design tokens (override any `--color-*`).
 <!-- /spec:kai-progress-bar -->
 
 A thin determinate progress bar: a rounded track whose fill width is `value / max`, clamped. `tone` picks a semantic fill hue and `label` adds a caption above the track. Scalar attributes only.
-
----
-
-### `<kai-agent-card>` / `AgentCard`
-
-<!-- spec:kai-agent-card -->
-#### Properties
-
-| Property | Attribute | Type | Default | Notes |
-|----------|-----------|------|---------|-------|
-| `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
-| `name` | `name` | `undefined | string` | — | The agent's name, the primary label. Attribute: `name`. |
-| `active` | `active` | `undefined | false | true` | — | Selected / focused state: highlighted border + surface. Attribute: `active`. |
-| `needsAttention` | `needs-attention` | `undefined | false | true` | — | Raise a prominent "Needs you" pill plus a glowing amber edge. This is the attention-routing signal that pulls focus to this agent. Attribute: `needs-attention`. |
-| `status` | — | `undefined | { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: undefined | string; pulse?: undefined | false | true }` | — | Run status: `{ tone, label?, pulse? }`. JS property, not an attribute. |
-
-#### Events
-
-| Event | `detail` | Description |
-|-------|-----------|-------------|
-| `kai-activate` | — | The card was activated by a click, or by Enter / Space while focused. Promote this agent back to focus. |
-| `kai-menu` | — | The trailing "..." kebab was clicked. The consumer opens its own menu; the card only surfaces the affordance (the click does not also activate the card). |
-
-#### Styleable parts
-
-Restyle from outside the Shadow DOM via `kai-agent-card::part(name)`.
-
-| Part | Description |
-|------|-------------|
-| `::part(status)` | The leading tone-colored status dot. <br>`kai-agent-card::part(status) { width: 0.625rem; height: 0.625rem }` |
-| `::part(menu)` | The trailing overflow ("...") menu button. <br>`kai-agent-card::part(menu) { opacity: 1 }` |
-
-#### Composed from
-
-`Components/AgentCard`
-
-#### Theming
-
-Themed by the global design tokens (override any `--color-*`).
-<!-- /spec:kai-agent-card -->
-
-The compact glanceable card for one agent in a multi-agent workspace: the agent name, a tone-colored status dot (`status` is a JS-property object, `{ tone, label?, pulse? }`), a needs-attention treatment, an `active` state and a trailing overflow button. `kai-activate` says promote this agent back to focus; `kai-menu` asks you to open your own per-agent menu (the card only surfaces the affordance).
 
 ---
 
