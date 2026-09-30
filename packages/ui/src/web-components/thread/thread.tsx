@@ -13,7 +13,7 @@ interface Props extends Record<string, unknown> {
   // actions/avatar/feedback; mutating an entry in place does not re-render. Re-declared
   // from `ChatAppProps` so the element's own prop table carries its own description,
   // matching `<kai-chat>`.
-  /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. Ignored while the element has `<kai-message>` children, which render instead. */
+  /** The message thread to render, newest last. JS property; pass a NEW array per chunk. Ignored while `<kai-message>` children exist. */
   messages?: ChatMessage[];
   /** Show a typing indicator on the pending assistant turn. Set it while
    *  awaiting the assistant's reply. */

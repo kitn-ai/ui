@@ -58,27 +58,16 @@ export function useStickToBottom() {
   }
 
   /**
-   * SIZE, not mutation, is what this watches for content the MutationObserver cannot see.
+   * Size, not mutation, covers what the MutationObserver cannot see: rows an app projects
+   * through a `<slot>` live in the light DOM, and the text they stream lives in their own
+   * shadow roots, so none of it mutates this subtree, yet it moves the scroll height.
    *
-   * The observer below covers the scroller's own subtree. Rows an app projects through a
-   * `<slot>` (a `<kai-thread>` with `<kai-message>` children) live in the LIGHT DOM, and the
-   * text they stream lives in their own shadow roots, so none of it is a mutation of this
-   * subtree. It is still a change to the height of the row that holds it, and that is the
-   * thing the pin depends on. A ResizeObserver on the ROWS sees it whatever the projection,
-   * and also catches what mutations never did in either mode: an image that finishes
-   * loading, a code block that highlights taller.
+   * The ROWS are observed, not the content column: that column is `min-h-full` in a flex
+   * scroller and shrinks back to the viewport while its rows overflow, so its own size never
+   * changes (measured). A slot has no box, so its assigned elements stand in for it.
    *
-   * The ROWS, not the content column: that column is `min-h-full` inside a flex scroller,
-   * so it is free to shrink back to the viewport height while its rows overflow it, and its
-   * own size then never changes however much the rows grow (measured: it reports nothing
-   * while the scroller's scrollHeight moves by 100px). A slot has no box of its own, so its
-   * assigned elements are observed in its place.
-   *
-   * It pins SYNCHRONOUSLY. Resize callbacks run after layout and before paint, so a scroll
-   * here lands in the same frame as the growth; deferring to a rAF the way the mutation path
-   * does would paint one frame of unpinned content per update, which at 30 updates a second
-   * is a visible shimmy. A scroll offset write does not invalidate layout, so it cannot
-   * feed the observer a loop.
+   * It pins synchronously: resize callbacks run after layout and before paint, so the scroll
+   * lands in the growth's own frame. A rAF would paint one unpinned frame per update.
    */
   function onResize() {
     if (shouldStick) scrollToBottom('instant');
