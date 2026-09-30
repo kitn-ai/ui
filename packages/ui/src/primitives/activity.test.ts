@@ -16,8 +16,13 @@ describe('activityStepsFromParts', () => {
     expect(steps.map((s) => s.status)).toEqual(['running', 'error']);
     expect(steps[1].errorText).toBe('ENOENT');
   });
-  it('an unsettled tool is done, not running, once the turn is not streaming', () => {
-    expect(activityStepsFromParts([T('web_search', 'input-available')])[0].status).toBe('done');
+  it('an unsettled tool is INTERRUPTED once the turn is not streaming, never done', () => {
+    for (const state of ['input-available', 'input-streaming'] as const) {
+      expect(activityStepsFromParts([T('web_search', state)])[0].status, state).toBe('interrupted');
+    }
+    // A settled tool is unaffected, and streaming still means running.
+    expect(activityStepsFromParts([T('web_search', 'output-available')])[0].status).toBe('done');
+    expect(activityStepsFromParts([T('web_search', 'input-available')], { streaming: true })[0].status).toBe('running');
   });
   it('carries tool fields, classifies the kind and copies timing onto the step', () => {
     const [s] = activityStepsFromParts([T('web_search', 'output-available', { input: { q: 'x' }, output: { hits: 1 }, timing: { startedAt: 10, endedAt: 1210 } })]);
@@ -77,6 +82,18 @@ describe('summarizeActivity', () => {
   it('streaming with nothing live falls back to the settled summary', () => {
     const steps = activityStepsFromParts([T('web_search', 'output-available')], { streaming: true });
     expect(summarizeActivity(steps, { streaming: true })).toBe('Searched the web');
+  });
+  it('does not count an interrupted tool as completed work, and says so loudly', () => {
+    const s = activityStepsFromParts([T('web_search', 'input-available')]);
+    expect(summarizeActivity(s)).toBe('Called web_search, no result');
+    expect(summarizeActivity(s)).not.toMatch(/Searched/);
+    const mixed = activityStepsFromParts([T('web_search', 'output-available'), T('web_search', 'input-available'), T('web_search', 'input-available')]);
+    expect(summarizeActivity(mixed)).toBe('Searched the web · Called web_search 2 times, no result');
+    expect(summarizeActivity(activityStepsFromParts([T('', 'input-available')]))).toBe('Called a tool, no result');
+  });
+  it('an interrupted step is not "live": the streaming form only names a running one', () => {
+    const steps = activityStepsFromParts([T('web_search', 'input-available')]);
+    expect(summarizeActivity(steps, { streaming: true })).toBe('Called web_search, no result');
   });
   it('is empty for no steps', () => {
     expect(summarizeActivity([])).toBe('');

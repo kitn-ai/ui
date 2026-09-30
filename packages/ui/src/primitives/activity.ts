@@ -18,7 +18,8 @@ import { isPlanTool } from './plan';
 export interface ActivityStep {
   id: string;
   kind: 'reasoning' | 'tool';
-  status: 'running' | 'done' | 'error';
+  /** `interrupted`: the tool never settled and nothing is streaming any more, so it will not. */
+  status: 'running' | 'done' | 'error' | 'interrupted';
   /** Overrides the derived label. */
   label?: string;
   toolName?: string;
@@ -44,8 +45,9 @@ const isSettled = (t: ToolPart): boolean => t.state === 'output-available' || t.
  *
  * `status`: an errored tool is `error`. While `streaming`, a tool that has not settled is
  * `running`, and so is a reasoning block that has not ended (its `timing.endedAt` is unset; with no
- * timing at all, the LAST part of the turn). Not streaming, nothing is running: a tool parked at
- * `input-available` is awaiting its host, not working, and showing it as failed would be a lie.
+ * timing at all, the LAST part of the turn). Not streaming, nothing is running, so a tool that
+ * never settled is `interrupted`: reporting it `done` would claim work that has no result
+ * (`abort()` flips such tools to `output-error`; this covers the thread that was never aborted).
  */
 export function activityStepsFromParts(parts: MessagePart[], opts: { streaming?: boolean } = {}): ActivityStep[] {
   const streaming = opts.streaming === true;
@@ -66,7 +68,7 @@ export function activityStepsFromParts(parts: MessagePart[], opts: { streaming?:
       steps.push({
         id: t.toolCallId ?? `tool-${i}`,
         kind: 'tool',
-        status: t.state === 'output-error' ? 'error' : streaming && !isSettled(t) ? 'running' : 'done',
+        status: t.state === 'output-error' ? 'error' : isSettled(t) ? 'done' : streaming ? 'running' : 'interrupted',
         ...(isPlanTool(t.type) ? { label: PLAN_STEP_LABEL } : {}),
         toolName: t.type,
         toolKind: t.kind ?? classifyTool(t.type),
@@ -130,11 +132,17 @@ export const ACTIVITY_LABELS: Record<ToolKind | 'reasoning', ActivityLabel> = {
   generic: usedTool,
 };
 
+/** The line for tool calls that never got a result. Worded as what happened, not as work done. */
+export function interruptedLabel(n: number, name?: string): string {
+  return `${times(name ? `Called ${name}` : 'Called a tool', n)}, no result`;
+}
+
 const labelKey = (s: ActivityStep): ToolKind | 'reasoning' => (s.kind === 'reasoning' ? 'reasoning' : s.toolKind ?? 'generic');
 
 /** Consecutive steps collapse when they say the same thing: the same kind, and for the kinds that
  *  name the tool ("Used read_file") the same tool, so two different tools never merge into a count. */
 const groupKey = (s: ActivityStep): string => {
+  if (s.status === 'interrupted') return `interrupted:${s.toolName ?? ''}`;
   const kind = labelKey(s);
   return kind === 'generic' || kind === 'mcp' ? `${kind}:${s.toolName ?? ''}` : kind;
 };
@@ -142,6 +150,7 @@ const groupKey = (s: ActivityStep): string => {
 /**
  * The one line for a run of steps.
  *
+ * Interrupted tools are never counted as work: each group reads "Called <tool>, no result".
  * Settled: each group of consecutive like steps becomes its phrase, joined with " · ";
  * reasoning gains " for Ns" when every block in the group is timed and over (a still-open block
  * would make the total a lie, so the duration is omitted instead). Streaming with a step running:
@@ -161,7 +170,9 @@ export function summarizeActivity(steps: ActivityStep[], opts: { streaming?: boo
     while (j < steps.length && groupKey(steps[j]) === key) j++;
     const group = steps.slice(i, j);
     const first = group[0];
-    let phrase = ACTIVITY_LABELS[labelKey(first)].done(group.length, first.toolName);
+    let phrase = first.status === 'interrupted'
+      ? interruptedLabel(group.length, first.toolName || undefined)
+      : ACTIVITY_LABELS[labelKey(first)].done(group.length, first.toolName);
     if (first.kind === 'reasoning') {
       const timed = group.every((s) => s.startedAt !== undefined && s.endedAt !== undefined);
       if (timed) {
