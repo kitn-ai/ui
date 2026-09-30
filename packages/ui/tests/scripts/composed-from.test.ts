@@ -61,6 +61,8 @@ describe('composedFrom', () => {
     // renders a bare <slot/> over createViewStack; kai-view is a slot plus a
     // host style. All three import only lowercase controller/helper functions
     // from ../components/, which composedFrom rightly excludes.
-    expect(empty).toEqual(['kai-icon', 'kai-remote', 'kai-tab-bar', 'kai-view', 'kai-view-stack']);
+    // kai-question and kai-question-option are data holders in the way <option> is: they draw
+    // nothing (a host style that hides them) and their kai-question-panel parent reads them.
+    expect(empty).toEqual(['kai-icon', 'kai-question', 'kai-question-option', 'kai-remote', 'kai-tab-bar', 'kai-view', 'kai-view-stack']);
   });
 });

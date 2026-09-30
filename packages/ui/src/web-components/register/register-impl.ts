@@ -120,6 +120,10 @@ import '../view-stack/view-stack';
 import '../view/view';
 import '../row/row';
 import '../row/row-group';
+import '../question/question-panel';
+import '../question/question';
+import '../question/question-option';
+import '../question/questions-waiting';
 
 // The devtools recorder hook, installed HERE because this file is already the
 // browser-only half of the web-components entry (register.ts gates it behind a window

@@ -205,6 +205,21 @@ export {
 export type {
   TabBarItemContentProps, TabBarItemsController, TabBarItemsControllerOptions,
 } from './components/tabs/tab-bar';
+// Question panel: the composer-replacing surface for a model's `kai_ask` questions, and the parts
+// `<kai-question-panel>` is built from. The pure answer rules ride along, so a host that wants the
+// waiting line's count (`unansweredCount`) uses the same rule the panel does.
+export { QuestionPanel } from './components/question/question-panel';
+export { QuestionBody } from './components/question/question';
+export { QuestionOptionRow } from './components/question/question-option';
+export { OtherAnswer } from './components/question/other-answer';
+export { QuestionsWaiting } from './components/question/questions-waiting';
+export { unansweredCount, answersFromDrafts, isAnswered as isQuestionAnswered } from './components/question/question-state';
+export type { QuestionPanelProps, QuestionPanelController } from './components/question/question-panel';
+export type { QuestionBodyProps, QuestionBodyApi } from './components/question/question';
+export type { QuestionOptionRowProps } from './components/question/question-option';
+export type { OtherAnswerProps } from './components/question/other-answer';
+export type { QuestionsWaitingProps } from './components/question/questions-waiting';
+export type { PanelQuestion, AnswerDraft } from './components/question/question-state';
 // createViewStack — the controller behind `<kai-view-stack>`'s DOM-children
 // navigation model. A Solid consumer composing the web-component pattern
 // directly needs it too.

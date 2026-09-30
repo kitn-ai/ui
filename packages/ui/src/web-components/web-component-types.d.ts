@@ -1603,6 +1603,94 @@ export interface KaiPromptInputElement extends HTMLElement {
   removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
+export interface KaiQuestionElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The question's identity, echoed in its answer. Defaults to `q<index>` from its position. */
+  questionId?: string;
+  /** The short tab label (keep it under about twelve characters). */
+  header?: string;
+  /** The question itself, shown above the options. */
+  question?: string;
+  /** What kind of answer it takes. Default `choice`. */
+  kind?: "choice" | "confirm" | "tasks" | "text" | "form";
+  /** Let the user pick several options (checkboxes). A `tasks` question is always multiple. */
+  multiSelect?: boolean;
+  /** Hint text of the free-text field (the `text` kind, or the Other row). */
+  placeholder?: string;
+  /** Whether the question must be answered before Submit. Default true; `required="false"` turns it off. */
+  required?: boolean;
+  /** Offer the Other row (the user's own words). Default true for choice, confirm and tasks; `allow-other="false"` turns it off. */
+  allowOther?: boolean;
+  /** The `form` kind's fields: a JSON Schema object with `properties`, and `required` for the fields that must be filled. JS property. */
+  fields?: Record<string, unknown>;
+}
+
+export interface KaiQuestionOptionElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The option's label, and the value that comes back in `selected`. The element's own text is the fallback. */
+  label?: string;
+  /** One line under the label. */
+  description?: string;
+  /** Code or config text shown beside the list while this option is focused. Rendered as plain text, never markup. */
+  preview?: string;
+}
+
+export interface KaiQuestionPanelElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The questions to ask, in order. JS property; `questionsFromToolCall` output fits. Ignored while `<kai-question>` children exist. */
+  questions?: { id: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; multiSelect?: boolean; options?: { label: string; description?: string; preview?: string }[]; placeholder?: string; fields?: Record<string, unknown>; required: boolean }[];
+  /** The provider's tool call id. Echoed in `kai-questions-submit` and `kai-questions-dismiss` so the host settles the right call, and a new one resets the answers. */
+  toolCallId?: string;
+  /** Controlled answers, one per answered question. JS property. Omit to let the panel keep its own. */
+  value?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** The answers to start from when uncontrolled (a Reopen with the answers kept). JS property. */
+  defaultValue?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** Controlled step: the question index, or the question count for the Review step. Omit to let the panel keep its own. */
+  activeIndex?: number;
+  /** The step to start on when uncontrolled. */
+  defaultActiveIndex?: number;
+  /** Text of the dismiss button. Replace the whole control with the `dismiss` slot. */
+  dismissLabel?: string;
+  /** Text of the final action. */
+  submitLabel?: string;
+  /** Accessible name of the panel and its tab list. */
+  label?: string;
+  /** Move focus into the panel when it appears. Default true; turn it off for a panel that is on the page from the start. */
+  focusOnOpen?: boolean;
+  /** Go to the next step. */
+  next(): void;
+  /** Go to the previous step. */
+  back(): void;
+  /** Go to a step by index; the question count is the Review step. */
+  select(index: number): void;
+  /** Submit, when every required question is answered. Fires `kai-questions-submit`. */
+  submit(): void;
+  /** Focus the active step's first control. Call it when a dismissed panel is reopened. */
+  focus(): void;
+  addEventListener<K extends keyof KaiQuestionPanelElementEventMap>(type: K, listener: (this: KaiQuestionPanelElement, ev: KaiQuestionPanelElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof KaiQuestionPanelElementEventMap>(type: K, listener: (this: KaiQuestionPanelElement, ev: KaiQuestionPanelElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+export interface KaiQuestionsWaitingElement extends HTMLElement {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** How many questions still have no answer. */
+  count?: number;
+  /** How many questions the call asked in all. */
+  total?: number;
+  /** Text of the reopen control. */
+  reopenLabel?: string;
+  addEventListener<K extends keyof KaiQuestionsWaitingElementEventMap>(type: K, listener: (this: KaiQuestionsWaitingElement, ev: KaiQuestionsWaitingElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+  removeEventListener<K extends keyof KaiQuestionsWaitingElementEventMap>(type: K, listener: (this: KaiQuestionsWaitingElement, ev: KaiQuestionsWaitingElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
 export interface KaiRadioGroupElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
@@ -2706,6 +2794,22 @@ export interface KaiPromptInputElementEventMap extends HTMLElementEventMap {
   'kai-voice': CustomEvent<Record<string, never>>;
 }
 
+export interface KaiQuestionPanelElementEventMap extends HTMLElementEventMap {
+  /** The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. */
+  'kai-active-change': CustomEvent<{ index: number; questionId?: undefined | string }>;
+  /** An answer changed. `answers` is the whole current set, one entry per answered question. */
+  'kai-answer-change': CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>;
+  /** The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. */
+  'kai-questions-dismiss': CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>;
+  /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
+  'kai-questions-submit': CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>;
+}
+
+export interface KaiQuestionsWaitingElementEventMap extends HTMLElementEventMap {
+  /** The reopen control was pressed. The host brings the panel back and calls its `focus()`. */
+  'kai-reopen': CustomEvent<Record<string, never>>;
+}
+
 export interface KaiRadioGroupElementEventMap extends HTMLElementEventMap {
   /** A row was chosen. */
   'kai-change': CustomEvent<{ value: string }>;
@@ -2928,6 +3032,10 @@ declare global {
     'kai-progress-bar': KaiProgressBarElement;
     'kai-prompt-dock': KaiPromptDockElement;
     'kai-prompt-input': KaiPromptInputElement;
+    'kai-question': KaiQuestionElement;
+    'kai-question-option': KaiQuestionOptionElement;
+    'kai-question-panel': KaiQuestionPanelElement;
+    'kai-questions-waiting': KaiQuestionsWaitingElement;
     'kai-radio-group': KaiRadioGroupElement;
     'kai-reasoning': KaiReasoningElement;
     'kai-remote': KaiRemoteElement;
@@ -2975,7 +3083,7 @@ declare global {
 declare global {
   interface HTMLElementEventMap {
     'kai-action': CustomEvent<{ id: string; label: string }>;
-    'kai-active-change': CustomEvent<{ id: string | undefined }>;
+    'kai-answer-change': CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>;
     'kai-aside-resize': CustomEvent<{ side: "start" | "end"; width: number }>;
     'kai-aside-toggle': CustomEvent<{ side: "start" | "end"; collapsed: boolean }>;
     'kai-attachments-change': CustomEvent<{ attachments: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }[] }>;
@@ -3017,10 +3125,13 @@ declare global {
     'kai-new-chat': CustomEvent<Record<string, never>>;
     'kai-open-change': CustomEvent<{ open: boolean }>;
     'kai-query-change': CustomEvent<{ value: string }>;
+    'kai-questions-dismiss': CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>;
+    'kai-questions-submit': CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>;
     'kai-ready': CustomEvent<{ compareId: string }>;
     'kai-recording-change': CustomEvent<{ recording: boolean }>;
     'kai-remove': CustomEvent<{ id: string }>;
     'kai-rename': CustomEvent<{ value: string }>;
+    'kai-reopen': CustomEvent<Record<string, never>>;
     'kai-scope-change': CustomEvent<{ filters: { tags?: undefined | string[]; authors?: undefined | string[]; contentType?: undefined | "transcript" | "markdown"; dateRange?: undefined | { from: string; to: string } } | undefined }>;
     'kai-scroll': CustomEvent;
     'kai-speaking-change': CustomEvent<{ speaking: boolean }>;
@@ -3119,6 +3230,10 @@ declare module 'react' {
       'kai-progress-bar': KaiElementJsxProps;
       'kai-prompt-dock': KaiElementJsxProps;
       'kai-prompt-input': KaiElementJsxProps;
+      'kai-question': KaiElementJsxProps;
+      'kai-question-option': KaiElementJsxProps;
+      'kai-question-panel': KaiElementJsxProps;
+      'kai-questions-waiting': KaiElementJsxProps;
       'kai-radio-group': KaiElementJsxProps;
       'kai-reasoning': KaiElementJsxProps;
       'kai-remote': KaiElementJsxProps;
@@ -4254,6 +4369,76 @@ export interface KaiPromptInputElementProps {
   belowOpen?: boolean;
 }
 
+export interface KaiQuestionElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The question's identity, echoed in its answer. Defaults to `q<index>` from its position. */
+  questionId?: string;
+  /** The short tab label (keep it under about twelve characters). */
+  header?: string;
+  /** The question itself, shown above the options. */
+  question?: string;
+  /** What kind of answer it takes. Default `choice`. */
+  kind?: "choice" | "confirm" | "tasks" | "text" | "form";
+  /** Let the user pick several options (checkboxes). A `tasks` question is always multiple. */
+  multiSelect?: boolean;
+  /** Hint text of the free-text field (the `text` kind, or the Other row). */
+  placeholder?: string;
+  /** Whether the question must be answered before Submit. Default true; `required="false"` turns it off. */
+  required?: boolean;
+  /** Offer the Other row (the user's own words). Default true for choice, confirm and tasks; `allow-other="false"` turns it off. */
+  allowOther?: boolean;
+  /** The `form` kind's fields: a JSON Schema object with `properties`, and `required` for the fields that must be filled. JS property. */
+  fields?: Record<string, unknown>;
+}
+
+export interface KaiQuestionOptionElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The option's label, and the value that comes back in `selected`. The element's own text is the fallback. */
+  label?: string;
+  /** One line under the label. */
+  description?: string;
+  /** Code or config text shown beside the list while this option is focused. Rendered as plain text, never markup. */
+  preview?: string;
+}
+
+export interface KaiQuestionPanelElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** The questions to ask, in order. JS property; `questionsFromToolCall` output fits. Ignored while `<kai-question>` children exist. */
+  questions?: { id: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; multiSelect?: boolean; options?: { label: string; description?: string; preview?: string }[]; placeholder?: string; fields?: Record<string, unknown>; required: boolean }[];
+  /** The provider's tool call id. Echoed in `kai-questions-submit` and `kai-questions-dismiss` so the host settles the right call, and a new one resets the answers. */
+  toolCallId?: string;
+  /** Controlled answers, one per answered question. JS property. Omit to let the panel keep its own. */
+  value?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** The answers to start from when uncontrolled (a Reopen with the answers kept). JS property. */
+  defaultValue?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** Controlled step: the question index, or the question count for the Review step. Omit to let the panel keep its own. */
+  activeIndex?: number;
+  /** The step to start on when uncontrolled. */
+  defaultActiveIndex?: number;
+  /** Text of the dismiss button. Replace the whole control with the `dismiss` slot. */
+  dismissLabel?: string;
+  /** Text of the final action. */
+  submitLabel?: string;
+  /** Accessible name of the panel and its tab list. */
+  label?: string;
+  /** Move focus into the panel when it appears. Default true; turn it off for a panel that is on the page from the start. */
+  focusOnOpen?: boolean;
+}
+
+export interface KaiQuestionsWaitingElementProps {
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
+  theme?: "light" | "dark" | "auto";
+  /** How many questions still have no answer. */
+  count?: number;
+  /** How many questions the call asked in all. */
+  total?: number;
+  /** Text of the reopen control. */
+  reopenLabel?: string;
+}
+
 export interface KaiRadioGroupElementProps {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
@@ -5233,6 +5418,30 @@ export interface KaiPromptInputElementEvents {
   onKaiVoice?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
+export interface KaiQuestionElementEvents {
+
+}
+
+export interface KaiQuestionOptionElementEvents {
+
+}
+
+export interface KaiQuestionPanelElementEvents {
+  /** The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. */
+  onKaiActiveChange?: (event: CustomEvent<{ index: number; questionId?: undefined | string }>) => void;
+  /** An answer changed. `answers` is the whole current set, one entry per answered question. */
+  onKaiAnswerChange?: (event: CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. */
+  onKaiQuestionsDismiss?: (event: CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
+  onKaiQuestionsSubmit?: (event: CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>) => void;
+}
+
+export interface KaiQuestionsWaitingElementEvents {
+  /** The reopen control was pressed. The host brings the panel back and calls its `focus()`. */
+  onKaiReopen?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
 export interface KaiRadioGroupElementEvents {
   /** A row was chosen. */
   onKaiChange?: (event: CustomEvent<{ value: string }>) => void;
@@ -5592,6 +5801,14 @@ declare module 'vue' {
     KaiPromptDock: KaiVueElement<KaiPromptDockElementProps, KaiPromptDockElementEvents>;
     'kai-prompt-input': KaiVueElement<KaiPromptInputElementProps, KaiPromptInputElementEvents>;
     KaiPromptInput: KaiVueElement<KaiPromptInputElementProps, KaiPromptInputElementEvents>;
+    'kai-question': KaiVueElement<KaiQuestionElementProps, KaiQuestionElementEvents>;
+    KaiQuestion: KaiVueElement<KaiQuestionElementProps, KaiQuestionElementEvents>;
+    'kai-question-option': KaiVueElement<KaiQuestionOptionElementProps, KaiQuestionOptionElementEvents>;
+    KaiQuestionOption: KaiVueElement<KaiQuestionOptionElementProps, KaiQuestionOptionElementEvents>;
+    'kai-question-panel': KaiVueElement<KaiQuestionPanelElementProps, KaiQuestionPanelElementEvents>;
+    KaiQuestionPanel: KaiVueElement<KaiQuestionPanelElementProps, KaiQuestionPanelElementEvents>;
+    'kai-questions-waiting': KaiVueElement<KaiQuestionsWaitingElementProps, KaiQuestionsWaitingElementEvents>;
+    KaiQuestionsWaiting: KaiVueElement<KaiQuestionsWaitingElementProps, KaiQuestionsWaitingElementEvents>;
     'kai-radio-group': KaiVueElement<KaiRadioGroupElementProps, KaiRadioGroupElementEvents>;
     KaiRadioGroup: KaiVueElement<KaiRadioGroupElementProps, KaiRadioGroupElementEvents>;
     'kai-reasoning': KaiVueElement<KaiReasoningElementProps, KaiReasoningElementEvents>;
@@ -6067,6 +6284,30 @@ export interface KaiPromptInputElementSvelteEvents {
   'onkai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
+export interface KaiQuestionElementSvelteEvents {
+
+}
+
+export interface KaiQuestionOptionElementSvelteEvents {
+
+}
+
+export interface KaiQuestionPanelElementSvelteEvents {
+  /** The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. */
+  'onkai-active-change'?: (event: CustomEvent<{ index: number; questionId?: undefined | string }>) => void;
+  /** An answer changed. `answers` is the whole current set, one entry per answered question. */
+  'onkai-answer-change'?: (event: CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. */
+  'onkai-questions-dismiss'?: (event: CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
+  'onkai-questions-submit'?: (event: CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>) => void;
+}
+
+export interface KaiQuestionsWaitingElementSvelteEvents {
+  /** The reopen control was pressed. The host brings the panel back and calls its `focus()`. */
+  'onkai-reopen'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
 export interface KaiRadioGroupElementSvelteEvents {
   /** A row was chosen. */
   'onkai-change'?: (event: CustomEvent<{ value: string }>) => void;
@@ -6366,6 +6607,10 @@ declare global {
       'kai-progress-bar': KaiSvelteElement<KaiProgressBarElementProps, KaiProgressBarElementSvelteEvents>;
       'kai-prompt-dock': KaiSvelteElement<KaiPromptDockElementProps, KaiPromptDockElementSvelteEvents>;
       'kai-prompt-input': KaiSvelteElement<KaiPromptInputElementProps, KaiPromptInputElementSvelteEvents>;
+      'kai-question': KaiSvelteElement<KaiQuestionElementProps, KaiQuestionElementSvelteEvents>;
+      'kai-question-option': KaiSvelteElement<KaiQuestionOptionElementProps, KaiQuestionOptionElementSvelteEvents>;
+      'kai-question-panel': KaiSvelteElement<KaiQuestionPanelElementProps, KaiQuestionPanelElementSvelteEvents>;
+      'kai-questions-waiting': KaiSvelteElement<KaiQuestionsWaitingElementProps, KaiQuestionsWaitingElementSvelteEvents>;
       'kai-radio-group': KaiSvelteElement<KaiRadioGroupElementProps, KaiRadioGroupElementSvelteEvents>;
       'kai-reasoning': KaiSvelteElement<KaiReasoningElementProps, KaiReasoningElementSvelteEvents>;
       'kai-remote': KaiSvelteElement<KaiRemoteElementProps, KaiRemoteElementSvelteEvents>;
@@ -6801,6 +7046,30 @@ export interface KaiPromptInputElementSolidEvents {
   'on:kai-voice'?: (event: CustomEvent<Record<string, never>>) => void;
 }
 
+export interface KaiQuestionElementSolidEvents {
+
+}
+
+export interface KaiQuestionOptionElementSolidEvents {
+
+}
+
+export interface KaiQuestionPanelElementSolidEvents {
+  /** The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. */
+  'on:kai-active-change'?: (event: CustomEvent<{ index: number; questionId?: undefined | string }>) => void;
+  /** An answer changed. `answers` is the whole current set, one entry per answered question. */
+  'on:kai-answer-change'?: (event: CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. */
+  'on:kai-questions-dismiss'?: (event: CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
+  'on:kai-questions-submit'?: (event: CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>) => void;
+}
+
+export interface KaiQuestionsWaitingElementSolidEvents {
+  /** The reopen control was pressed. The host brings the panel back and calls its `focus()`. */
+  'on:kai-reopen'?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
 export interface KaiRadioGroupElementSolidEvents {
   /** A row was chosen. */
   'on:kai-change'?: (event: CustomEvent<{ value: string }>) => void;
@@ -7125,6 +7394,10 @@ declare module 'solid-js/jsx-runtime' {
       'kai-progress-bar': KaiSolidElement<KaiProgressBarElementProps, KaiProgressBarElementSolidEvents>;
       'kai-prompt-dock': KaiSolidElement<KaiPromptDockElementProps, KaiPromptDockElementSolidEvents>;
       'kai-prompt-input': KaiSolidElement<KaiPromptInputElementProps, KaiPromptInputElementSolidEvents>;
+      'kai-question': KaiSolidElement<KaiQuestionElementProps, KaiQuestionElementSolidEvents>;
+      'kai-question-option': KaiSolidElement<KaiQuestionOptionElementProps, KaiQuestionOptionElementSolidEvents>;
+      'kai-question-panel': KaiSolidElement<KaiQuestionPanelElementProps, KaiQuestionPanelElementSolidEvents>;
+      'kai-questions-waiting': KaiSolidElement<KaiQuestionsWaitingElementProps, KaiQuestionsWaitingElementSolidEvents>;
       'kai-radio-group': KaiSolidElement<KaiRadioGroupElementProps, KaiRadioGroupElementSolidEvents>;
       'kai-reasoning': KaiSolidElement<KaiReasoningElementProps, KaiReasoningElementSolidEvents>;
       'kai-remote': KaiSolidElement<KaiRemoteElementProps, KaiRemoteElementSolidEvents>;
