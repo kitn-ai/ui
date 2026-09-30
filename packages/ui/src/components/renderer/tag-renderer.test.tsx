@@ -53,4 +53,28 @@ describe('TagRenderer', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     vi.useRealTimers(); warn.mockRestore();
   });
+  it('routes properties through the class accessors when the tag is defined after the element was created', async () => {
+    const { container } = render(() => (
+      <TagRenderer
+        tag="accessor-late-el"
+        data={{ n: 3 }}
+        prop="data"
+        fallback={<span>fb</span>}
+        apply={(ref) => { (ref as unknown as { heading: string }).heading = 'Title'; }}
+      />
+    ));
+    const seen: Record<string, unknown> = {};
+    class AccessorEl extends HTMLElement {
+      set data(v: unknown) { seen.data = v; this.textContent = `n=${(v as { n: number }).n}`; }
+      set heading(v: string) { seen.heading = v; }
+    }
+    customElements.define('accessor-late-el', AccessorEl);
+    await customElements.whenDefined('accessor-late-el');
+    await new Promise((r) => setTimeout(r, 0));
+    const el = container.querySelector('accessor-late-el') as HTMLElement;
+    expect(el.textContent).toBe('n=3');
+    expect(seen.heading).toBe('Title');
+    // The own property that shadowed the accessor is gone, so later assignments reach it too.
+    expect(Object.prototype.hasOwnProperty.call(el, 'data')).toBe(false);
+  });
 });

@@ -23,6 +23,19 @@ function warnOnce(key: string, message: string): void {
   console.warn(message);
 }
 
+/** Properties assigned before the tag was defined are OWN data properties, and they shadow
+ *  the class accessors the definition adds. Once defined, take each one off the instance and
+ *  assign it again so it goes through the accessor (the standard "upgrade property" pattern). */
+function upgradeProperties(node: HTMLElement | undefined): void {
+  if (!node) return;
+  customElements.upgrade(node);
+  for (const key of Object.keys(node)) {
+    const own = (node as unknown as Record<string, unknown>)[key];
+    delete (node as unknown as Record<string, unknown>)[key];
+    (node as unknown as Record<string, unknown>)[key] = own;
+  }
+}
+
 /** Renders `data` through a consumer's custom element: the element is created once per tag,
  *  `data` is assigned as a property, and the built-in `fallback` shows instead when the tag
  *  is invalid or is not defined within 2s (each warned once, never silent);
@@ -57,6 +70,7 @@ export function TagRenderer<T>(props: TagRendererProps<T>): JSX.Element {
     // A tag defined after the timeout recovers: leave the fallback for the real element.
     void customElements.whenDefined(tag).then(() => {
       clearTimeout(timer);
+      if (!stale) upgradeProperties(el());
       if (!stale) setTimedOut(false);
     });
   });
