@@ -3,6 +3,8 @@ import { defineWebComponent } from '../define/define';
 import { readSlots, MESSAGE_SLOTS } from '../slots/slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../../primitives/chat-config';
 import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../../components/message/message';
+// lint-preset-parts: private BUILTIN_ACTION_LABEL -- the built-in action label table, the same one the data-mode bar reads, not a renderable part
+import { BUILTIN_ACTION_LABEL } from '../../components/action-icons/action-icons';
 import { createMessageFeedback } from '../../primitives/message-feedback';
 import {
   mergeCardTags,
@@ -270,12 +272,19 @@ defineWebComponent<Props, Events>('kai-message', {
     const read = () => {
       setComposed(bodyChildren().length > 0);
       const nodes = [...element.querySelectorAll('kai-action')];
-      setSlottedActions(nodes.map(n => ({
-        id: n.id || n.getAttribute('action') || '',
-        label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
+      setSlottedActions(nodes.map(n => {
+        const id = n.id || n.getAttribute('action') || '';
+        return {
+        id,
+        // Text, then `label`, then the built-in's own label (the one data-mode `actions: ['copy']`
+        // gets), then the raw id: a bare `<kai-action action="copy">` never ends up nameless.
+        label: n.textContent?.trim() || n.getAttribute('label')
+          || (Object.hasOwn(BUILTIN_ACTION_LABEL, id) ? BUILTIN_ACTION_LABEL[id as keyof typeof BUILTIN_ACTION_LABEL] : '')
+          || id,
         icon: n.getAttribute('icon') ?? undefined,
         tooltip: n.getAttribute('tooltip') ?? undefined,
-      })));
+        };
+      }));
       setSlots(readSlots(element, MESSAGE_SLOTS));
     };
     read();

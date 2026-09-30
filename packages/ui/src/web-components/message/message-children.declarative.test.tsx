@@ -103,4 +103,12 @@ describe('<kai-message> composed mode', () => {
     (t.el as unknown as { copy(): void }).copy();
     expect(writeText).toHaveBeenCalledWith('copy me');
   });
+  it('gives a bare <kai-action action="copy"> its built-in label, not an empty aria-label', async () => {
+    const t = await mount(
+      '<kai-markdown content="hi"></kai-markdown><kai-action action="copy"></kai-action><kai-action action="share"></kai-action><kai-action action="regenerate" label="Again"></kai-action>',
+      (el) => { el.role = 'assistant'; },
+    );
+    const names = [...t.row()!.querySelectorAll('button')].map((b) => b.getAttribute('aria-label'));
+    expect(names).toEqual(['Copy', 'share', 'Again']);
+  });
 });
