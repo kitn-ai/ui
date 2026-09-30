@@ -151,6 +151,15 @@ if (blockFiles.length === 0) {
   );
 }
 
+// And the pattern tier, the same shape again: `add <pattern>` walks dist/patterns
+// at runtime, so a tarball without it installs cleanly and then answers every
+// pattern name with "no block named".
+if (!files.some((f) => f.startsWith('dist/patterns/'))) {
+  problems.push(
+    'no dist/patterns/** in the tarball - `create-kai add <pattern>` would install and then find no pattern to write',
+  );
+}
+
 // The same failure shape one level in. A block controller is TypeScript and
 // `add` renders the html form at RUNTIME with no stripper of its own, so a
 // tarball carrying the .ts source and not its stripped .js twin installs fine

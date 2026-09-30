@@ -15,6 +15,11 @@
 //                                             file contents - THE public
 //                                             integration surface (CLI,
 //                                             docs site, MCP all resolve it)
+//   dist/blocks/patterns.json                 the PATTERN index (kind:
+//                                             "pattern", manifests only) the
+//                                             docs /patterns page lists from
+//   dist/blocks/r/<pattern>.json              a pattern's item JSON, files
+//                                             carrying content (`add <url>`)
 //   dist/blocks/f/<name>.<form>.json          one file per block per FRAMEWORK
 //                                             delivery form (spec 3.5): the
 //                                             rendered tree, contents and
@@ -70,6 +75,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const BLOCKS_PKG_JSON = createRequire(import.meta.url).resolve('@kitn.ai/blocks/package.json');
 const BLOCKS_PKG_ROOT = dirname(BLOCKS_PKG_JSON);
 const BLOCKS_DIR = join(BLOCKS_PKG_ROOT, 'blocks');
+const PATTERNS_DIR = join(BLOCKS_PKG_ROOT, 'patterns');
 // The OUTPUTS stay in packages/ui: dist/blocks/ ships inside @kitn.ai/ui, and
 // the driver pages are served by this package's block driver.
 const OUT_DIR = join(ROOT, 'dist', 'blocks');
@@ -130,6 +136,38 @@ if (errors.length) {
   process.exit(1);
 }
 
+// ------------------------------------------------------------- the patterns
+// A pattern is plain web components: no controller, no twins, no framework
+// forms. The same scan rule (a directory holding a registry-item.json), then
+// the shared per-file kai- contract checks. Zero patterns is a broken walk,
+// for the same reason zero blocks is.
+const patternSources = [];
+for (const entry of readdirSync(PATTERNS_DIR, { withFileTypes: true })) {
+  if (!entry.isDirectory()) continue;
+  const dir = join(PATTERNS_DIR, entry.name);
+  const manifestPath = join(dir, 'registry-item.json');
+  if (!existsSync(manifestPath)) continue;
+  const files = readdirSync(dir, { withFileTypes: true })
+    .filter((f) => f.isFile() && f.name !== 'registry-item.json')
+    .map((f) => ({ name: f.name, content: readFileSync(join(dir, f.name), 'utf8') }));
+  patternSources.push({ dirName: entry.name, manifestJson: readFileSync(manifestPath, 'utf8'), files });
+}
+if (patternSources.length === 0) {
+  console.error(`gen-blocks: no pattern directories under ${PATTERNS_DIR} - a zero-pattern scan is a broken walk, not an empty tier`);
+  process.exit(1);
+}
+const { patterns, errors: patternErrors } = blocksMod.discoverPatterns(patternSources);
+for (const pattern of patterns) patternErrors.push(...blocksMod.checkPatternContracts(pattern, nonscalarByTag));
+// One namespace for `add <name>`: a pattern may not share a block's name.
+for (const pattern of patterns) {
+  if (blocks.some((b) => b.name === pattern.name)) patternErrors.push(`${pattern.name}: names both a block and a pattern`);
+}
+if (patternErrors.length) {
+  console.error(`gen-blocks: ${patternErrors.length} pattern error(s):`);
+  for (const e of patternErrors) console.error(`  RED ${e}`);
+  process.exit(1);
+}
+
 // -------------------------------------------------------- the stripped twins
 // The controller is TypeScript and two delivery forms land in contexts with
 // no build step (a pasted single file, and a tree dropped next to markup), so
@@ -150,6 +188,10 @@ const outputs = new Map();
 const put = (path, content) => outputs.set(path, content);
 
 put(join(OUT_DIR, 'registry.json'), JSON.stringify(blocksMod.buildRegistryIndex(withTwins), null, 2) + '\n');
+put(join(OUT_DIR, 'patterns.json'), JSON.stringify(blocksMod.buildPatternIndex(patterns), null, 2) + '\n');
+for (const pattern of patterns) {
+  put(join(OUT_DIR, 'r', `${pattern.name}.json`), JSON.stringify(blocksMod.buildPatternItem(pattern), null, 2) + '\n');
+}
 for (const block of withTwins) {
   put(join(OUT_DIR, 'r', `${block.name}.json`), JSON.stringify(blocksMod.buildRegistryItem(block), null, 2) + '\n');
 
@@ -203,7 +245,7 @@ if (!CHECK) {
     writeFileSync(path, content);
     console.log(`wrote ${relative(ROOT, path)}`);
   }
-  console.log(`gen-blocks: ${blocks.length} block(s), ${outputs.size} file(s).`);
+  console.log(`gen-blocks: ${blocks.length} block(s), ${patterns.length} pattern(s), ${outputs.size} file(s).`);
 } else {
   const drift = [];
   for (const [path, content] of outputs) {
@@ -215,5 +257,5 @@ if (!CHECK) {
     for (const d of drift) console.error(`  RED ${d}`);
     process.exit(1);
   }
-  console.log(`gen-blocks --check: fresh (${blocks.length} block(s), ${outputs.size} file(s)).`);
+  console.log(`gen-blocks --check: fresh (${blocks.length} block(s), ${patterns.length} pattern(s), ${outputs.size} file(s)).`);
 }

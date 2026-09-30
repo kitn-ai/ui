@@ -1,6 +1,6 @@
 ---
-title: Blocks
-description: Complete compositions built from kai web components. Preview one, read the files it writes, then run the command.
+title: Patterns
+description: Small compositions of kai web components you copy into your project. Read one, then run the command.
 template: splash
 tableOfContents: false
 # Starlight's pagination walks the whole sidebar order, so on a section
@@ -10,7 +10,8 @@ prev: false
 next: false
 ---
 
-import BlocksIsland from '../../components/blocks/BlocksIsland.tsx';
+import BlocksIsland from '../../../components/blocks/BlocksIsland.tsx';
+import PatternsList from '../../../components/blocks/PatternsList.tsx';
 
 {/* SERVER-rendered marker, the same as `.landing-page` and `.kai-fullscreen`.
     `:root:has(.blocks-page)` has to match at FIRST PAINT or the page renders
@@ -18,5 +19,6 @@ import BlocksIsland from '../../components/blocks/BlocksIsland.tsx';
     mounts. `client:only="solid"` renders nothing on the server, so the marker
     cannot live inside the island. */}
 <div class="blocks-page not-content">
+  <PatternsList client:only="solid" />
   <BlocksIsland client:only="solid" />
 </div>

@@ -26,15 +26,20 @@ import {
   blockFromItemJson,
   detectForm,
   loadBlocks,
+  loadPatterns,
+  patternFromItemJson,
   planAdd,
+  planPattern,
   resolveAdd,
 } from './blocks';
-import type { AddPlan, Block, BlockForm } from './blocks';
+import type { AddPlan, Block, BlockForm, Pattern } from './blocks';
 
 export interface AddEnv {
   cwd: string;
   /** the bundled blocks directory (dist/blocks for the real CLI) */
   blocksRoot: string;
+  /** the bundled patterns directory; defaults to `patterns/` beside blocksRoot */
+  patternsRoot?: string;
   /** the @kitn.ai/ui range the CLI pins (__KIT_RANGE__ for the real CLI) */
   kitRange: string;
   /** the exact kit version the CLI was built against (__KIT_VERSION__) */
@@ -67,9 +72,10 @@ const FORM_PROSE = `${FORM_IDS.slice(0, -1).join(', ')} or ${FORM_IDS[FORM_IDS.l
 
 export const ADD_HELP = `
 create-kai add <block>       write a block from the registry into this project
-create-kai add <url>         resolve a per-block item JSON URL the same way
+create-kai add <pattern>     copy a pattern (plain web components) into src/patterns/<id>/
+create-kai add <url>         resolve a per-item JSON URL the same way
 
-  --list [--json]            print the blocks this release ships and exit
+  --list [--json]            print the blocks and patterns this release ships and exit
   --form <${FORM_IDS.join('|')}>    override framework detection
   --dir <path>               target project directory (default: cwd)
   -y, --yes                  non-interactive; an ambiguous detection fails instead of asking
@@ -211,14 +217,37 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     return 1;
   }
 
+  let patterns: Pattern[];
+  try {
+    patterns = await loadPatterns(env.patternsRoot ?? path.join(path.dirname(env.blocksRoot), 'patterns'));
+  } catch (error) {
+    env.error(`create-kai add: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+  // One namespace for `add <name>`: a name in both tiers would resolve to
+  // whichever was checked first, which is a decision made quietly.
+  const shared = patterns.filter((p) => blocks.some((b) => b.name === p.name)).map((p) => p.name);
+  if (shared.length) {
+    env.error(`create-kai add: ${shared.join(', ')} names both a block and a pattern; rename one`);
+    return 1;
+  }
+
   if (args.list) {
     if (args.json) {
-      env.out(JSON.stringify({ blocks: blocks.map((b) => b.manifest) }, null, 2));
+      env.out(JSON.stringify({ blocks: blocks.map((b) => b.manifest), patterns: patterns.map((p) => p.manifest) }, null, 2));
     } else {
       for (const block of blocks) {
         env.out(`  ${block.name.padEnd(20)}${block.manifest.title} - ${block.manifest.description}`);
       }
-      env.out(`${blocks.length} block${blocks.length === 1 ? '' : 's'} in this release`);
+      for (const pattern of patterns) {
+        env.out(`  ${pattern.name.padEnd(20)}${pattern.manifest.title} - ${pattern.manifest.description} (pattern)`);
+      }
+      const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+      env.out(
+        patterns.length
+          ? `${plural(blocks.length, 'block')} and ${plural(patterns.length, 'pattern')} in this release`
+          : `${plural(blocks.length, 'block')} in this release`,
+      );
     }
     return 0;
   }
@@ -231,6 +260,16 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
   const targetDir = path.resolve(env.cwd, args.dir ?? '.');
   const near = await nearestPackageJson(targetDir);
   const interactive = env.interactive && !args.yes;
+
+  // A PATTERN takes its own short path: no form detection, because it has no
+  // per-framework form. It is either a bundled name or an item JSON URL whose
+  // `kind` says pattern.
+  const fetchItemJson = cachedFetch(env);
+  const patternPlan = await planPatternAdd(args, patterns, near, env, fetchItemJson);
+  if (patternPlan) {
+    if (typeof patternPlan === 'number') return patternPlan;
+    return writePlan(patternPlan.plan, patternPlan.root, near, patternPlan.cdn, env);
+  }
 
   const decided = await decideForm(args.form, near?.pkg ?? null, near !== null, interactive, env.io);
   if (decided.error || !decided.form) {
@@ -254,9 +293,7 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     const resolved = await resolveAdd(args.item, {
       local: (name) => blocks.find((b) => b.name === name),
       fetchItem: async (url) => {
-        const json = env.fetchJson
-          ? await env.fetchJson(url)
-          : await (await fetch(url)).json();
+        const json = await fetchItemJson(url);
         const parsed = blockFromItemJson(json, url);
         if (!parsed.block) throw new Error(parsed.errors.join('; '));
         return parsed.block;
@@ -267,7 +304,78 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     env.error(`create-kai add: ${error instanceof Error ? error.message : String(error)}`);
     return 1;
   }
+  return writePlan(plan, root, near, form === 'cdn', env);
+}
 
+/** Fetch a per-item JSON URL once per `add`, however many times it is asked for. */
+function cachedFetch(env: AddEnv): (url: string) => Promise<unknown> {
+  const seen = new Map<string, Promise<unknown>>();
+  return (url) => {
+    let hit = seen.get(url);
+    if (!hit) {
+      hit = env.fetchJson ? env.fetchJson(url) : fetch(url).then((res) => res.json());
+      seen.set(url, hit);
+    }
+    return hit;
+  };
+}
+
+/**
+ * The pattern branch of `add`. Returns undefined when the item is not a
+ * pattern (the block path continues), an exit code on a refusal, or the plan.
+ * `--form` has no meaning for a pattern, so it is said aloud rather than
+ * dropped: only `cdn` changes anything (the pinned-import paste form).
+ */
+async function planPatternAdd(
+  args: AddArgs,
+  patterns: readonly Pattern[],
+  near: { path: string; pkg: unknown } | null,
+  env: AddEnv,
+  fetchItemJson: (url: string) => Promise<unknown>,
+): Promise<{ plan: AddPlan; root: string; cdn: boolean } | number | undefined> {
+  const item = args.item as string;
+  let pattern: Pattern | undefined = patterns.find((p) => p.name === item);
+  if (!pattern && /^https?:\/\//.test(item)) {
+    let json: unknown;
+    try {
+      json = await fetchItemJson(item);
+    } catch (error) {
+      env.error(`create-kai add: ${error instanceof Error ? error.message : String(error)}`);
+      return 1;
+    }
+    if (typeof json === 'object' && json !== null && (json as { kind?: unknown }).kind === 'pattern') {
+      const parsed = patternFromItemJson(json, item);
+      if (!parsed.pattern) {
+        env.error(`create-kai add: ${parsed.errors.join('; ')}`);
+        return 1;
+      }
+      pattern = parsed.pattern;
+    }
+  }
+  if (!pattern) return undefined;
+
+  const targetDir = path.resolve(env.cwd, args.dir ?? '.');
+  const cdn = args.form === 'cdn' || near === null;
+  if (args.form !== undefined && args.form !== 'cdn') {
+    env.out(`create-kai add: ${pattern.name} is a pattern, which has no per-framework form; --form ${args.form} is ignored. Its files are copied verbatim.`);
+  }
+  if (cdn && near === null) env.out('No project here (no package.json up from this directory), so the pattern script imports the kit from a pinned CDN URL.');
+  const root = cdn || !near ? targetDir : path.dirname(near.path);
+  return { plan: planPattern(pattern, { cdn, kitRange: env.kitRange, kitVersion: env.kitVersion }), root, cdn };
+}
+
+/**
+ * Write a planned add: refuse the whole plan on any collision, write the files,
+ * merge dependencies, print the notes and the README. Shared by the block and
+ * pattern paths so the two cannot drift on what "never overwrites" means.
+ */
+async function writePlan(
+  plan: AddPlan,
+  root: string,
+  near: { path: string; pkg: unknown } | null,
+  cdn: boolean,
+  env: AddEnv,
+): Promise<number> {
   // COLLISION REFUSAL, whole-plan and loud: existing files are never
   // overwritten, and a partial block is worse than none, so one collision
   // refuses every write and lists them all.
@@ -288,7 +396,7 @@ export async function runAdd(argv: readonly string[], env: AddEnv): Promise<numb
     env.out(`  write ${file.path}`);
   }
 
-  if (near && form !== 'cdn' && Object.keys(plan.dependencies).length) {
+  if (near && !cdn && Object.keys(plan.dependencies).length) {
     const merged = mergeDependencies(await readFile(near.path, 'utf8'), plan.dependencies);
     if (merged.added.length) {
       await writeFile(near.path, merged.text, 'utf8');
