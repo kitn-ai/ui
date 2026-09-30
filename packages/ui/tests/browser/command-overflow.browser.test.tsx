@@ -29,6 +29,11 @@ describe('kai-command long labels', () => {
     const option = cmd.shadowRoot!.querySelector('[role="option"]') as HTMLElement;
     const label = option.querySelector('span.font-medium') as HTMLElement;
     expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(option.getBoundingClientRect().right);
+    // The label gives way first: a short description is never clipped itself.
+    const desc = label.nextElementSibling as HTMLElement;
+    expect(desc.textContent).toBe('Assistant UI');
+    expect(desc.scrollWidth).toBeLessThanOrEqual(desc.clientWidth);
+    expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
   });
 });
 

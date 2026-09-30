@@ -81,7 +81,7 @@ export function CommandList(props: CommandListProps): JSX.Element {
                       <Show when={row.icon}>{(icon) => renderIcon(icon(), { imgClass: 'size-4 shrink-0 rounded object-cover', spanClass: 'flex size-4 shrink-0 items-center justify-center text-sm', ariaHidden: true })}</Show>
                       <span class="min-w-0 truncate font-medium">{row.label}</span>
                       <Show when={row.description}>
-                        <span class="min-w-0 truncate text-muted-foreground">{row.description}</span>
+                        <span class="max-w-[50%] shrink-0 truncate text-muted-foreground">{row.description}</span>
                       </Show>
                       <Show when={row.shortcut}>
                         {(sc) => (
