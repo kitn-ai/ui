@@ -716,7 +716,7 @@ export function DerivedBuilderPanel(props: DerivedBuilderPanelProps): JSX.Elemen
               }}
             </For>
             <For each={problemsFor(section)}>
-              {(p) => <p class="text-xs text-destructive" role="alert">{p.path}: {p.message}</p>}
+              {(p) => <p class="text-xs text-destructive-text" role="alert">{p.path}: {p.message}</p>}
             </For>
           </section>
         )}

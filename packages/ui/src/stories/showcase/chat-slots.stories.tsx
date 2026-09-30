@@ -91,7 +91,7 @@ function InjectDemo() {
       <kai-button slot="composer-actions" variant="subtle" icon="sparkles"
         ref={(e) => onMount(() => onCleanup(attachKaiActions(e)))}>Improve prompt</kai-button>
       <footer slot="footer" style="font:12px/1.4 system-ui;color:var(--color-muted-foreground);text-align:center;padding:4px">
-        Acme may make mistakes. <a href="#" style="color:var(--color-foreground)">Verify important info</a>.
+        Acme may make mistakes. <a href="#" style="color:var(--color-foreground);text-decoration:underline">Verify important info</a>.
       </footer>
     </kai-chat>
   );

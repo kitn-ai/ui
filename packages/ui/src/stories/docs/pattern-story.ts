@@ -15,7 +15,15 @@ export function patternStory(html: string, js: string) {
     const host = document.createElement('div');
     const page = new DOMParser().parseFromString(html, 'text/html');
     page.querySelectorAll('script').forEach((s) => s.remove());
-    host.append(...page.head.querySelectorAll('style'), ...page.body.childNodes);
+    // A pattern page declares `:root { color-scheme: light dark }` so a standalone
+    // install follows the OS. Mounted into Storybook that rule lands on the preview
+    // <html> and overrides the toolbar's `.dark`, leaving the page light under a
+    // dark-themed kai-* element (light text on a light surface, 2.86:1). Drop the
+    // declaration here so the story follows Storybook's scheme; the installed file
+    // is untouched.
+    const styles = [...page.head.querySelectorAll('style')];
+    for (const st of styles) st.textContent = (st.textContent ?? '').replace(/color-scheme\s*:[^;}]*;?/g, '');
+    host.append(...styles, ...page.body.childNodes);
 
     onMount(() => {
       const added: [string, EventListenerOrEventListenerObject][] = [];
