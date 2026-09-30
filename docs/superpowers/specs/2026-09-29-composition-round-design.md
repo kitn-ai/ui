@@ -11,6 +11,7 @@ beside this one:
 | C | [`2026-09-29-C-questions-design.md`](2026-09-29-C-questions-design.md) | the Claude-Desktop-style question panel above the prompt; confirm/choice/form/tasks cards removed |
 | D | [`2026-09-29-D-conversation-rail-design.md`](2026-09-29-D-conversation-rail-design.md) | the rail keyboard mechanism for web-component authors, the rail pattern, the command-trigger pattern |
 | E | [`2026-09-29-E-removals-design.md`](2026-09-29-E-removals-design.md) | `kai-agent-card` → a pattern; `kai-artifact` toolbar → slots; ViewStack documented as navigation |
+| P | [`2026-09-30-P-prompt-attachments-design.md`](2026-09-30-P-prompt-attachments-design.md) | added after the checkpoint: content grows into the prompt input's card; `PromptDock` retired |
 
 ## 1. Why this round exists
 
@@ -51,13 +52,23 @@ Every owner answer from the 2026-09-29 session, verbatim where it was typed.
 | 11 | Where patterns live | **Docs + `kai add`** — story + docs page + `kai add <pattern>`; `/blocks` becomes `/patterns` |
 | 12 | Question panel placement | **Above the composer**, with the note: "I really like how Labs/Apps/Claude Code and Labs/Apps/Codex work there is this section that appears above the composer. I can see it sliding up and having a nice look to it and it feels natural. I think the user should always have hte option to type in their own answer if they want… the questions hsould be placed near the prompt, because they are responses." |
 | 12b | Clarification | "I'm not suggesting that you make it work like those examples with the Claude code or the Codex examples. You know how that works in Claude Desktop, and that's what I want. I was just using that as an example so you can see the information that shows up above and sometimes below the prompt" |
-| 13 | After submit | **Compact receipt** — "Answered N questions ›", expandable to Q → A |
+| 13 | After submit | ~~**Compact receipt**~~ — superseded by 21 |
 | 14 | Which cards become question types | **Confirm, Choice, Form, Tasks** |
 | 15 | Activity line | **Summary, expand to steps** — collapsed one line, expand to a step timeline, a step expands to args/result |
-| 16 | Typing while the panel is open | **Answers the active question** |
+| 16 | Typing while the panel is open | ~~**Answers the active question**~~ — superseded by 22 (the panel replaces the composer; custom answers are an "Other" option) |
 | 17 | Tasks | **Both** — Tasks is a checklist question type AND a new agent plan/progress display |
 | 18 | Presets | **Keep presets, rebuilt** on the public composed parts |
 | 19 | `kai-chat` | **Only what flows through**; a full recast is a later round |
+
+**Checkpoint rulings (2026-09-30, two rounds).**
+
+| # | question | owner answer |
+|---|---|---|
+| 20 | How content attaches to the prompt | **Variant B, "grows into the input"**: "the first one adds a border when there isn't one, so I think that may look weird", and "always having a wrapper around the prompt input feels wrong". The input card owns surface, shadow and ring; attached content sits inside its top area over a hairline divider; nothing attached is pixel-identical to today. `kai-prompt-dock`/`PromptDock` are **retired** (break now). Spec P. |
+| 21 | How the submitted answers look | **Variant (a), the user bubble**: a normal user bubble of `Label: answer` lines, labels bold, long and multi-line answers wrapping. The data stays one tool result (spec C §4). |
+| 22 | The question panel | **v2 with composer variant A**: the panel **replaces** the composer while open; segmented tabs (clickable to go back); Back beside Next; a small outline "Let's chat" button (`dismissLabel` prop or `dismiss` slot) hands the composer back, then a quiet "N questions waiting · Reopen" line; custom answers are an **"Other"** last numbered option with an inline auto-growing textarea (its number key selects and focuses it; Enter advances, Shift+Enter newline). The composer-as-answer path is removed. |
+| 22a | One-click approval | **Not answered by the owner. SUPERVISOR DEFAULT, reversible:** a panel whose only question is a confirm submits on one click; multi-question panels keep Submit. Likewise "Dismissed with some answers shows a bubble plus a muted 'Skipped: …' line" is a supervisor default. |
+| 23 | Activity line and plan display | **Approved in round 1** as mocked. The plan attaches through decision 20, not a dock. |
 
 ## 3. The tier model
 
@@ -74,7 +85,7 @@ now; converting or retiring them is out of scope for this round (see §8).
 
 | need | mechanism | example |
 |---|---|---|
-| fixed regions | **named slots** | `kai-artifact` `slot="toolbar"`, `kai-prompt-dock` `top`/`bottom` |
+| fixed regions | **named slots** | `kai-artifact` `slot="toolbar"`, `kai-prompt-input` `above`/`below` |
 | repeated items | **app-rendered children**; the container adds scroll, focus and ARIA over them | `<kai-thread>` holding `<kai-message>`s; `<kai-conversations>` holding `<kai-conversation-item>`s (already shipped) |
 | "draw this data my way" inside a list a preset renders | a **tag registry**: data type → custom-element tag; the kit creates the tag and sets `.part` | `el.renderers = { 'tool:web_search': 'my-search-step' }` |
 
@@ -128,7 +139,21 @@ and one final PR `feat/composition` → `main` carries the round, titled `feat!:
 question panel (single-select, multi-select, with previews, several questions with the review
 step, the receipt collapsed and expanded), the activity line (collapsed, streaming, expanded, one
 step expanded) and the plan display (pending, running, done). Built from real kit primitives
-where they exist.
+where they exist. **Done 2026-09-30** over two rounds (branches `feat/comp-b0`, `feat/comp-c0`;
+rulings 20-23 above). The mockup stories stay on those branches as references and are not merged.
+
+**Status and remaining order (2026-09-30).** Merged on `feat/composition`: all of A, D and E, the
+extra rounds K1-K3 and DA, and B1. Remaining, in the order the plans give:
+
+```
+P1 attachment regions ── P2 retire PromptDock
+B2 activity ── B3 MessageBody + renderers ── B6 scaffolder/docs
+B4 thread rows + item mode (after B3)
+B5 kai-plan (after B1 + P1)
+C1 kai_ask helpers + threadRows ── C2 panel v2 ── C4 kai-chat (after P1, B5, C2, C3)
+                                └ C3 answers bubble (after B4)
+C4 ── C5a / C5b / C5c removals ── C6 docs
+```
 
 ## 8. Non-goals
 
