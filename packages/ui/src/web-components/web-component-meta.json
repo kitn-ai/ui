@@ -791,7 +791,7 @@
         "type": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\"",
         "optional": true,
         "scalar": true,
-        "description": "Badge style; `default` is the muted pill, `outline` a bordered transparent one.",
+        "description": "Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border.",
         "default": "'default'",
         "displayType": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\""
       }

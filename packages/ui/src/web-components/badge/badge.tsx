@@ -2,7 +2,7 @@ import { Badge } from '../../components/badge/badge';
 import { defineWebComponent } from '../define/define';
 
 interface Props extends Record<string, unknown> {
-  /** Badge style; `default` is the muted pill, `outline` a bordered transparent one. */
+  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: 'default' | 'count' | 'citation' | 'outline';
 }
 

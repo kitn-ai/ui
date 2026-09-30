@@ -10,7 +10,7 @@ describe('Badge outline', () => {
     const { container } = render(() => <Badge variant="outline">Needs you</Badge>);
     const el = container.firstChild as HTMLElement;
     expect(el).toHaveTextContent('Needs you');
-    for (const c of ['border', 'border-border', 'bg-transparent', 'text-foreground']) {
+    for (const c of ['border', 'border-input', 'bg-transparent', 'text-foreground']) {
       expect(el.classList.contains(c)).toBe(true);
     }
     expect(el.classList.contains('bg-muted')).toBe(false);

@@ -289,7 +289,7 @@ export interface KaiAvatarElement extends HTMLElement {
 export interface KaiBadgeElement extends HTMLElement {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Badge style; `default` is the muted pill, `outline` a bordered transparent one. */
+  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
@@ -3238,7 +3238,7 @@ export interface KaiAvatarElementProps {
 export interface KaiBadgeElementProps {
   /** Color mode (`auto` follows prefers-color-scheme). */
   theme?: "light" | "dark" | "auto";
-  /** Badge style; `default` is the muted pill, `outline` a bordered transparent one. */
+  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 

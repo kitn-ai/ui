@@ -2148,7 +2148,7 @@ An image avatar with an automatic initials fallback, in three sizes.
 | Property | Attribute | Type | Default | Notes |
 |----------|-----------|------|---------|-------|
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
-| `variant` | `variant` | `undefined | "default" | "count" | "citation" | "outline"` | `'default'` | Badge style; `default` is the muted pill, `outline` a bordered transparent one. |
+| `variant` | `variant` | `undefined | "default" | "count" | "citation" | "outline"` | `'default'` | Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. |
 
 #### Slots
 

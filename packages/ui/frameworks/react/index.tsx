@@ -289,7 +289,7 @@ export const Avatar = /*#__PURE__*/ createWebComponent<AvatarProps, KaiAvatarEle
 );
 
 export interface BadgeProps extends WebComponentProps {
-  /** Badge style; `default` is the muted pill, `outline` a bordered transparent one. */
+  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
