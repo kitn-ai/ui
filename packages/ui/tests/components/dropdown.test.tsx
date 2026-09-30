@@ -362,7 +362,7 @@ describe('DropdownContent height', () => {
   // real browser over several viewport heights, both placements and every anchor position
   // down a window, in `tests/browser/dropdown-containment.browser.test.tsx`
   // (`npm run test:containment`), which is the only layer that can measure it at all.
-  const CEILING = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
+  const CEILING = 'var(--kai-dropdown-max-height,min(20rem,calc(100dvh - 2rem)))';
 
   it('caps the height at the viewport, and never above the room the positioner left it', () => {
     const { trg, menu } = setupSurface();
@@ -374,6 +374,8 @@ describe('DropdownContent height', () => {
     // The viewport is the ceiling, never a typed pixel count: `100dvh` is the window the
     // user actually has, so the same declaration covers a laptop and a short window.
     expect(value).toContain('100dvh');
+    // ...and 20rem is the default cap, so a tall window does not grow the menu with it.
+    expect(value).toContain('20rem');
     // And the room half is a bound INSIDE the window rather than a number of its own. The
     // px comes from the offset the positioner applied, which is still its seed (`y = 0`)
     // until the first `computePosition` resolves — and a cap for a surface at the top of

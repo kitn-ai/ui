@@ -53,10 +53,11 @@ const VIEWPORT_MARGIN = 8;
  * expression lives and both surfaces and the docs entry name it by its value. The VAR
  * carries the DEFAULT inside itself (`var(--x, <default>)`), which is what makes it a
  * seam: a consumer sets `--kai-dropdown-max-height` on `kai-menu`/`kai-dropdown` and needs
- * no reach into the shadow root the panel is portaled into. `100dvh` is the window the
- * user actually has, mobile URL bars included -- never a typed pixel count.
+ * no reach into the shadow root the panel is portaled into. The default is 20rem, a menu
+ * height that reads as a menu on any screen, further bounded by `100dvh` (the window the
+ * user actually has, mobile URL bars included) so a short window still wins.
  */
-const MENU_MAX_HEIGHT = 'var(--kai-dropdown-max-height,calc(100dvh - 2rem))';
+const MENU_MAX_HEIGHT = 'var(--kai-dropdown-max-height,min(20rem,calc(100dvh - 2rem)))';
 
 /**
  * How many px tall a surface may be before it would leave the window.
