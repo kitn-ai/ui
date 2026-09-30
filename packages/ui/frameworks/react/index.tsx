@@ -258,7 +258,7 @@ export const Avatar = /*#__PURE__*/ createWebComponent<AvatarProps, KaiAvatarEle
 );
 
 export interface BadgeProps extends WebComponentProps {
-  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
+  /** Badge style. The default is a muted pill; `outline` is a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
@@ -1154,7 +1154,7 @@ export interface InputProps extends WebComponentProps {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px field for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
@@ -1924,7 +1924,7 @@ export interface SegmentedProps extends WebComponentProps {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px track for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
   /** A segment was chosen. */
   onChange?: (event: CustomEvent<{ value: string }>) => void;
