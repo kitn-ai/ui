@@ -220,3 +220,5 @@ export type { CreateViewStackOptions } from './components/view/view-stack';
 // coverage guard verifies that export survives the build.
 export { ViewStack, View, useViewStack } from './components/view/view-stack';
 export type { ViewStackProps, ViewProps, ViewStackController, ViewStackState, ViewEntry } from './components/view/view-stack';
+export { TagRenderer } from './components/renderer/tag-renderer';
+export type { TagRendererProps } from './components/renderer/tag-renderer';

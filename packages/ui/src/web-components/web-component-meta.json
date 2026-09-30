@@ -6023,6 +6023,14 @@
       {
         "name": "MessageBody",
         "group": "Components"
+      },
+      {
+        "name": "TagRenderer",
+        "group": "Components"
+      },
+      {
+        "name": "CardFallback",
+        "group": "Components"
       }
     ],
     "tokens": [],

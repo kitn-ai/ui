@@ -613,7 +613,7 @@ Restyle from outside the Shadow DOM via `kai-message::part(name)`.
 
 #### Composed from
 
-`Components/Message`, `Components/MessageAvatar`, `Components/MessageBody`
+`Components/Message`, `Components/MessageAvatar`, `Components/MessageBody`, `Components/TagRenderer`, `Components/CardFallback`
 
 #### Theming
 

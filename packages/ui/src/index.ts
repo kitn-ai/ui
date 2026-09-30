@@ -492,3 +492,5 @@ export { compileMask, formatForDisplay, formatRaw, normalizeToRaw } from './prim
 export { canonicalize, fieldSemantics } from './primitives/field-semantics';
 export { noticeIconNode } from './components/notice/notice';
 export { normalizeValue, serializeToText, entitiesOf } from './primitives/composer-model';
+export { resolveRenderer, isValidCustomElementName } from './primitives/renderer-registry';
+export type { RendererMap } from './primitives/renderer-registry';

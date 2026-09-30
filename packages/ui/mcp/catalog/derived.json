@@ -3231,7 +3231,9 @@
       "composedFrom": [
         "Message",
         "MessageAvatar",
-        "MessageBody"
+        "MessageBody",
+        "TagRenderer",
+        "CardFallback"
       ],
       "tokens": []
     },

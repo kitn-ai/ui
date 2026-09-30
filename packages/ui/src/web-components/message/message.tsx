@@ -1,5 +1,4 @@
 import { Show, createSignal, createEffect, onMount, onCleanup, type JSX } from 'solid-js';
-import { Dynamic } from 'solid-js/web';
 import { defineWebComponent } from '../define/define';
 import { readSlots, MESSAGE_SLOTS } from '../slots/slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../../primitives/chat-config';
@@ -12,6 +11,8 @@ import {
   type CardTagMap,
   type CardComponentMap,
 } from '../../components/card/card-registry';
+import { TagRenderer } from '../../components/renderer/tag-renderer';
+import { CardFallback } from '../../components/card/card-fallback';
 import type { CardEnvelope } from '../../primitives/card-contract';
 import { hasParts } from './validate-messages';
 import type { ChatMessage } from '../chat/chat-types';
@@ -44,17 +45,21 @@ export function cardComponentsFromTags(types?: CardTagMap, theme = 'auto'): Card
  *  custom card behaves identically whether it arrives via `<kai-cards>` or a
  *  `card` message part here. */
 function CardTagSlot(props: { tag: string; envelope: CardEnvelope; theme: string }): JSX.Element {
-  let ref: HTMLElement | undefined;
-  createEffect(() => {
-    if (!ref) return;
-    (ref as unknown as { data: unknown }).data = props.envelope.data;
-    (ref as unknown as { cardId: string }).cardId = props.envelope.id;
-    if (props.envelope.title != null) (ref as unknown as { heading: string }).heading = props.envelope.title;
-    (ref as unknown as { resolution: unknown }).resolution = props.envelope.resolution;
-    ref.setAttribute('theme', props.theme);
-    ref.setAttribute('data-card-id', props.envelope.id);
-  });
-  return <Dynamic component={props.tag} ref={ref} />;
+  return (
+    <TagRenderer
+      tag={props.tag}
+      data={props.envelope.data}
+      prop="data"
+      fallback={<CardFallback type={props.envelope.type} cardId={props.envelope.id} />}
+      apply={(ref) => {
+        (ref as unknown as { cardId: string }).cardId = props.envelope.id;
+        if (props.envelope.title != null) (ref as unknown as { heading: string }).heading = props.envelope.title;
+        (ref as unknown as { resolution: unknown }).resolution = props.envelope.resolution;
+        ref.setAttribute('theme', props.theme);
+        ref.setAttribute('data-card-id', props.envelope.id);
+      }}
+    />
+  );
 }
 
 interface Props extends Record<string, unknown> {
