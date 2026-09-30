@@ -3,7 +3,7 @@ import { defineWebComponent } from '../define/define';
 import { createControllableSignal } from '../../primitives/controllable';
 import { readSlots, CONVERSATIONS_SLOTS } from '../slots/slots';
 import {
-  ConversationList, CollapsedRail, createConversationItemsController,
+  ConversationList, CollapsedRail, createConversationItemsController, conversationRowsOf,
   type ConversationListController,
 } from '../../components/conversation/conversation-list';
 import type { ConversationRowDensity } from '../../components/conversation/conversation-item';
@@ -122,7 +122,16 @@ defineWebComponent<Props, Events>('kai-conversations', {
       setSlottedConversations(nodes.map(parseKaiConversationElement));
       // Reference-stable: a fresh array every observer tick would re-run the
       // sync effect (whose writes the observer sees) in a feedback loop.
-      const hosts = [...element.querySelectorAll<HTMLElement>(':scope > kai-conversation-item')];
+      // Every descendant row, folders included; a closed <details> hides its rows from the
+      // list (they are not reachable) and a row inside another row's menu is not a row.
+      const hosts = conversationRowsOf(element);
+      // Rows a closed folder just hid keep no tab stop: a stale tabindex="0" on a hidden
+      // body would leave the list with a tab stop nobody can reach.
+      for (const h of conversationRowsOf(element, true)) {
+        if (hosts.includes(h)) continue;
+        const b = h.shadowRoot?.querySelector('[data-kai-item-body]');
+        if (b && b.getAttribute('tabindex') !== '-1') b.setAttribute('tabindex', '-1');
+      }
       setItemHosts((prev) =>
         prev.length === hosts.length && hosts.every((h, i) => h === prev[i]) ? prev : hosts,
       );
@@ -137,7 +146,10 @@ defineWebComponent<Props, Events>('kai-conversations', {
     read();
     const observer = new MutationObserver(read);
     observer.observe(element, { childList: true, attributes: true, subtree: true });
-    onCleanup(() => observer.disconnect());
+    // `toggle` does not bubble and is not a mutation: it is the only signal that a folder
+    // opened or closed, so listen in the capture phase on the host.
+    element.addEventListener('toggle', read, true);
+    onCleanup(() => { observer.disconnect(); element.removeEventListener('toggle', read, true); });
   });
 
   const itemMode = () => itemHosts().length > 0;

@@ -7,7 +7,7 @@
  * halves are tested against the pieces the facade composes:
  *
  *   1. `isStandaloneConversationItem` — the facade's inside/outside decision,
- *      derived from the container's own `:scope > kai-conversation-item`
+ *      derived from the container's own `conversationRowsOf`
  *      membership rule.
  *   2. `SlottedConversationItem` with `onActivate` — the standalone activation
  *      contract on the row BODY (tabbable, role button, click + Enter/Space),
@@ -43,17 +43,25 @@ describe('isStandaloneConversationItem', () => {
     expect(isStandaloneConversationItem(item)).toBe(true);
   });
 
-  it('is true for an item WRAPPED inside <kai-conversations> — the container manages only direct children (:scope >)', () => {
-    // The container's item mode queries `:scope > kai-conversation-item`, so a
-    // wrapper-nested item is invisible to its controller. Standalone activation
-    // must follow the same membership rule, or such an item would be inert with
-    // no path to activation at all.
+  it('is false for an item nested in a wrapper or folder inside <kai-conversations> (item mode takes every descendant row)', () => {
     const container = document.createElement('kai-conversations');
-    const wrapper = document.createElement('div');
+    const wrapper = document.createElement('details');
     const item = document.createElement('kai-conversation-item');
     wrapper.appendChild(item);
     container.appendChild(wrapper);
-    expect(isStandaloneConversationItem(item)).toBe(true);
+    expect(isStandaloneConversationItem(item)).toBe(false);
+  });
+
+  it('is true for an item inside another row\'s menu slot (a preview is not a row)', () => {
+    const container = document.createElement('kai-conversations');
+    const row = document.createElement('kai-conversation-item');
+    const menu = document.createElement('div');
+    menu.setAttribute('slot', 'menu');
+    const preview = document.createElement('kai-conversation-item');
+    menu.appendChild(preview);
+    row.appendChild(menu);
+    container.appendChild(row);
+    expect(isStandaloneConversationItem(preview)).toBe(true);
   });
 });
 
