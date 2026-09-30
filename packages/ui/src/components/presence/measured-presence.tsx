@@ -69,8 +69,12 @@ export function MeasuredPresence(props: MeasuredPresenceProps) {
   let wrapper!: HTMLDivElement;
   let measured!: HTMLDivElement;
 
-  // Bound at setup: a teardown path must not resolve a DOM global by bare name.
-  const cancel = cancelAnimationFrame;
+  // Bound at setup: a teardown path must not resolve a DOM global by bare name. Guarded
+  // because setup is the component body and a server render runs component bodies, where
+  // Node has no cancelAnimationFrame (and nothing can be scheduled to cancel).
+  const cancel = typeof cancelAnimationFrame === 'function'
+    ? cancelAnimationFrame.bind(globalThis)
+    : () => {};
   let settle = 0;
   // Transitions are on once the first frame has passed and nothing is waiting on its first measurement.
   const animating = () => ready() && !settling();
