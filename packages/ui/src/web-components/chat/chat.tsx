@@ -2,10 +2,12 @@ import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { CHAT_SLOTS, readSlots } from '../slots/slots';
 import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../../components/chat/chat-thread';
+import type { ThreadDensity } from '../../components/chat/thread-density';
 import { cardComponentsFromTags } from '../message/message';
 import { createMessagesGuard } from '../message/validate-messages';
 import type { AttachmentData } from '../../components/attachments/attachments';
-import type { RejectedAttachment } from '../../components/prompt/default-input';
+import type { RejectedAttachment, ComposerToolItem } from '../../components/prompt/default-input';
+import { resolveExpandedProp } from '../../primitives/composer-expansion';
 import type { ChatMessage, ChatMessageAction, CustomAction } from './chat-types';
 import type { TriggerDef } from '../../components/composer/composer';
 import type { ComposerDoc } from '../../primitives/composer-model';
@@ -15,7 +17,7 @@ import type { ConversationStore } from '../../primitives/conversation-store';
 
 type Props = Omit<ChatThreadProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
-  | 'onMessageAction' | 'onWebSearch' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
+  | 'onMessageAction' | 'onToolSelect' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
   | 'accept' | 'onAttachmentsRejected'
   // `conversations`/`store` are re-declared below (own doc comments, matching
   // this element's own attribute/property conventions) rather than left to
@@ -138,6 +140,20 @@ type Props = Omit<ChatThreadProps,
     // launcher's open state, mirror that event onto its badge.
     /** Whether the chrome hosting this element is visible (e.g. a launcher's open state). JS property only; `false` has no attribute form. */
     hostOpen?: boolean;
+    // The element-specific half of this prop's story, because the generator CONCATENATES
+    // a facade's doc with the underlying component's: a restatement here renders twice in
+    // the published tables. So this adds only what `ChatThreadProps.tools` cannot say —
+    // that an attribute IS parsed, and what a bad one does. The alternative, a raw string
+    // reaching the tree, is spread into the menu character by character while the chip row
+    // walks it: a nonsense menu rather than a missing one.
+    /** An attribute is JSON-parsed; a malformed one is refused loudly. */
+    tools?: ComposerToolItem[];
+    // Likewise only the element-specific half. Tri-state, where the third state carries
+    // the weight, which is also why this cannot be read with the kit's `flag()` helper:
+    // that answers `false` for an absent attribute AND for an explicit `="false"`,
+    // collapsing "derive" into "pinned shut". Hence `resolveExpandedProp`.
+    /** As an attribute: present pins two rows, `="false"` pins one, absent derives. */
+    expanded?: boolean;
   };
 
 interface Events {
@@ -157,10 +173,11 @@ interface Events {
   'kai-message-action': { messageId: string; action: string; state?: 'on' | 'off' };
   /** The header model switcher changed. */
   'kai-model-change': { modelId: string };
-  /** The web-search (Globe) toolbar button was clicked. */
-  'kai-web-search': Record<string, never>;
   /** The Mic / voice button was clicked. */
   'kai-voice': Record<string, never>;
+  /** A `+` menu item was chosen. `checked` is present only for a toggle, with its NEW
+   *  state. The same name and shape `<kai-menu>` fires, so one handler serves both. */
+  'kai-select': { id: string; checked?: boolean };
   // Fires on a row tap in the list, "new conversation," or the visitor's own
   // mount-time auto-restore of their most recent thread -- only when `conversations` is
   // on and a `store` is set. `detail.id` is `undefined` for the "new conversation" case
@@ -189,14 +206,27 @@ interface Events {
  */
 defineWebComponent<Props, Events>('kai-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
-  suggestions: undefined, suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
+  suggestions: undefined, suggestionsLayout: 'pill', suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
   codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
-  attach: true, webSearch: false, voice: false, triggers: undefined, kindIcons: undefined,
-  actionsReveal: 'always', cardTypes: undefined, cardSchemas: undefined, accept: undefined,
+  attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
+  // No default, deliberately: an omitted value keys the reveal to each message's own role
+  // (see `resolveActionsReveal`), which a default here would override with an explicit one.
+  actionsReveal: undefined, cardTypes: undefined, cardSchemas: undefined, accept: undefined,
   reasoning: undefined, reasoningOpen: undefined, conversations: false, store: undefined,
   home: undefined, userActions: undefined, assistantActions: undefined, hideSources: false,
   hostOpen: true,
+  // Default-true flag convention, as `<kai-conversations show-trailing="false">`: the
+  // attribute form is the only way an HTML author says `false`, so the option reaches
+  // the host through `flag()` rather than a raw prop read. Inherited from
+  // `ChatThreadProps` (not re-declared above, so the prop table carries one doc comment
+  // rather than two concatenated ones), declared HERE so the element reads back `true`
+  // rather than `undefined` before any consumer writes it. Same reason as `density`.
+  showTrailing: true,
+  // Inherited from `ChatThreadProps` (not re-declared above, so the prop table carries
+  // one doc comment rather than two concatenated ones); declared HERE so the element
+  // observes the `density` attribute and reads back `'default'` rather than `undefined`.
+  density: 'default' as ThreadDensity,
 }, (props, { dispatch, flag, reflectFlag, element, expose }) => {
   // `messages` is an untyped boundary: a consumer can hand it anything at
   // runtime (a pre-0.20.0 `{ id, role, content }` array, in particular). Skip
@@ -283,17 +313,21 @@ defineWebComponent<Props, Events>('kai-chat', {
   <ChatThread
     messages={validMessages(props.messages)} value={props.value as string | ComposerDoc | undefined} placeholder={props.placeholder as string}
     loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
+    suggestionsLayout={props.suggestionsLayout as 'pill' | 'block' | undefined}
     suggestionMode={props.suggestionMode as 'submit' | 'fill'} persistSuggestions={flag('persistSuggestions')}
     proseSize={props.proseSize as ProseSize}
     codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}
     chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
     currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
-    scrollButton={props.scrollButton !== false} attach={flag('attach')} webSearch={flag('webSearch')} voice={flag('voice')}
+    scrollButton={props.scrollButton !== false} attach={flag('attach')} voice={flag('voice')}
+    tools={props.tools as ComposerToolItem[] | undefined}
+    expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}
     reasoning={props.reasoning as 'full' | 'compact' | 'off' | undefined}
     reasoningOpen={flag('reasoningOpen')}
     triggers={props.triggers as TriggerDef[] | undefined}
     kindIcons={props.kindIcons as Record<string, string> | undefined}
-    actionsReveal={props.actionsReveal as 'always' | 'hover'}
+    actionsReveal={props.actionsReveal as 'always' | 'hover' | undefined}
+    density={props.density as ThreadDensity}
     userActions={props.userActions as (ChatMessageAction | CustomAction)[] | undefined}
     assistantActions={props.assistantActions as (ChatMessageAction | CustomAction)[] | undefined}
     hideSources={flag('hideSources')}
@@ -309,6 +343,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     onUnreadChange={(unread) => dispatch('kai-unread-change', { unread })}
     home={props.home as HomeConfig | undefined}
     onHomeLink={(entry) => dispatch('kai-home-link', { entry })}
+    showTrailing={flag('showTrailing')}
     /* Card parts emit off THIS element as the bubbling `kai-card` event,
        so `listenForCardEvents(el)` / addEventListener('kai-card') work. */
     cardHostElement={element}
@@ -320,7 +355,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     onSuggestionClick={(value) => dispatch('kai-suggestion-click', { value })}
     onModelChange={(modelId) => dispatch('kai-model-change', { modelId })}
     onMessageAction={(detail) => dispatch('kai-message-action', detail)}
-    onWebSearch={() => dispatch('kai-web-search', {})}
+    onToolSelect={(detail) => dispatch('kai-select', detail)}
     onVoice={() => dispatch('kai-voice', {})}
     controllerRef={(c) => (controller = c)}
     headerStart={slot('header-start')}

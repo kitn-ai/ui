@@ -8,6 +8,7 @@ import { actionIcon, BUILTIN_ACTION_LABEL } from "../action-icons/action-icons";
 import type { ChatMessageAction, CustomAction, FeedbackVote, MessagePart, MessageSource } from "../../web-components/chat/chat-types";
 import { useChatConfig, textClass } from "../../primitives/chat-config";
 import { Reasoning, ReasoningTrigger, ReasoningContent } from "../reasoning/reasoning";
+import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from "../chat/thread-density";
 import { Loader } from "../loader/loader";
 import { Tool } from "../tool/tool";
 import {
@@ -71,14 +72,24 @@ export interface MessageProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, '
   /** Who is speaking. NOT an ARIA role: the row gets `role="article"` with a named
    *  `aria-label`, and the ARIA `role` attribute is shadowed. */
   role?: MessageRole;
+  // The row's gap is the thread density axis one scale down, not a second axis: a
+  // thread passes its RESOLVED value down (`thread.tsx` / `chat-thread.tsx`) so a
+  // compact thread is compact at the avatar gap too. `thread-density.ts` owns the class
+  // table, which is why this prop takes that axis' type rather than a boolean or its
+  // own `'tight' | 'loose'`. Rendered outside a thread, omitted means `default`, which
+  // is the shipped `gap-3` byte for byte.
+  /** How much air the row has between the avatar (or role marker) and the content,
+   *  as the thread's density. Omitted keeps the shipped spacing. */
+  density?: ThreadDensity;
 }
 
 function Message(props: MessageProps) {
-  const [local, rest] = splitProps(props, ["children", "class", "role"]);
+  const [local, rest] = splitProps(props, ["children", "class", "role", "density"]);
+  const messageGap = () => THREAD_DENSITY_CLASSES[resolveThreadDensity(local.density, 'Message')].messageGap;
   return (
     <div
       part="row"
-      class={cn("flex items-start gap-3", local.class)}
+      class={cn("flex items-start", messageGap(), local.class)}
       data-role={local.role}
       role={local.role ? 'article' : undefined}
       aria-label={local.role ? MESSAGE_ROLE_LABEL[local.role] : undefined}
@@ -217,7 +228,7 @@ function feedbackVoteOf(a: ChatMessageAction | CustomAction): FeedbackVote | und
  * built-in names pull their label+icon from the curated registry; custom
  * descriptors use their `label` plus `actionIcon(icon)` (label-only when the
  * icon is unknown or absent). `reveal="hover"` makes the bar fade in on the
- * parent `.group`'s hover.
+ * parent `.group`'s hover or focus-within.
  *
  * Pure/prop-driven: feedback (`activeFeedback`) and copy (`copied`) state are
  * owned by the parent facade and passed in: the bar holds no internal signals,
@@ -233,7 +244,23 @@ function MessageActionBar(props: MessageActionBarProps) {
       part="actions"
       class={cn(
         'mt-1 flex gap-0',
-        props.reveal === 'hover' && 'opacity-0 transition-opacity group-hover:opacity-100',
+        // The hover reveal, and three constraints a later reader will otherwise
+        // simplify back into two accessibility failures:
+        //  - `opacity`, never `display` or `visibility`: both of those take the
+        //    control OUT of the accessibility tree, so the actions would vanish
+        //    for a screen reader rather than for the eye.
+        //  - the hidden state sits INSIDE the `hover: hover` media query (which is
+        //    what `[@media(hover:hover)]` compiles to). A bare `opacity-0` leaves
+        //    the bar permanently invisible on a touch device, where no hover ever
+        //    arrives to reveal it.
+        //  - `group-focus-within:opacity-100` is not decoration: without it a
+        //    keyboard user tabs onto a control they cannot see (WCAG 2.4.7, Focus
+        //    Visible). The row carrying the `group` is `chat-thread`'s rowGroup,
+        //    and the action bar is inside it, so focusing an action reveals it.
+        // `group-hover:` is already hover-scoped by Tailwind, so only the base
+        // state needs the query.
+        props.reveal === 'hover' &&
+          'transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 [@media(hover:hover)]:opacity-0',
         props.class,
       )}
     >
@@ -343,7 +370,8 @@ export interface MessageBodyProps {
   /** Action-bar entries: built-in names and/or custom descriptors. When empty
    *  the bar is not rendered. */
   actions?: (ChatMessageAction | CustomAction)[];
-  /** Whether the bar stays visible or appears on pointer-over; defaults to staying visible. */
+  /** Whether the bar is visible at rest or on pointer-over; omitted keys the default to the
+   *  turn, so a user row reveals and an assistant row stays visible. */
   actionsReveal?: 'always' | 'hover';
   // The parts STAY in `parts`: the wire encoder still needs them, in order.
   /** Skip the citations row that consecutive `source` parts collapse into. */
@@ -543,6 +571,20 @@ function AttachmentTile(props: { data: AttachmentData }) {
   );
 }
 
+/** Resolve the action bar's reveal mode. An explicit value always wins; an OMITTED one is
+ *  keyed to the turn, because the row already knows its own speaker. A user message is read
+ *  back, so its actions wait for a hover or a focus; an assistant message's actions are the
+ *  ones a reader reaches for while reading forward, so they stay put. One spelling of the
+ *  rule, read by `MessageBody` and by every list that renders a row (`ChatThread`, `Thread`,
+ *  and the `<kai-message>` facade) so the row's `group` class and the bar's own reveal can
+ *  never disagree. */
+export function resolveActionsReveal(
+  reveal: 'always' | 'hover' | undefined,
+  isUser: boolean,
+): 'always' | 'hover' {
+  return reveal ?? (isUser ? 'hover' : 'always');
+}
+
 /**
  * The shared message body: the message's `parts` rendered in a single ordered
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
@@ -709,7 +751,7 @@ function MessageBody(props: MessageBodyProps) {
                                 fire, matching 'off'). 'off' never reaches here:
                                 its Match doesn't fire either. */}
                             <Match when={mode() === 'compact' && props.isStreaming}>
-                              <Loader variant="text-shimmer" text={p().label ?? 'Reasoning'} class="mb-2" />
+                              <Loader variant="text-shimmer" text={p().label ?? 'Reasoning'} class="mb-3" />
                             </Match>
                           </Switch>
                         );
@@ -734,7 +776,7 @@ function MessageBody(props: MessageBodyProps) {
       <Show when={(props.actions?.length ?? 0) > 0}>
         <MessageActionBar
           actions={props.actions!}
-          reveal={props.actionsReveal === 'hover' ? 'hover' : 'always'}
+          reveal={resolveActionsReveal(props.actionsReveal, props.isUser)}
           activeFeedback={props.activeFeedback}
           copied={props.copied}
           onAction={(id) => props.onAction?.(id)}

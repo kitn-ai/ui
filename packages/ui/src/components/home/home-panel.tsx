@@ -16,6 +16,15 @@ export interface HomePanelProps {
   /** Defaults to `'Send us a message'`. */
   newChatLabel?: string;
   links?: HomeLinkEntry[];
+  // The recent card's trailing region holds a relative time this component DERIVES from
+  // the summary's timestamps (the summary's own `trailing` field renders as the card's
+  // subtitle, under the title), so a consumer whose own chrome owns that region had no
+  // way to reach "nothing": omitting the timestamps in the data only changed which
+  // fallback ran. Same option, same name and same default as the data row's
+  // (`ConversationItem.showTrailing`). The whole region empties, the unread dot
+  // included, which is what "leave the edge empty" means everywhere else.
+  /** Paint the recent card's trailing edge, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   onSelectRecent?: (id: string) => void;
   onNewChat: () => void;
   /** Fired only for href-less link entries; an entry with a safe `href` navigates as an anchor. */
@@ -54,6 +63,11 @@ export function HomePanel(props: HomePanelProps) {
 
       <Show when={props.recent}>
         {(recent) => {
+          // The edge is opted OUT of rather than into, because the written form of a
+          // default-true prop is `showTrailing={false}`; every other value leaves the
+          // card exactly as it was. `Row` paints its trailing region only for a defined
+          // value, so `undefined` is what leaves no node for a `::part(trailing)` rule.
+          const showTrailing = () => props.showTrailing !== false;
           const time = () => relativeTimeShort(recent().updatedAt ?? recent().lastMessageAt);
           const unread = () => isConversationUnread(recent());
           return (
@@ -63,14 +77,16 @@ export function HomePanel(props: HomePanelProps) {
                 class="p-4"
                 subtitle={recent().trailing}
                 trailing={
-                  <>
-                    <Show when={unread()}>
-                      <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-unread" />
-                    </Show>
-                    <Show when={time()}>
-                      <span class="shrink-0">{time()}</span>
-                    </Show>
-                  </>
+                  showTrailing() ? (
+                    <>
+                      <Show when={unread()}>
+                        <span aria-hidden="true" class="size-1.5 shrink-0 rounded-full bg-unread" />
+                      </Show>
+                      <Show when={time()}>
+                        <span class="shrink-0">{time()}</span>
+                      </Show>
+                    </>
+                  ) : undefined
                 }
                 onActivate={() => props.onSelectRecent?.(recent().id)}
               >

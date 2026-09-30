@@ -83,7 +83,7 @@ declare module 'solid-js' {
       'kai-badge': JSX.HTMLAttributes<HTMLElement> & { variant?: string };
       'kai-status': JSX.HTMLAttributes<HTMLElement> & { status?: string; pulse?: boolean; label?: string; size?: string; theme?: string };
       'kai-message': JSX.HTMLAttributes<HTMLElement>;
-      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; 'web-search'?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
+      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
       'kai-file-tree': JSX.HTMLAttributes<HTMLElement>;
       'kai-tabs': JSX.HTMLAttributes<HTMLElement> & { variant?: string; value?: string; 'default-value'?: string; disabled?: boolean; theme?: string };
       'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
@@ -1191,8 +1191,8 @@ export const SplitWorkspace: Story = {
                   el.addEventListener('focusout', () => setRenamingId(null));
                   queueMicrotask(() => (el as unknown as { edit?: () => void }).edit?.());
                 }}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e: MouseEvent) => e.stopPropagation()}
+                onPointerDown={(e: PointerEvent) => e.stopPropagation()}
                 class="min-w-0 max-w-[10rem] text-xs font-medium"
               ></kai-editable-label>
             </Show>

@@ -399,6 +399,26 @@ function DensityDemo() {
           density="compact"
         />
       </div>
+      {/* ACTIVE rows sit on `bg-muted`, the one surface the muted-foreground token was
+          never measured against. Rendering one per density in dark is what lets axe's
+          contrast check see the trailing time on it. */}
+      <div>
+        <div class="mb-1 text-xs font-medium text-muted-foreground">density="default" (active)</div>
+        <ConversationItem
+          conversation={{ ...densityConversations[1], trailing: undefined }}
+          isActive
+          onSelect={() => {}}
+        />
+      </div>
+      <div>
+        <div class="mb-1 text-xs font-medium text-muted-foreground">density="compact" (active)</div>
+        <ConversationItem
+          conversation={{ ...densityConversations[1], trailing: undefined }}
+          isActive
+          onSelect={() => {}}
+          density="compact"
+        />
+      </div>
     </div>
   );
 }

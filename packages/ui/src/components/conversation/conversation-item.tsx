@@ -2,6 +2,7 @@ import { Show, splitProps, createMemo, type JSX } from 'solid-js';
 import { MessageSquare } from 'lucide-solid';
 import { cn } from '../../utils/cn';
 import { isConversationUnread } from '../../primitives/conversation-store';
+import { interactiveInside } from '../../primitives/focusable-child';
 import type { ConversationSummary } from '../../types';
 
 /**
@@ -16,17 +17,27 @@ import type { ConversationSummary } from '../../types';
 export type ConversationRowDensity = 'default' | 'compact' | 'panel';
 
 /**
- * The row box (padding) per density. `panel` restates conversation-panel.tsx's
- * row class `px-3 py-2.5` (12px/10px; with the single 20px text-sm line that
- * is the measured 40px row). It is a copy by necessity:
- * Tailwind utilities are compiled from literal class strings, so this cannot
- * be imported from the panel at runtime. `conversation-item-density.test.tsx`
- * derives the expected utilities from conversation-panel.tsx's SOURCE and
- * fails if the two drift.
+ * The row box (padding) per density, all three on the one density scale
+ * (`--spacing` re-points at `--kai-density`, theme.css). `panel` restates
+ * conversation-panel.tsx's row class `px-3 py-2.5` (12px/10px; with the 20px
+ * text-sm line, the measured 40px row). A copy by necessity: Tailwind utilities
+ * compile from literal class strings, so it cannot be imported from the panel at
+ * runtime. `conversation-item-density.test.tsx` derives the expected utilities
+ * from conversation-panel.tsx's SOURCE and fails if the two drift.
+ *
+ * `default` is what every consumer gets with no density set, `px-2.5 py-1.5`
+ * (10px inline, 6px block). Its inline half is the `px-2.5` this axis has always
+ * carried, so a consumer that moved to `compact` and back keeps its rows'
+ * leading edge; only the block half moved, one step down from `py-2` (8px).
+ *
+ * `compact` is the dense single-line box, `px-2 py-0.5` (8px/2px, a 24px row),
+ * deliberately the tightest box on the axis rather than one step below
+ * `default`: a rail row is furniture listed one under another, so its height
+ * comes from its padding rather than a fixed box.
  */
 export const DENSITY_ROW_BOX: Record<ConversationRowDensity, string> = {
-  default: 'px-2.5 py-2',
-  compact: 'px-2.5 py-1.5',
+  default: 'px-2.5 py-1.5',
+  compact: 'px-2 py-0.5',
   panel: 'px-3 py-2.5',
 };
 
@@ -54,13 +65,28 @@ export interface ConversationItemProps {
   conversation: ConversationSummary;
   isActive: boolean;
   onSelect: (id: string) => void;
-  /** Dense single-line row: a leading dot + title, no message count. */
+  // What compact drops, precisely: one line instead of two, so the message-count subline
+  // goes and the title gains a leading icon. The trailing edge and the unread dot STAY on
+  // that line, so a consumer who wanted the timestamp gone would get a one-line row with a
+  // timestamp still on it: that is `showTrailing`'s job, not this flag's.
+  /** Dense single-line row: a leading icon + title, no message count. */
   compact?: boolean;
   // `panel` is the widget-panel presentation matching `ConversationPanel`'s measured row
   // box (single semibold title line, right-aligned time, optional preview line). An explicit
   // density wins over `compact`.
   /** Row density. */
   density?: ConversationRowDensity;
+  // Why a render prop rather than a sentinel value: "paint nothing here" is a fact about
+  // this row's presentation, not about the conversation, and `ConversationSummary.trailing`
+  // already means two different things by density (the field's own doc) while the store
+  // writes one on every save, so gating only the DERIVED time would leave those summaries
+  // showing something on the edge anyway. The part name is the generic `Row`'s, so `false`
+  // paints no node for a `::part(trailing)` rule to hit. In the `panel` density this
+  // empties the right-aligned time and leaves the field's other rendering, the preview line
+  // under the title: that line is the row's preview rather than its trailing edge, and
+  // omitting the field already removes it.
+  /** Paint the row's trailing edge, `part="trailing"`, or leave the edge empty. Default `true`. */
+  showTrailing?: boolean;
   class?: string;
 }
 
@@ -108,7 +134,10 @@ export { isConversationUnread } from '../../primitives/conversation-store';
  * activation guard keys off, so a click in the consumer's menu never also
  * selects the row. STANDALONE, `onActivate` makes the row body
  * its own tabbable button-role control: click / Enter / Space, with the menu
- * still outside the control as the body's sibling.
+ * still outside the control as the body's sibling. That control yields to any
+ * keyboard-reachable control inside it: an inline editor in the title region
+ * keeps its own SPACE, Enter and clicks, via the same `interactiveInside` rule
+ * the container applies.
  *
  * ARIA contract for direct Solid use: the row renders `role="listitem"` holding
  * a `role="button"` body (`aria-current` marks the active row, the same dialect
@@ -162,6 +191,14 @@ export interface SlottedConversationItemProps {
 export function SlottedConversationItem(props: SlottedConversationItemProps) {
   const [local] = splitProps(props, ['conversationId', 'active', 'compact', 'density', 'unread', 'leading', 'meta', 'menu', 'children', 'hostSemantics', 'onActivate', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
+  // The activation body, the boundary both handlers below are judged against: a
+  // click or key that happened INSIDE a control in the title region is that
+  // control's, not the row's (see `interactiveInside`). The element ref is used
+  // rather than `event.currentTarget` because event delegation is not something
+  // this handler should depend on for its own identity.
+  let bodyEl: HTMLDivElement | undefined;
+  const startedInsideControl = (e: Event): boolean =>
+    bodyEl !== undefined && interactiveInside(e.composedPath(), bodyEl) !== undefined;
   return (
     // The sibling restructure: axe nested-interactive
     // bans focusable descendants of an activation control, so the control role
@@ -186,17 +223,29 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
     >
       <div
         part="body"
+        ref={bodyEl}
         role="button"
         data-kai-item-body
         aria-current={local.active ? 'true' : 'false'}
         // Standalone activation only: with `onActivate` unset —
         // the inside-a-container case — no tabindex and no handlers render, so
         // the container's delegated activation stays the single path.
+        //
+        // Both handlers yield to a control inside the body, the same rule the
+        // container applies over the same helper: an inline editor in the title
+        // region (the documented place for it) keeps every SPACE — no
+        // preventDefault — and a click in it does not select the row. Not a
+        // capture-phase stopPropagation, which would kill that editor's own
+        // keydown too.
         tabindex={local.onActivate ? 0 : undefined}
-        onClick={() => local.onActivate?.()}
+        onClick={(e: MouseEvent) => {
+          if (startedInsideControl(e)) return;
+          local.onActivate?.();
+        }}
         onKeyDown={(e: KeyboardEvent) => {
           if (!local.onActivate) return;
           if (e.key === 'Enter' || e.key === ' ') {
+            if (startedInsideControl(e)) return;
             e.preventDefault(); // Space must not scroll the page
             local.onActivate();
           }
@@ -228,14 +277,18 @@ export function SlottedConversationItem(props: SlottedConversationItemProps) {
 }
 
 export function ConversationItem(props: ConversationItemProps) {
-  const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'class']);
+  const [local] = splitProps(props, ['conversation', 'isActive', 'onSelect', 'compact', 'density', 'showTrailing', 'class']);
   const density = () => resolveRowDensity(local.density, local.compact);
+  // Whether this row paints its trailing edge at all. Default-true, so the
+  // written form is the opt-OUT (`showTrailing={false}`); every value other
+  // than `false` leaves the row exactly as it was.
+  const showTrailing = () => local.showTrailing !== false;
   // Unread dot: derived from the same public read primitive the
   // facade's panel and home surfaces use, never a second policy.
   const unread = createMemo(() => isConversationUnread(local.conversation));
-  // The trailing text: the consumer's own `trailing` field, else an auto relative
-  // time from updatedAt (fallback lastMessageAt). Never an internal clock — it is a
-  // render-time snapshot.
+  // The trailing edge's TEXT: the consumer's own `trailing` field, else an auto relative
+  // time from updatedAt (fallback lastMessageAt); '' when the edge is opted out of. Never an
+  // internal clock — it is a render-time snapshot.
   //
   // REACTIVITY, and the weaker version of this note is what shipped the stale dot:
   // a new `conversations` array reference is NOT sufficient. `ConversationList` renders
@@ -246,12 +299,23 @@ export function ConversationItem(props: ConversationItemProps) {
   // removes and reorders are fine on a fresh array alone, since those rows' identities
   // already differ. Pinned by `src/components/reactivity-contract/reactivity-contract.test.tsx`.
   const trailing = createMemo(
-    () => local.conversation.trailing ?? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt),
+    () => (showTrailing()
+      ? local.conversation.trailing ?? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
+      : ''),
   );
   // The panel anatomy renders the time directly (never the consumer's
   // `trailing` field, which is the PREVIEW line there), same as
-  // ConversationPanel.
-  const panelTime = () => relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt);
+  // ConversationPanel. The same option empties THIS edge in this density: the
+  // preview line under the title is not the trailing edge, so it stays.
+  // The ACTIVE row (every density) sits on `bg-muted`, and muted text on the muted surface itself is
+  // 4.42:1 in dark (#93918a on #2d2c2a), just under AA's 4.5. The token is right for every
+  // other surface it lands on (5.68 on the background, 4.94 on the strongest surface), so
+  // the row steps its own secondary text up instead, the same treatment the message-count
+  // line below gives an active row.
+  const activeMuted = () => (local.isActive ? 'text-foreground/70' : 'text-muted-foreground');
+  const panelTime = () => (showTrailing()
+    ? relativeTimeShort(local.conversation.updatedAt ?? local.conversation.lastMessageAt)
+    : '');
   return (
     <button
       data-conversation-id={local.conversation.id}
@@ -285,12 +349,12 @@ export function ConversationItem(props: ConversationItemProps) {
                 {local.conversation.title}
               </span>
               <Show when={panelTime()}>
-                <span part="trailing" class="shrink-0 text-xs text-muted-foreground">{panelTime()}</span>
+                <span part="trailing" class={cn('shrink-0 text-xs', activeMuted())}>{panelTime()}</span>
               </Show>
             </div>
             <Show when={local.conversation.trailing || unread()}>
               <div class="mt-0.5 flex items-center gap-1.5">
-                <span class="min-w-0 flex-1 truncate text-xs text-muted-foreground">{local.conversation.trailing}</span>
+                <span class={cn('min-w-0 flex-1 truncate text-xs', activeMuted())}>{local.conversation.trailing}</span>
                 <Show when={unread()}>
                   <UnreadDot />
                 </Show>
@@ -309,7 +373,7 @@ export function ConversationItem(props: ConversationItemProps) {
                   <UnreadDot />
                 </Show>
                 <Show when={trailing()}>
-                  <span part="trailing" class="ml-auto shrink-0 text-xs text-muted-foreground">{trailing()}</span>
+                  <span part="trailing" class={cn('ml-auto shrink-0 text-xs', activeMuted())}>{trailing()}</span>
                 </Show>
               </div>
               <div class={cn('mt-0.5 truncate text-xs', local.isActive ? 'text-foreground/70' : 'text-muted-foreground')}>{local.conversation.messageCount} messages</div>
@@ -323,7 +387,7 @@ export function ConversationItem(props: ConversationItemProps) {
               <UnreadDot />
             </Show>
             <Show when={trailing()}>
-              <span part="trailing" class="ml-auto shrink-0 text-xs text-muted-foreground">{trailing()}</span>
+              <span part="trailing" class={cn('ml-auto shrink-0 text-xs', activeMuted())}>{trailing()}</span>
             </Show>
           </div>
         </Show>

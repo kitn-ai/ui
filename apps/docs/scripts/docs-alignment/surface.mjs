@@ -18,6 +18,130 @@ const ts = require('typescript');
 const isTypedEntry = (target) =>
   target && typeof target === 'object' && typeof target.types === 'string' && target.types.endsWith('.d.ts');
 
+const entrySpecifier = (sub) => (sub === '.' ? '@kitn.ai/ui' : `@kitn.ai/ui${sub.slice(1)}`);
+
+/** Where the kai-* element catalog lives, read through the package's own exports map. */
+const metaFile = (uiRoot, pkg) =>
+  resolve(uiRoot, pkg.exports?.['./web-component-meta.json'] ?? './src/web-components/web-component-meta.json');
+
+/**
+ * Every typed entry point the package's `exports` map DECLARES, and where its built
+ * types must be.
+ *
+ * THIS LIST IS THE EXPECTATION, and it is the reason this function exists rather than a
+ * count. `exports` is the contract a consumer resolves against, so an entry declared
+ * there whose `.d.ts` is absent means the BUILD has not finished writing — not that the
+ * package got smaller. Reading the leftover files and reporting a count against them is
+ * what produced three different advisory totals for one tree in four minutes.
+ */
+export function declaredTypedEntries(uiRoot, pkg) {
+  const out = [];
+  for (const [sub, target] of Object.entries(pkg.exports ?? {})) {
+    if (sub.includes('*')) continue;
+    if (!isTypedEntry(target)) continue;
+    out.push({ subpath: sub, specifier: entrySpecifier(sub), types: target.types, dts: resolve(uiRoot, target.types) });
+  }
+  return out;
+}
+
+/** Typed WILDCARD entries — `./web-components/*` — as `<dir> -> pattern`,
+ *  since a pattern has no single file to check. */
+function declaredTypedWildcards(uiRoot, pkg) {
+  const out = [];
+  for (const [sub, target] of Object.entries(pkg.exports ?? {})) {
+    if (!sub.includes('*') || !isTypedEntry(target)) continue;
+    out.push({ subpath: sub, pattern: target.types, dir: resolve(uiRoot, dirname(target.types)) });
+  }
+  return out;
+}
+
+/**
+ * What a COMPLETE build must provide, and every way this one falls short of it.
+ *
+ * Returns `[]` on a complete surface. Each expectation is derived from a source of
+ * truth the package already owns — never a hand-typed number:
+ *
+ *   · the `exports` map declares which typed entry points exist, so each must have a
+ *     `.d.ts` on disk and that file must export at least one name;
+ *   · a typed WILDCARD entry must match at least one file, or every per-element
+ *     import resolves to nothing and the harness reports those imports as stale;
+ *   · `web-component-meta.json` and the shipped `dist/web-components.d.ts` describe the
+ *     same elements, generated from one source, so each tag meta declares needs its
+ *     `Kai<Name>Props` interface in the built types.
+ *
+ * @param {string} uiRoot absolute path to packages/ui
+ * @param {object} pkg    its parsed package.json
+ * @param {Map<string, Map<string, object>>} entries specifier -> exported names, as
+ *        built from the files that DO exist (missing and empty ones cannot be in it)
+ */
+export function surfaceIncompleteness(uiRoot, pkg, entries) {
+  const problems = [];
+  const declared = declaredTypedEntries(uiRoot, pkg);
+  for (const e of declared) {
+    if (!existsSync(e.dts)) {
+      problems.push(
+        `${e.specifier} — \`exports["${e.subpath}"].types\` names \`${e.types}\`, and ${e.dts} does not exist`,
+      );
+      continue;
+    }
+    if (!(entries?.get(e.specifier)?.size > 0)) {
+      problems.push(`${e.specifier} — ${e.dts} exists but declares NO exports (an entry point nothing imports)`);
+    }
+  }
+
+  for (const w of declaredTypedWildcards(uiRoot, pkg)) {
+    const matched = existsSync(w.dir) ? readdirSync(w.dir).filter((f) => f.endsWith('.d.ts')).length : 0;
+    if (!matched) {
+      problems.push(`${entrySpecifier(w.subpath)} — \`exports["${w.subpath}"]\` declares the pattern \`${w.pattern}\` (via ${w.dir}), which matches no file`);
+    }
+  }
+
+  // The element catalog against the built types. Both are generated from the kit's own
+  // source, so a tag in one without an interface in the other is a build that has not
+  // finished — not a package with fewer elements.
+  const metaPath = metaFile(uiRoot, pkg);
+  if (!existsSync(metaPath)) {
+    problems.push(`the kai-* element catalog is missing: ${metaPath} does not exist`);
+  } else {
+    const meta = JSON.parse(readFileSync(metaPath, 'utf8'));
+    const wcTypes = declared.find((e) => e.subpath === './web-components');
+    if (!wcTypes || !existsSync(wcTypes.dts)) {
+      problems.push(`cannot cross-check the element catalog: ${wcTypes?.dts ?? './dist/web-components.d.ts'} does not exist`);
+    } else {
+      const text = readFileSync(wcTypes.dts, 'utf8');
+      const interfaces = new Set([...text.matchAll(/interface\s+([A-Za-z0-9_$]+)/g)].map((m) => m[1]));
+      const withoutProps = meta.filter((el) => !interfaces.has(`${el.className}Props`));
+      if (withoutProps.length) {
+        const first = withoutProps
+          .slice(0, 5)
+          .map((el) => `${el.tag} (expected \`${el.className}Props\`)`)
+          .join(', ');
+        problems.push(
+          `${withoutProps.length} of ${meta.length} elements in ${metaPath} have no \`Kai<Name>Props\` interface in ${wcTypes.dts} — ${first}`,
+        );
+      }
+    }
+  }
+
+  return problems;
+}
+
+/** The refusal, so the gate and the tests quote the same wording. */
+export function incompleteSurfaceMessage(uiRoot, pkg, problems) {
+  const declared = declaredTypedEntries(uiRoot, pkg);
+  const present = declared.filter((e) => existsSync(e.dts)).length;
+  return [
+    `the shipped API surface looks INCOMPLETE — refusing to report findings against it.`,
+    `A count taken against a half-written build is not evidence: one tree reported 70 and 85 advisories four minutes apart, and the only tell was \`9 entry points\` instead of \`14\` on line two.`,
+    ``,
+    `${declared.length} typed entry points are declared in ${join(uiRoot, 'package.json')}, ${present} of them are on disk.`,
+    ...problems.map((p) => `  · ${p}`),
+    ``,
+    `Everything above is derived from the package's own \`exports\` map and \`web-component-meta.json\`, so none of it is a hand-typed number.`,
+    `Finish the build (\`pnpm exec nx build ui\`) and run this again; a smaller count is not a smaller package.`,
+  ].join('\n');
+}
+
 /**
  * @param {string} uiRoot absolute path to packages/ui
  */
@@ -25,19 +149,14 @@ export function loadSurface(uiRoot) {
   const pkg = JSON.parse(readFileSync(join(uiRoot, 'package.json'), 'utf8'));
 
   // ── 1. Exported names per entry point, through the REAL exports map ────────
+  // Declared vs present is tracked apart on purpose: a declared entry whose file is
+  // missing is a half-written build, and the guard at the end of this function refuses
+  // to hand such a surface to any checker. Skipping it silently is what let one tree
+  // report three different advisory totals.
   const entryFiles = [];
-  for (const [sub, target] of Object.entries(pkg.exports ?? {})) {
-    if (sub.includes('*')) continue;
-    if (!isTypedEntry(target)) continue;
-    const dts = resolve(uiRoot, target.types);
-    if (!existsSync(dts)) continue;
-    const specifier = sub === '.' ? '@kitn.ai/ui' : `@kitn.ai/ui${sub.slice(1)}`;
-    entryFiles.push({ specifier, dts });
-  }
-  if (!entryFiles.length) {
-    throw new Error(
-      `No typed entry points found under ${uiRoot}. Run \`nx build ui\` first — this reads the SHIPPED types.`,
-    );
+  for (const e of declaredTypedEntries(uiRoot, pkg)) {
+    if (!existsSync(e.dts)) continue;
+    entryFiles.push({ specifier: e.specifier, dts: e.dts });
   }
 
   const program = ts.createProgram(
@@ -85,8 +204,16 @@ export function loadSurface(uiRoot) {
     }
   }
 
+  // ── 1b. Refuse to hand out a surface that looks incomplete ───────────────
+  // BEFORE anything is parsed off it and before any checker has seen it. Every number
+  // this harness prints is computed from what is returned below, so a half-written
+  // build here is a wrong answer that looks like evidence — the failure mode the MCP
+  // manifest tests already answer by failing loudly and naming the artifact they wanted.
+  const incomplete = surfaceIncompleteness(uiRoot, pkg, entries);
+  if (incomplete.length) throw new Error(incompleteSurfaceMessage(uiRoot, pkg, incomplete));
+
   // ── 2. The kai-* element catalog ───────────────────────────────────────────
-  const metaPath = resolve(uiRoot, (pkg.exports?.['./web-component-meta.json'] ?? './src/web-components/web-component-meta.json'));
+  const metaPath = metaFile(uiRoot, pkg);
   const elements = JSON.parse(readFileSync(metaPath, 'utf8'));
 
   // web-component-meta.json records the props each element DECLARES, but `define.tsx`
@@ -146,6 +273,71 @@ export function loadSurface(uiRoot) {
     for (const e of el.events ?? []) eventNames.add(e.name);
   }
 
+  // ── 2b. Declarative light-DOM children: markup a consumer WRITES that no
+  //         `defineWebComponent` registers ─────────────────────────────────────
+  // `<kai-step>` inside `<kai-chain-of-thought>`, `<kai-model>` inside
+  // `<kai-model-switcher>`, `<kai-conversation>` inside `<kai-conversations>`.
+  // The owning element reads them out of the light DOM; they have no
+  // `Kai<Name>Element`, no `HTMLElementTagNameMap` row and nothing to upgrade, so
+  // they stay ABSENT from the element catalog — which is what `loadSurface`
+  // returns them under a marker for, not a registration.
+  //
+  // The declaration was never missing. `gen-web-component-api.mjs` reads each
+  // owner's `querySelectorAll('kai-…')` parse callback and emits the attributes it
+  // reads under that owner's `declarativeChildren` in web-component-meta.json, and
+  // the docs site renders it (DeclarativeChildrenTable). What was missing is a
+  // CONSUMER of it here, so `<kai-step whatever="x">` was checked against NOTHING
+  // and every gate passed — and the tag was reported as a metadata hole instead.
+  //
+  // Merged into `byTag` (marked `dataCarrier`) rather than kept in a second map:
+  // every reader in this harness already asks `byTag`, so this is what makes
+  // `checkMarkup` validate their attribute names, what stops `checkProse`
+  // advising on a tag the kit really declares, and what keeps them out of the
+  // registered-element counts everywhere else (nothing else reads this map).
+  const dataCarrierParents = new Map(); // tag -> { parents, attributes, description }
+  for (const el of elements) {
+    for (const child of el.declarativeChildren ?? []) {
+      // A child that is ALSO a registered element — `<kai-source>` inside
+      // `<kai-sources>` — is already in `byTag` with its real Props interface.
+      // Never overwrite that with the attribute-name-only view.
+      if (byTag.has(child.tag)) continue;
+      const entry = dataCarrierParents.get(child.tag) ?? { parents: [], attributes: new Set(), description: '' };
+      entry.parents.push(el.tag);
+      for (const name of child.attributes ?? []) entry.attributes.add(name);
+      if (!entry.description) entry.description = child.description ?? '';
+      dataCarrierParents.set(child.tag, entry);
+    }
+  }
+  for (const [tag, carrier] of dataCarrierParents) {
+    const props = new Map();
+    for (const name of carrier.attributes) {
+      // `scalar: true`: each is read with `getAttribute`, so an attribute string is
+      // the whole channel and the nonscalar-as-attribute check has nothing to say.
+      const prop = { name, scalar: true };
+      props.set(name, prop);
+      props.set(camelToKebab(name), prop);
+    }
+    byTag.set(tag, {
+      tag,
+      className: null,
+      displayName: null,
+      dataCarrier: true,
+      declarativeChildOf: carrier.parents,
+      description: carrier.description,
+      // Empty rather than absent: readers walk `byTag.values()` and touch `.props`
+      // (the self-test picks its non-scalar probe that way), and an entry missing
+      // the key crashes them. A data carrier declares no Props interface, so the
+      // truthful value is the empty list.
+      props: [],
+      propIndex: props,
+      propNames: new Set(props.keys()),
+      eventNames: new Set(),
+      handlerNames: new Set(),
+      slotNames: new Set(),
+      partNames: new Set(),
+      methodNames: new Set(),
+    });
+  }
   // Not every kai-* event is declared on an element. The card protocol routes a
   // document-level `kai-card` event, published as `CARD_EVENT_NAME = "kai-card"`.
   // Any exported const whose type is a string literal starting with `kai-` is an

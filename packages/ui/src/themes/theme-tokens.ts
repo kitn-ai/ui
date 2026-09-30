@@ -141,6 +141,10 @@ export const EXTRA_TOKENS = [
   '--kai-radius-pill',
   // Code: its own corner, not a rung of the radius ladder.
   '--kai-code-radius',
+  // Composer: half the collapsed row, and the row is built from spacing steps, so its
+  // default is expressed in THOSE units rather than rem. A theme that sets it pins a
+  // fixed corner instead, which is how the pill becomes a rounded square.
+  '--kai-radius-composer',
   // Elevation: one multiplier over every shadow rung (unitless, not rem).
   '--kai-shadow-strength',
   // Weights: one knob per rung.
@@ -227,5 +231,20 @@ export function parseKitDefaults(css: string): ReadonlyMap<string, KitDefault> {
 export function remValue(css: string): number {
   const m = css.match(/^([\d.]+)rem$/);
   if (!m) throw new Error(`Expected a rem value, got "${css}"`);
+  return parseFloat(m[1]);
+}
+
+/** `calc(var(--spacing) * 6)` -> 6: the multiplier for a default expressed in SPACING
+ *  UNITS rather than rem, which is what a value derived from the kit's own density has
+ *  to be. The composer's corner is half its collapsed row and that row is built from
+ *  spacing steps, so expressing it in rem would be a number that has to agree with the
+ *  steps rather than one that moves with them.
+ *
+ *  Returns the multiplier only; a caller resolves it against the density default
+ *  (`remValue` of `--kai-density`). Throws on anything else, the same way `remValue`
+ *  does: a default the editor cannot read is a knob it cannot seed. */
+export function spacingMultiple(css: string): number {
+  const m = css.match(/^calc\(\s*var\(\s*--spacing\s*\)\s*\*\s*([\d.]+)\s*\)$/);
+  if (!m) throw new Error(`Expected a spacing multiple (calc(var(--spacing) * N)), got "${css}"`);
   return parseFloat(m[1]);
 }

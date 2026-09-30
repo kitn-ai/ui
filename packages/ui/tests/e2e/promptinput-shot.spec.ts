@@ -1,12 +1,33 @@
 import { test, expect, type Page } from '@playwright/test';
+import {
+  BASELINE_PLATFORM,
+  BASELINE_SKIP_REASON,
+  captureBaseline,
+  reportBaselineCaptures,
+} from './screenshot-baselines';
 
 /**
- * Captures kai-prompt-input in key states for before/after visual comparison of
- * the textarea→composer swap. SHOT env var selects the output subdir.
- *   SHOT=baseline → current textarea ; SHOT=after → composer-backed
+ * Captures kai-prompt-input in key states. SHOT names the OUTPUT directory under
+ * `__screenshots__/promptinput/` and nothing else — it does NOT select a variant.
+ * The textarea→composer swap it was built for has landed, so there is one render,
+ * and the default `baseline` is the only directory the suite writes to.
+ *
+ * CAPTURE-ONLY: nothing here asserts an image, so the captures are artifacts.
+ * A plain run writes them beside the evidence tree and compares them against the
+ * committed PNGs; `KAI_SCREENSHOT_UPDATE=1` re-records the committed ones. See
+ * `screenshot-baselines.ts` for both the shape and the platform rule below.
  */
 const SHOT = process.env.SHOT || 'baseline';
-const dir = `tests/e2e/__screenshots__/promptinput/${SHOT}`;
+const REL = `tests/e2e/__screenshots__/promptinput/${SHOT}`;
+
+// Off darwin the committed baselines hold a different rasteriser's output, so a
+// capture here is not comparable to anything. Skips VISIBLY (reported as
+// `N skipped`), before a page is loaded.
+test.beforeEach(() => {
+  test.skip(process.platform !== BASELINE_PLATFORM, BASELINE_SKIP_REASON);
+});
+
+test.afterAll(() => reportBaselineCaptures('promptinput-shot'));
 const story = (id: string) => `/iframe.html?id=${id}&viewMode=story`;
 
 function host(page: Page) {
@@ -17,7 +38,7 @@ async function shot(page: Page, name: string) {
   await expect(host(page)).toBeVisible();
   // settle layout/fonts
   await page.waitForTimeout(250);
-  await host(page).screenshot({ path: `${dir}/${name}.png` });
+  await captureBaseline(host(page), `${REL}/${name}.png`);
 }
 
 test('basic — empty (placeholder)', async ({ page }) => {

@@ -1,5 +1,5 @@
 import {
-  createEffect, createSignal, createUniqueId, Show, type Accessor, type JSX,
+  createEffect, createSignal, createUniqueId, onCleanup, Show, type Accessor, type JSX,
 } from 'solid-js';
 import { Portal } from 'solid-js/web';
 import { cn } from '../../utils/cn';
@@ -83,13 +83,90 @@ function deepActiveElement(): HTMLElement | null {
 }
 
 /**
+ * The element, then the contexts it sits in, nearest first, crossing shadow
+ * boundaries. Recorded while the element is still connected, because a removed
+ * element has no parent left to walk: a close that finds the remembered element
+ * gone has to look for the nearest SURVIVING context instead, and a detached node
+ * cannot tell it what that was.
+ */
+function focusChain(el: HTMLElement | null): HTMLElement[] {
+  const chain: HTMLElement[] = [];
+  let node: HTMLElement | null = el;
+  while (node) {
+    chain.push(node);
+    const parent: HTMLElement | null = node.parentElement;
+    const root = node.getRootNode();
+    node = parent ?? (root instanceof ShadowRoot && root.host instanceof HTMLElement ? root.host : null);
+  }
+  return chain;
+}
+
+/**
+ * The close fallback's ONE walk, so every host composing this dialog inherits the
+ * policy instead of re-deciding it. Its rule:
+ *
+ *   Outward from the remembered opener, over the contexts it sat in, nearest first,
+ *   take the first context that yields a focusable destination.
+ *
+ * Two things it does not do, both measured. It does not stop at the first context that
+ * merely SURVIVED: surviving and being able to take focus are different questions, and
+ * answering only the first is what dropped focus on `body` when the opener was a host's
+ * own slotted trigger and its only focusable - the host survived EMPTY, and the walk
+ * ended on it. And it never lands inside this dialog's own panel, or the light DOM
+ * assigned into it, because that subtree goes in the same breath as the walk: a
+ * destination there is the focus drop again. `goingAway` is how the caller says so.
+ *
+ * It stops at the END OF THE RECORDED CHAIN - `body`/`html`, the outermost contexts a
+ * remembered opener can have - so an emptied page leaves focus where the browser put it
+ * once the panel went. Nothing further out is invented: a second guess at where the
+ * reader "really" was is the quiet fallback this component should not make.
+ */
+function focusFirstIn(ctx: HTMLElement, goingAway: (el: HTMLElement) => boolean): boolean {
+  const candidates = ctx.matches(FOCUSABLE_SELECTOR) ? [ctx] : [];
+  for (const el of [...candidates, ...ctx.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)]) {
+    if (goingAway(el)) continue;
+    el.focus();
+    // Ask the DOCUMENT, not the candidate list: `focus()` on a node the browser will not
+    // focus (hidden, inert, `display:none`) is silent, and "a candidate was found" is not
+    // the same answer as "the reader is somewhere". A silent no-op is what the walk has
+    // to keep walking past.
+    if (deepActiveElement() === el) return true;
+  }
+  return false;
+}
+
+/**
+ * The panel was asked for focus and did not get it, and nothing else here would notice:
+ * the browser refuses `focus()` on an unfocusable node silently. The cause is the
+ * consumer's arrangement rather than this component's - a native modal, or an `inert`
+ * region, covering the portal target makes everything inside it unfocusable, and no
+ * retry changes that - so this cannot fix it. What it can do is not pretend the reader
+ * was moved: a dialog that opens without focus is a keyboard reader's dead end, and
+ * opening quietly is the failure. Said on every open that was refused, because each one
+ * is that reader's dead end rather than a condition to report once for the session.
+ */
+function warnOpenedWithoutFocus(): void {
+  console.warn(
+    '[kai-dialog] opened without taking focus: the browser refused to focus the panel, so a '
+    + 'keyboard reader is left where they were. The usual cause is a native modal, or an inert '
+    + 'region, covering this dialog\'s portal target.',
+  );
+}
+
+/**
  * Dialog is the presentational centered modal surface. It renders through a Portal
  * (so it escapes any clipping/stacking ancestor), dims the page with a backdrop,
  * and centers a panel with a sensible max width/height and internal scroll. It
- * closes on Escape and on a backdrop click (never on a panel click), moves focus
- * into the panel on open and restores it on close, and runs a basic Tab focus
- * trap so keyboard focus cycles within the panel while open. The developer owns
- * when it opens (drive `open` / `defaultOpen`); this owns being the modal.
+ * closes on Escape (from inside the panel and, since focus can leave the panel while
+ * it is open, from anywhere on the page) and on a backdrop click (never on a panel
+ * click), moves focus into the panel on open and restores it on close - to the nearest
+ * surviving context that can take focus when the element that had it is gone by then -
+ * and runs a basic Tab focus trap so keyboard focus cycles within the panel while open.
+ * It cannot make an unfocusable panel focusable - a native modal or an `inert` region over
+ * the portal target is the consumer's arrangement - so when the browser refuses that focus
+ * move it warns on the console rather than opening silently.
+ * The developer owns when it opens (drive `open` / `defaultOpen`); this owns being the
+ * modal.
  *
  * Styleable parts: `backdrop` · `panel` · `header` · `body` · `footer`.
  */
@@ -113,23 +190,88 @@ export function Dialog(props: DialogProps) {
 
   let backdrop: HTMLElement | undefined;
   let panel: HTMLElement | undefined;
-  // The element that had focus before we opened, restored on close.
+  // The element that had focus before we opened, restored on close, and the contexts
+  // it sat in, for the case where that element is gone by then.
   let restoreFocus: HTMLElement | null = null;
+  let restoreContext: HTMLElement[] = [];
   // Track where a click started so a drag that ends on the backdrop (e.g. a text
   // selection begun inside the panel) does not falsely dismiss.
   let pointerDownOnBackdrop = false;
+
+  /** Is `node` inside this dialog's own panel: either the shadow content, or the
+   *  light-DOM content assigned to its slots (which `panel.contains` cannot see). */
+  const insidePanel = (node: HTMLElement | null): boolean => {
+    if (!node || !panel) return false;
+    if (node === panel || panel.contains(node)) return true;
+    const root = panel.getRootNode();
+    return root instanceof ShadowRoot && root.host instanceof HTMLElement && root.host.contains(node);
+  };
+
+  // Escape while we are open, at the DOCUMENT. The backdrop's own keydown is reached
+  // through the event's composed path, so it only ever sees a press that started
+  // inside this panel - and focus can leave the panel through no fault of the reader's,
+  // most ordinarily because whatever opened the modal returns focus to its own trigger
+  // in a microtask. An `aria-modal="true"` surface owns Escape for the whole page, so
+  // the press that lands elsewhere still belongs to us. Scoped to exactly that case:
+  // while the panel IS in the path the backdrop handler owns the key, which is also
+  // what keeps a nested modal's Escape from closing the modal it sits in.
+  const onDocumentKeyDown = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !panel || e.composedPath().includes(panel)) return;
+    setOpen(false);
+  };
 
   // Move focus into the panel on open; restore it on close. Seeded prev=false so a
   // `defaultOpen` (open-at-mount) still runs the open branch.
   createEffect((wasOpen: boolean) => {
     const open = isOpen();
     if (open && !wasOpen) {
-      restoreFocus = deepActiveElement();
-      queueMicrotask(() => panel?.focus());
+      // Capture the document at SETUP and close over the capture, as `useDismiss`
+      // and the composer's selection listener do: dispose is not guaranteed to run
+      // while the DOM globals still exist (`component-register` releases a root a
+      // microtask after detach), and a bare `document` read from the cleanup throws
+      // `ReferenceError` there.
+      const doc = document;
+      doc.addEventListener('keydown', onDocumentKeyDown);
+      onCleanup(() => doc.removeEventListener('keydown', onDocumentKeyDown));
+      const active = deepActiveElement();
+      // A target already inside the panel is not a place to come BACK to: the panel is
+      // removed when we close, so remembering it would restore focus into a node that
+      // is going away (i.e. drop it on `<body>`) rather than return the reader anywhere.
+      restoreFocus = insidePanel(active) ? null : active;
+      restoreContext = focusChain(restoreFocus);
+      queueMicrotask(() => {
+        panel?.focus();
+        // Ask the DOCUMENT, as the close walk does: `focus()` on a node the browser will
+        // not focus is silent, so "the call was made" is not "the reader is somewhere".
+        // A detached panel is a dialog that already closed (the close raced this
+        // microtask), not one that opened without focus, so only a connected panel that
+        // did not end up holding focus is the case worth saying out loud.
+        if (panel?.isConnected && !insidePanel(deepActiveElement())) warnOpenedWithoutFocus();
+      });
     } else if (!open && wasOpen) {
       const target = restoreFocus;
+      const chain = restoreContext;
       restoreFocus = null;
-      if (target && target.isConnected) queueMicrotask(() => target.focus());
+      restoreContext = [];
+      if (target?.isConnected) {
+        queueMicrotask(() => target.focus());
+      } else if (target && insidePanel(deepActiveElement())) {
+        // The element is gone (a menu item that closed behind the modal is the
+        // ordinary case) and focus is still ours, so without a fallback the browser
+        // drops it on `<body>` and the reader loses their place on the page. Return it
+        // to the nearest surviving context that can actually TAKE focus - the walk's
+        // rule and where it stops are stated on `focusFirstIn`.
+        //
+        // Deferred like every other focus move here, and the walk runs inside the
+        // microtask rather than being resolved ahead of it because the panel can still
+        // be mounted at this instant: `insidePanel` has to read it then, so the panel
+        // subtree is skipped for what it is (a destination about to disappear) and not
+        // for what it happens to be right now.
+        const survivors = chain.filter((ctx) => ctx !== target && ctx.isConnected);
+        queueMicrotask(() => {
+          for (const ctx of survivors) if (focusFirstIn(ctx, insidePanel)) return;
+        });
+      }
     }
     return open;
   }, false);

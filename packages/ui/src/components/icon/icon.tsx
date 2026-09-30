@@ -1,7 +1,7 @@
 import type { Component, JSX } from 'solid-js';
 import {
   Plus, Paperclip, Github, Globe, Sparkles, Settings,
-  FileText, Folder, Image, Monitor, MessageCircle, MessageSquare, Search,
+  FileText, Folder, FolderOpen, FolderClosed, Image, Monitor, MessageCircle, MessageSquare, Search,
   Mic, AudioLines, X, ChevronDown, ChevronLeft,
   Pencil, BookOpen, Code, Smile,
   Share, ArrowLeft, MoreHorizontal,
@@ -35,6 +35,11 @@ const NAMED_ICONS: Record<string, IconComponent> = {
   settings: Settings,
   'file-text': FileText,
   folder: Folder,
+  // The open/closed pair, for any disclosure that paints a folder instead of a
+  // caret (`folder` alone could only say "folder"). lucide's own names, so no
+  // alias is needed here.
+  'folder-open': FolderOpen,
+  'folder-closed': FolderClosed,
   image: Image,
   monitor: Monitor,
   'message-circle': MessageCircle,

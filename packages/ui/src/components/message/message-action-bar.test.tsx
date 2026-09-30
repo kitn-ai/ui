@@ -185,6 +185,62 @@ describe('MessageActionBar', () => {
   });
 });
 
+/**
+ * The hover reveal is an accessibility contract rather than a fade, and the two
+ * failure modes it guards against are both silent: a keyboard user tabbing onto
+ * an invisible control, and a touch user whose bar never appears at all.
+ *
+ * These cases assert the CLASS CONSTRUCTION, and that is honest here only
+ * because jsdom applies no stylesheet — a class-based `opacity-0` computes to
+ * nothing, so a "is it visible" assertion would pass with the defect in place.
+ * The first case is the discriminating one: it fails on the previous
+ * construction (`opacity-0 transition-opacity group-hover:opacity-100`) for two
+ * independent reasons, a bare hide and a missing focus reveal. The reveal itself
+ * is a browser fact and needs a probe; nothing here claims to have measured it.
+ */
+describe('MessageActionBar hover reveal', () => {
+  const bar = (container: HTMLElement) => container.querySelector('[part="actions"]') as HTMLElement;
+
+  it('hides only where hover exists, and reveals on focus as well as hover', () => {
+    const { container } = render(() => (
+      <MessageActionBar actions={['copy']} onAction={vi.fn()} reveal="hover" />
+    ));
+    const cls = bar(container).className;
+
+    // A BARE `opacity-0` is the defect: on a device with no hover it hides the
+    // bar with nothing able to reveal it. The hidden state must carry the query.
+    expect(cls).not.toMatch(/(^|\s)opacity-0(\s|$)/);
+    expect(cls).toContain('@media(hover:hover)');
+
+    // Focus has to reveal it too, or a keyboard user focuses something they
+    // cannot see (WCAG 2.4.7, Focus Visible).
+    expect(cls).toContain('group-focus-within:opacity-100');
+    expect(cls).toContain('group-hover:opacity-100');
+  });
+
+  it('keeps the buttons in the tree, named and reachable, while the bar is hidden', () => {
+    const { getByLabelText } = render(() => (
+      <MessageActionBar actions={['copy']} onAction={vi.fn()} reveal="hover" />
+    ));
+    // The reveal is visual: the control must stay announced and focusable whatever
+    // its opacity. `display: none` and `visibility: hidden` are the two ways to
+    // hide it from assistive tech instead of from the eye.
+    const copy = getByLabelText('Copy');
+    expect(copy.tagName).toBe('BUTTON');
+    expect(copy).toBeVisible();
+    expect(copy).not.toHaveAttribute('hidden');
+  });
+
+  it('leaves the default reveal alone', () => {
+    const { container } = render(() => (
+      <MessageActionBar actions={['copy']} onAction={vi.fn()} />
+    ));
+    // `always` is the default and must stay unqualified: no opacity state of any
+    // kind, since only the hover path was ever wrong.
+    expect(bar(container).className).not.toContain('opacity-');
+  });
+});
+
 describe('MessageAvatar', () => {
   it('renders an img when src is set', () => {
     const { container } = render(() => (

@@ -2,7 +2,7 @@ import { createSignal, createEffect, createComputed, createMemo, For, Show, Swit
 import { ChatConfig, useChatConfig } from '../../primitives/chat-config';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { ChatContainer, ChatContainerContent, ChatContainerScrollAnchor } from './chat-container';
-import { Message, MessageAvatar, MessageBody } from '../message/message';
+import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../message/message';
 import { type AttachmentData, type AttachmentImagePreview } from '../attachments/attachments';
 import { createMessageFeedback, type MessageActionDetail } from '../../primitives/message-feedback';
 import { ModelSwitcher } from '../model/model-switcher';
@@ -11,7 +11,7 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from '../context/context';
-import { DefaultPromptInput, type RejectedAttachment } from '../prompt/default-input';
+import { DefaultPromptInput, type RejectedAttachment, type ComposerToolItem } from '../prompt/default-input';
 import type { MediaTypeFilter } from '../../wire/media-types';
 import type { TriggerDef } from '../composer/composer';
 import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-components/chat/chat-types';
@@ -20,7 +20,7 @@ import type { ModelOption } from '../../types';
 import type { CardComponentMap } from '../card/card-registry';
 import type { CardSchemaMap } from '../card/card-renderer';
 import type { JSX } from 'solid-js';
-import type { ConversationStore } from '../../primitives/conversation-store';
+import { mostRecentSummary, type ConversationStore } from '../../primitives/conversation-store';
 import { ConversationPanel } from '../conversation/conversation-panel';
 import type { ConversationSummary } from '../../types';
 import { MessagesSquare, ArrowLeft } from 'lucide-solid';
@@ -29,6 +29,7 @@ import { HomePanel } from '../home/home-panel';
 import { WidgetTabBar } from '../widget-tab-bar/widget-tab-bar';
 import { Panel, PanelHeader, PanelBody, PanelFooter } from '../panel/panel';
 import { createViewStack, type ViewEntry } from '../view/view-stack';
+import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from './thread-density';
 import { createConversationController, type ConversationController } from '../../stores/conversation-controller';
 import type { HomeConfig, HomeLinkEntry } from '../../types';
 
@@ -43,6 +44,13 @@ export interface ChatThreadContextUsage {
 export interface ChatThreadProps {
   /** Extra classes for the thread root (e.g. `h-full`). */
   class?: string;
+  // ONE axis, not three props: the between-turn gap, the message band's padding and
+  // the composer band's padding move together, because a consumer has no other way to
+  // reach any of them (they are inside this shadow tree). See `thread-density.ts` for
+  // what each value is and where its numbers come from.
+  /** How much air the thread has: `'default'` (the shipped look) or `'compact'`
+   *  (a desktop-panel rhythm: 8px between turns, a tighter band). */
+  density?: ThreadDensity;
   /** The message thread to render, newest last. A new array reference is what
    *  re-renders. */
   messages: ChatMessage[];
@@ -65,6 +73,9 @@ export interface ChatThreadProps {
   loading?: boolean;
   /** Starter prompts shown above the input while the thread is empty. */
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders
+   *  each suggestion as a full-width list row. */
+  suggestionsLayout?: 'pill' | 'block';
   /** What clicking a suggestion does. Default sends it immediately; `'fill'`
    *  places it in the input without sending. */
   suggestionMode?: 'submit' | 'fill';
@@ -146,6 +157,14 @@ export interface ChatThreadProps {
   /** Fires when a `home.links` entry with no `href` is activated; one with an `href`
    *  navigates instead. Only meaningful when `home` is set. */
   onHomeLink?: (entry: HomeLinkEntry) => void;
+  // Both widget surfaces that DERIVE a trailing edge of their own read this one option:
+  // the panel's row time (`ConversationPanel`) and the home recent card's (`HomePanel`).
+  // Default-true, matching the data row's own option of the same name
+  // (`ConversationItem.showTrailing`), so a consumer who owns that edge (their own menu,
+  // their own timestamp) turns it off once for the whole thread instead of per surface.
+  /** Paint the panel rows' and home recent card's derived trailing edge, or leave it
+   *  empty. Default true. */
+  showTrailing?: boolean;
   // ── Composition slots ─────────────────────────────────────────────────────
   // Each flag below is set by the `<kai-chat>` facade when matching light-DOM
   // `slot="…"` content is projected, and gates one composition slot. Two kinds:
@@ -188,16 +207,20 @@ export interface ChatThreadProps {
   /** Hides the built-in paperclip attach button; only an explicit `false` hides it.
    *  Default true. */
   attach?: boolean;
-  /** Show a web-search (Globe) button in the input toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
+  /** The composer's `+` menu tree: the built-in file row first (when `attach`), then
+   *  these verbatim. An array, so it is a JS property and never an attribute. */
+  tools?: ComposerToolItem[];
+  /** Pins the composer's layout: `true` is two rows, `false` is one, omitted derives it
+   *  from the content. */
+  expanded?: boolean;
   /** Show a voice-input button in the input toolbar; calls `onVoice`. */
   voice?: boolean;
   /** Rich entity triggers. Each opens a menu at the caret that inserts an atomic pill. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) for pills/menu items. */
   kindIcons?: Record<string, string>;
-  /** Whether each message's action bar is visible at rest or revealed on pointer-over.
-   *  Visible at rest by default. */
+  /** Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to
+   *  the turn, so a user row reveals and an assistant row does not. */
   actionsReveal?: 'always' | 'hover';
   /** Default action bar for user messages that have no `actions` of their own; a
    *  message's own `actions` replaces it. */
@@ -219,7 +242,9 @@ export interface ChatThreadProps {
   onSuggestionClick?: (value: string) => void;
   onModelChange?: (modelId: string) => void;
   onMessageAction?: (detail: MessageActionDetail) => void;
-  onWebSearch?: () => void;
+  /** A `+` menu item was chosen. `checked` is present exactly when the item is a
+   *  toggle, and carries its NEW state. */
+  onToolSelect?: (detail: { id: string; checked?: boolean }) => void;
   onVoice?: () => void;
   /** Receive the imperative controller once mounted. */
   controllerRef?: (controller: ChatThreadController) => void;
@@ -268,7 +293,16 @@ const ASSISTANT_ALIGN = 'items-stretch';
 
 export function ChatThread(props: ChatThreadProps) {
   const outer = useChatConfig();
-  const reveal = () => (props.actionsReveal === 'hover' ? 'hover' : 'always');
+  // The reveal mode is resolved PER ROW, from that row's own speaker, so one thread can hold
+  // a hover-revealed user turn and a pinned assistant turn at once. The rule itself lives in
+  // `resolveActionsReveal`: the row's `group` class and the bar's own opacity have to agree,
+  // so both read that one function rather than restating it.
+  const revealFor = (isUser: boolean) => resolveActionsReveal(props.actionsReveal, isUser);
+  // Resolved ONCE per render and used twice, for the same reason `thread.tsx` does it:
+  // the band/gap classes here, and the value handed down to every row, so the rows agree
+  // with the list they sit in.
+  const resolvedDensity = () => resolveThreadDensity(props.density, 'ChatThread');
+  const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
@@ -488,9 +522,12 @@ export function ChatThread(props: ChatThreadProps) {
   // auto-restored the visitor's thread on mount, so upgrading to
   // `conversations` must not regress that — their most recent conversation
   // (migrated legacy thread included) has to reappear without an extra tap
-  // into the list. The pick + load ride the controller (`refresh` sorts the
-  // cache byRecency; `select` is the same single path as an explicit row
-  // click, fresh-array contract included). The guards stay at this boundary
+  // into the list. The pick + load ride the controller (`refresh` fills the
+  // cache; `select` is the same single path as an explicit row
+  // click, fresh-array contract included); the pick itself is the newest
+  // INCLUDING archived ones excluded, which is NOT the cache's first row: that
+  // row is the pinned-first display order, and a pin is not a claim about when
+  // the visitor last spoke. The guards stay at this boundary
   // because they are about the CALLER's state, which the controller cannot
   // see: only when nothing is active yet (never fights startNew/a prior
   // select); only when `props.messages` is still empty (a parent that
@@ -506,9 +543,9 @@ export function ChatThread(props: ChatThreadProps) {
       if (untrack(activeConversationId) !== undefined) return;
       if (props.messages.length !== 0) return;
       if (untrack(view) !== 'chat') return;
-      const summaries = untrack(conversationSummaries);
-      if (summaries.length === 0) return;
-      await ctrl.select(summaries[0].id); // the controller cache is byRecency-sorted
+      const newest = mostRecentSummary(untrack(conversationSummaries));
+      if (newest === undefined) return;
+      await ctrl.select(newest.id);
     })();
   });
   // A string `value` is controlled; a ComposerDoc `value` is a one-time seed that
@@ -541,11 +578,11 @@ export function ChatThread(props: ChatThreadProps) {
   );
   // Recent-conversation card: only when explicitly opted into
   // (`home.recentConversation === true`), summaries are actually hydrated,
-  // and at least one exists — the newest by the shared recency rule.
+  // and at least one exists — the newest by the shared recency rule, out of the
+  // ones still visible (an archived conversation must not be the card's offer).
   const recentSummary = createMemo(() => {
     if (!homeEnabled() || props.home?.recentConversation !== true || !conversationsReady()) return undefined;
-    const summaries = conversationSummaries();
-    return summaries.length ? summaries[0] : undefined; // controller-sorted, newest first
+    return mostRecentSummary(conversationSummaries());
   });
   // Suggestions are conversation starters: show only on an empty thread unless
   // the host opts into persisting them.
@@ -705,8 +742,8 @@ export function ChatThread(props: ChatThreadProps) {
           <PanelBody>
             <Switch
               fallback={
-                <ChatContainer class="h-full px-4 py-3">
-              <ChatContainerContent class="mx-auto w-full max-w-3xl space-y-4">
+                <ChatContainer class={`h-full ${density().band}`}>
+              <ChatContainerContent class={`mx-auto w-full max-w-3xl ${density().gap}`}>
                 {/* REPLACE — custom empty-state content, shown only while the thread is
                     empty. The component still owns WHEN it shows (data state); the
                     consumer owns WHAT it looks like. `emptyContent` (JSX, rendered
@@ -750,13 +787,13 @@ export function ChatThread(props: ChatThreadProps) {
                             markdown={m().role === 'assistant'}
                             actions={m().actions ?? (m().role === 'user' ? props.userActions : props.assistantActions)}
                             hideSources={props.hideSources}
-                            actionsReveal={reveal()}
+                            actionsReveal={revealFor(m().role === 'user')}
                             activeFeedback={feedback.resolveFeedback(m())}
                             copied={feedback.isCopied(m().id)}
                             onAction={(action) => feedback.handleAction(m(), action)}
                           />
                         );
-                        const rowGroup = () => (reveal() === 'hover' ? 'group ' : '');
+                        const rowGroup = () => (revealFor(m().role === 'user') === 'hover' ? 'group ' : '');
                         return (
                           // `role` is the SPEAKER, forwarded on BOTH branches —
                           // see the same note in thread.tsx. `Message` turns it
@@ -766,13 +803,13 @@ export function ChatThread(props: ChatThreadProps) {
                           <Show
                             when={m().avatar}
                             fallback={
-                              <Message role={m().role} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : `flex-col ${ASSISTANT_ALIGN}`}`}>
+                              <Message role={m().role} density={resolvedDensity()} class={`${rowGroup()}${m().role === 'user' ? 'flex-col items-end' : `flex-col ${ASSISTANT_ALIGN}`}`}>
                                 {body}
                               </Message>
                             }
                           >
                             {(av) => (
-                              <Message role={m().role} class={rowGroup()}>
+                              <Message role={m().role} density={resolvedDensity()} class={rowGroup()}>
                                 <MessageAvatar src={av().src ?? ''} alt={av().alt ?? ''} fallback={av().fallback} />
                                 <div class={`flex min-w-0 flex-1 flex-col ${m().role === 'user' ? 'items-end' : ASSISTANT_ALIGN}`}>
                                   {body}
@@ -788,7 +825,11 @@ export function ChatThread(props: ChatThreadProps) {
                 <ChatContainerScrollAnchor />
               </ChatContainerContent>
               <Show when={showScrollButton()}>
-                <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+                {/* Same pair as `thread.tsx`: this wrapper spans the whole
+                    message band and only exists to place the button, so it must
+                    let the pointer through to the messages under it while the
+                    button takes it back. */}
+                <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
                   {/* The button now owns its elevation (kai-elevation); a `shadow-sm`
                       here would set box-shadow a second time and the winner would
                       be stylesheet order, not this call site. */}
@@ -810,6 +851,7 @@ export function ChatThread(props: ChatThreadProps) {
                       recent={recentSummary()}
                       newChatLabel={props.home?.newConversation?.label}
                       links={props.home?.links}
+                      showTrailing={props.showTrailing}
                       onSelectRecent={(id) => void controller()?.select(id)}
                       onNewChat={() => startNewConversation()}
                       onLink={(entry) => props.onHomeLink?.(entry)}
@@ -825,6 +867,7 @@ export function ChatThread(props: ChatThreadProps) {
                   activeId={activeConversationId()}
                   onSelect={(id) => void controller()?.select(id)}
                   onNewChat={() => startNewConversation()}
+                  showTrailing={props.showTrailing}
                 />
               </Match>
             </Switch>
@@ -838,11 +881,11 @@ export function ChatThread(props: ChatThreadProps) {
           <Show when={chatShowing()}>
             {/* INJECT — accessory row above the composer (extra actions/toolbar). */}
             <Show when={props.composerActions}>
-              <div class="shrink-0 px-4">
+              <div class={`shrink-0 ${density().composerActions}`}>
                 <div class="mx-auto flex max-w-3xl items-center gap-2 pb-2"><slot name="composer-actions" /></div>
               </div>
             </Show>
-            <div class="shrink-0 px-4 pb-4">
+            <div class={`shrink-0 ${density().composer}`}>
               <div class="mx-auto max-w-3xl">
                 {/* JSX escape hatch, rendered immediately before the composer region
                     (built-in or `slot="composer"` replacement) — see the prop doc. */}
@@ -854,13 +897,13 @@ export function ChatThread(props: ChatThreadProps) {
                   fallback={
                     <DefaultPromptInput
                       value={current()} placeholder={props.placeholder} loading={props.loading === true}
-                      suggestions={visibleSuggestions()} attachments={attachments()}
+                      suggestions={visibleSuggestions()} suggestionsLayout={props.suggestionsLayout} attachments={attachments()}
                       accept={props.accept} onAttachmentsRejected={props.onAttachmentsRejected}
-                      attach={props.attach} webSearch={props.webSearch === true} voice={props.voice === true}
+                      attach={props.attach} tools={props.tools} expanded={props.expanded} voice={props.voice === true}
                       triggers={props.triggers} kindIcons={props.kindIcons}
                       onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
                       onAttachmentsChange={(a) => { setAttachments(a); props.onAttachmentsChange?.(a); }}
-                      onWebSearch={() => props.onWebSearch?.()} onVoice={() => props.onVoice?.()}
+                      onToolSelect={(detail) => props.onToolSelect?.(detail)} onVoice={() => props.onVoice?.()}
                     />
                   }
                 >

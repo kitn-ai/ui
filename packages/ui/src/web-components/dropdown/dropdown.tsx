@@ -21,8 +21,10 @@ interface Props extends Record<string, unknown> {
   // supplied separately: the same two-slot distinction `kai-menu` documents.
   /** Accessible name for a trigger with no visible label. Ignored when `triggerLabel` is set. */
   label?: string;
-  /** Stretch the trigger to the full width of its container (a block row).
-   *  Attribute: `full`. */
+  // `full` stretches the trigger to its container, and the surface follows it: the
+  // slotted rows are then as wide as the row the menu opened from. The surface's
+  // `min-width` stays the floor. Same contract as kai-menu.
+  /** Stretch the trigger to the full width of its container (a block row), and open the surface at that same measured width. Attribute: `full`. */
   full?: boolean;
   // Shoelace-style: settable and reflected to the `open` attribute, while the menu
   // still self-manages on click/keyboard.
@@ -91,7 +93,12 @@ defineWebComponent<Props, Events>('kai-dropdown', {
             <Show when={!props.triggerIcon && !props.triggerLabel}><MoreHorizontal class="size-4" /></Show>
           </slot>
         </DropdownTrigger>
-        <DropdownContent class="min-w-[10rem]">
+        {/* Same surface contract as `kai-menu`: with `full` the slotted rows are
+            as wide as the trigger they opened from. See
+            `DropdownContent.matchTriggerWidth`. `min-w-[10rem]` is an explicit
+            OVERRIDE of `DropdownContent`'s 15rem default floor: these rows are the
+            consumer's markup, so the facade asks for a smaller one. */}
+        <DropdownContent class="min-w-[10rem]" matchTriggerWidth={flag('full')}>
           <slot />
         </DropdownContent>
       </Dropdown>

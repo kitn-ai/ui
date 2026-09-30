@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { fn } from 'storybook/test';
+import { expect, fn, screen, userEvent, waitFor, within } from 'storybook/test';
 import { createSignal } from 'solid-js';
 import { Paperclip, Github, Sparkles, Globe, Settings, Plus, FileText } from 'lucide-solid';
 import {
@@ -150,6 +150,88 @@ function CascadingMenuDemo(props: { onSelect?: SelectHandler }) {
     </div>
   );
 }
+
+function LongMenuDemo(props: { onSelect?: SelectHandler }) {
+  const [last, setLast] = createSignal<string>();
+  const select = (label: string) => { setLast(label); props.onSelect?.(label); };
+  return (
+    <div class="space-y-3">
+      <Dropdown>
+        <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }))}>Chats</DropdownTrigger>
+        <DropdownContent>
+          <DropdownLabel>Your chats</DropdownLabel>
+          {Array.from({ length: 30 }, (_, i) => (
+            <DropdownItem onSelect={() => select(`Chat ${i + 1}`)}>{`Chat ${i + 1}`}</DropdownItem>
+          ))}
+        </DropdownContent>
+      </Dropdown>
+      <p class="text-xs text-muted-foreground">Last action: {last() ?? '—'}</p>
+    </div>
+  );
+}
+
+/**
+ * A menu whose LENGTH comes from the consumer's data, which is the case the height
+ * ceiling exists for: the rail's palette listing the user's own conversations. 30 chats
+ * here, and the surface caps itself at the room between its trigger and the viewport
+ * edge and scrolls the rest, so the last row is reached by scrolling rather than by
+ * resizing the window. Open it in a short window and the panel shrinks with it; the
+ * ceiling is `--kai-dropdown-max-height`, defaulting to `min(20rem, calc(100dvh - 2rem))`.
+ */
+export const LongMenu: Story = {
+  render: (args: { onSelect?: SelectHandler }) => <LongMenuDemo onSelect={args.onSelect} />,
+  // Real layout, so this is where the ceiling can be measured: the surface is bounded at
+  // its default (20rem) yet holds 30 rows, it scrolls, and roving focus carries the last row
+  // into the visible part of it. jsdom has no layout and cannot state any of this.
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Chats' }));
+    const menu = await screen.findByRole('menu');
+    await waitFor(() => expect(menu.getBoundingClientRect().height).toBeGreaterThan(0));
+
+    const ceiling = 20 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+    expect(menu.getBoundingClientRect().height).toBeLessThanOrEqual(ceiling + 1);
+    expect(menu.scrollHeight).toBeGreaterThan(menu.clientHeight);
+    expect(getComputedStyle(menu).overflowY).toBe('auto');
+
+    const items = screen.getAllByRole('menuitem');
+    expect(items).toHaveLength(30);
+    for (let i = 0; i < items.length; i++) await userEvent.keyboard('{ArrowDown}');
+    await waitFor(() => expect(document.activeElement).toBe(items[items.length - 1]));
+    const box = menu.getBoundingClientRect();
+    const row = items[items.length - 1].getBoundingClientRect();
+    expect(row.top).toBeGreaterThanOrEqual(box.top - 1);
+    expect(row.bottom).toBeLessThanOrEqual(box.bottom + 1);
+    expect(menu.scrollTop).toBeGreaterThan(0);
+  },
+  parameters: {
+    // A capped menu now scrolls at its 20rem default, which trips axe's
+    // `scrollable-region-focusable`: the surface is `tabindex="-1"` and its rows are roving
+    // (`-1`), so no element in it is in the tab order. That rule models a scrollable DOCUMENT
+    // region reached by Tab; a menu is operated by ArrowUp/Down/Home/End and closes on Tab, so
+    // a tab stop on it would be the wrong fix. Waived for THIS story only, and the play
+    // function above is what proves the keyboard path reaches the last row.
+    a11y: { config: { rules: [{ id: 'scrollable-region-focusable', enabled: false }] } },
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `${IMPORT}
+import { DropdownLabel } from '@kitn.ai/ui/solid';
+
+const chats = Array.from({ length: 30 }, (_, i) => \`Chat \${i + 1}\`);
+
+<Dropdown>
+  <DropdownTrigger class={cn(buttonVariants({ variant: 'outline' }))}>Chats</DropdownTrigger>
+  <DropdownContent>
+    <DropdownLabel>Your chats</DropdownLabel>
+    {chats.map((chat) => (
+      <DropdownItem onSelect={() => open(chat)}>{chat}</DropdownItem>
+    ))}
+  </DropdownContent>
+</Dropdown>`,
+      },
+    },
+  },
+};
 
 /**
  * The composer's Plus action menu: a section `DropdownLabel`, items with leading

@@ -53,7 +53,7 @@ To migrate by hand, move each prop to the part that owns it now:
 | --- | --- |
 | `conversations`, `activeId`, `groups`, `noConversations` | your own `<kai-conversations slot="start">` |
 | `messages`, `loading`, `proseSize`, `codeTheme`, `codeHighlight`, `chatTitle`, `scrollButton`, `cardTypes`, `cardSchemas` | your own `<kai-chat>` in the main region |
-| `value`, `placeholder`, `suggestions`, `suggestionMode`, `voice`, `triggers`, `kindIcons`, `search` (renamed `webSearch`) | the composer surface on `<kai-chat>` or `<kai-prompt-input>` |
+| `value`, `placeholder`, `suggestions`, `suggestionMode`, `voice`, `triggers`, `kindIcons`, `tools`, `expanded` | the composer surface on `<kai-chat>` or `<kai-prompt-input>`. `tools` is the composer's menu tree — a capability like web search is an ITEM you declare there, not a built-in button |
 | `models`, `currentModel`, `context` | header chrome you slot (a model picker is a part in a slot, not three orchestrator props) |
 | `sidebarWidth`, `sidebarMinWidth`, `sidebarMaxWidth` | the `--kai-workspace-start-*` custom properties |
 | `sidebarCollapsed`, `defaultSidebarCollapsed` | `startCollapsed` / `defaultStartCollapsed` (the end aside has its own pair) |
@@ -61,13 +61,13 @@ To migrate by hand, move each prop to the part that owns it now:
 | `compact` | kept as a reflected density hint; the rail's row density is `<kai-conversations>`' own `compact` |
 | `theme` | unchanged, as on every web component |
 
-Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-voice`, and `kai-web-search` (was `kai-search`) on `<kai-chat>`.
+Events moved with their owners: listen for `kai-conversation-select` and `kai-new-chat` on `<kai-conversations>`, for `kai-submit`, `kai-message-action`, `kai-model-change`, `kai-value-change`, `kai-suggestion-click`, `kai-select` (a `+` menu item was chosen), and `kai-voice` on `<kai-chat>`.
 
 {/* docs-alignment: historical-kai-token -- the pre-rename element name, named here so a reader migrating off the old preset can find it */}
 The shell itself fires only `kai-aside-toggle` (was `kai-sidebar-toggle`, now with a `side`) and `kai-aside-resize`. The old sidebar methods `toggleSidebar()` / `collapseSidebar()` / `expandSidebar()` are `toggleAside(side)` / `collapseAside(side)` / `expandAside(side)`, and the thread methods (`focus()`, `clear()`, `send()`, `scrollToBottom()`) live on your `<kai-chat>`.
 
 <Aside type="note" title="Why the preset dissolved">
-Every consumer feature had to become a workspace prop, and the surface still misdescribed itself (its `kai-search` was the composer's web-search toggle, not conversation search). You compose the parts now; the shell only arranges them.
+Every consumer feature had to become a workspace prop, and the surface still misdescribed itself (its `kai-search` was the composer's web-search toggle — a capability that is a declared menu item now, not a prop — and not conversation search). You compose the parts now; the shell only arranges them.
 </Aside>
 
 ## What's next

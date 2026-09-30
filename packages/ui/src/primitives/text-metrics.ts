@@ -1,0 +1,71 @@
+/**
+ * Text metrics that more than one primitive needs to agree on.
+ *
+ * One question, and both of its callers need the same answer to it: how tall is
+ * one line of this element's text? `use-auto-resize` floors an empty field at that
+ * height, and `composer-expansion` compares content against it to decide whether
+ * the composer's text has wrapped. A second answer here is a second thing to keep
+ * in step, and the two drifted within a day of each other: one recovered CSS's
+ * `normal` keyword and the other read it as zero.
+ *
+ * What stays with each caller is what it does with the number, because those are
+ * different BOXES: `use-auto-resize` adds the element's own vertical padding and
+ * border to reach the border-box height it writes, while `composer-expansion`
+ * compares against an observed CONTENT height. Adding the wrong one is silent, so
+ * the arithmetic does not live here.
+ */
+
+/** The font size assumed when an element's computed `font-size` is unreadable.
+ *  The kit's own prose default, so an unstyled editable and a themed one derive
+ *  the same line height. */
+const FALLBACK_FONT_SIZE_PX = 14;
+
+/** The ratio assumed for `line-height: normal` when the environment will not
+ *  resolve it. Not a CSS constant: the used value comes from the FONT's own metrics
+ *  (ascent + descent + line gap), which lands near 1.2 for common fonts and differs
+ *  between them, so this is a convention rather than a fact about the keyword. */
+const NORMAL_LINE_HEIGHT_FACTOR = 1.2;
+
+// The style read below is PER CALL, and it is not free: `getComputedStyle` resolves
+// the element against the live cascade rather than reading a stored number, and
+// `composer-expansion` calls this on EVERY evaluation because a line height
+// remembered per element is the answer that goes stale when the prose size moves.
+// That is deliberate, so do not memoise it here; a caller that cannot afford the
+// read is better served by reading fewer times than by caching a number whose
+// freshness is the point.
+//
+// Nothing here guards SSR. Both callers arrive with a live element:
+// `composer-expansion` passes `el ? resolveLineHeight(el) : 0`, and `use-auto-resize`
+// measures its own textarea, so no server-render path reaches this with an element
+// to style.
+
+/**
+ * An element's line height in px.
+ *
+ * `getComputedStyle` resolves `line-height: normal` to the literal string
+ * `"normal"`, which `parseFloat` reads as `NaN` rather than as a length, and some
+ * environments (jsdom among them) report an empty string for the same fact. Both
+ * mean the keyword, and neither yields a number a caller can compare against, so the
+ * fallback below derives a stand-in from the font size through the same convention
+ * `NORMAL_LINE_HEIGHT_FACTOR` describes rather than reading the keyword's used value.
+ *
+ * THE FALLBACK IS WHY THIS FUNCTION EXISTS. A caller that stores an unreadable line
+ * height as zero stops responding to content and says nothing about it: zero is not
+ * a small threshold, it is the ABSENCE of one, because every comparison against it
+ * has the same answer. That is exactly how the composer came to be stuck in one
+ * layout with no way to expand.
+ *
+ * It does NOT override an explicit zero. An element that computes one asked for it,
+ * and answering with a font-size guess would invent a length its author rejected; a
+ * non-positive answer is the caller's to notice.
+ */
+export function resolveLineHeight(el: Element): number {
+  const cs = getComputedStyle(el);
+  const measured = Number.parseFloat(cs.lineHeight);
+  // `Number.isNaN`, NOT `> 0`: an element that explicitly computes a zero line
+  // height is asking for one, and answering with a font-size guess would invent a
+  // length its author rejected. A non-positive result is the caller's to notice,
+  // and the composer's expansion rule already fails closed on it.
+  if (!Number.isNaN(measured)) return measured;
+  return (Number.parseFloat(cs.fontSize) || FALLBACK_FONT_SIZE_PX) * NORMAL_LINE_HEIGHT_FACTOR;
+}

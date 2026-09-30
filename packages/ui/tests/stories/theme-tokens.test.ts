@@ -69,6 +69,7 @@ describe('token reference derives every corner rung theme.css declares', () => {
       '--radius-2xl',
       '--radius-3xl',
       '--radius-pill',
+      '--radius-composer',
       '--code-radius',
     ]);
     // Measured in a browser: Tailwind re-emits @theme with the root AFTER its rungs, so

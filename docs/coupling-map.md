@@ -445,3 +445,9 @@ naming which command produced it.
 44. The drilled rule in `createViewStack` vs `kai-chat`'s private view switching.
 45. `kai-row` anatomy vs the hand-built rows in `home-panel.tsx`.
 46. `createConversationController`'s fold vs the facades' internal conversation state — each side's own suite is green; their agreement is checked by nothing.
+
+## Late additions (2026-09-27): pairs found by the day's work
+
+**The store's carry-forward rule, now derivable.** `save()` and `saveGroup()` carry a field forward on write **only when clearing it has no meaning**: `createdAt`, `lastReadAt`, `pinned`, `archived`, `groupId` are carried; `name`, `sortOrder`, `userId`, `teamId` are taken from the caller **because reassigning or clearing them is a real decision** that a carry would make inexpressible. `lastMessageAt` is derived rather than carried. This rule was arrived at three times in one day before it was written down.
+
+**A required check can be red during a long sweep, and rounds must attribute by file.** The story type-check sweep cannot land green until it finishes, so while it runs, `npm run typecheck` reports ~151 errors in `src/stories/**` that belong to nobody else. A round that hit this correctly established that **no error named its own files** rather than trying to fix them. **The rule: read the paths, not the count.**

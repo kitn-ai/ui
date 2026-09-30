@@ -188,7 +188,7 @@ export const Pricing: Story = {
                   {/* "Most popular" badge on the highlighted tier */}
                   <Show when={plan.featured}>
                     <div class="absolute -top-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 rounded-full bg-primary px-3 py-1 text-caption font-semibold text-primary-foreground">
-                      <kai-icon name="sparkles" size="14" />
+                      <kai-icon name="sparkles" size="sm" />
                       Most popular
                     </div>
                   </Show>

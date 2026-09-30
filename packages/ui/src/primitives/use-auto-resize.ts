@@ -1,4 +1,5 @@
 import { onCleanup } from 'solid-js';
+import { resolveLineHeight } from './text-metrics';
 
 interface UseAutoResizeOptions {
   /** Cap the grown height; past it the box stops growing and scrolls
@@ -13,25 +14,18 @@ interface UseAutoResizeOptions {
 }
 
 /**
- * One visible line's rendered height, in px: computed `line-height` (falling
- * back to a `normal`-keyword-safe `1.2× font-size`: `getComputedStyle`
- * resolves `line-height: normal` to the literal string `"normal"`, which
- * `parseFloat` reads as `NaN`, not a length) plus the element's own vertical
- * padding and border. The border-box height this hook writes (`scrollHeight`,
- * and what it's floored against) includes padding+border, so a floor of the
- * bare line-height alone would still let a heavily-padded field collapse
- * tighter than it visually needs to.
+ * One visible line's rendered height, in px: the element's line height (see
+ * `resolveLineHeight`, which owns the `normal`-keyword recovery) plus the
+ * element's own vertical padding and border. The border-box height this hook
+ * writes (`scrollHeight`, and what it's floored against) includes padding+border,
+ * so a floor of the bare line-height alone would still let a heavily-padded field
+ * collapse tighter than it visually needs to.
  */
 function oneLineHeight(el: HTMLTextAreaElement): number {
   const cs = getComputedStyle(el);
-  let lineHeight = parseFloat(cs.lineHeight);
-  if (Number.isNaN(lineHeight)) {
-    const fontSize = parseFloat(cs.fontSize) || 14;
-    lineHeight = fontSize * 1.2;
-  }
-  const paddingY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-  const borderY = (parseFloat(cs.borderTopWidth) || 0) + (parseFloat(cs.borderBottomWidth) || 0);
-  return lineHeight + paddingY + borderY;
+  const paddingY = (Number.parseFloat(cs.paddingTop) || 0) + (Number.parseFloat(cs.paddingBottom) || 0);
+  const borderY = (Number.parseFloat(cs.borderTopWidth) || 0) + (Number.parseFloat(cs.borderBottomWidth) || 0);
+  return resolveLineHeight(el) + paddingY + borderY;
 }
 
 export function useAutoResize(options: UseAutoResizeOptions = {}) {

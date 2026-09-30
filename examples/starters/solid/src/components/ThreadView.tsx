@@ -112,9 +112,20 @@ export function ThreadView(props: ThreadViewProps) {
           <ChatContainerScrollAnchor />
         </ChatContainerContent>
 
-        {/* Scroll-to-bottom button */}
-        <div class="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
-          <ScrollButton class="shadow-sm" />
+        {/* Scroll-to-bottom button.
+            The `pointer-events-none` on this wrapper and the kit button's own
+            `pointer-events-auto` are ONE fix, not two style choices — and the
+            wrapper is the half a later reader deletes as redundant. It is
+            `w-full max-w-3xl` across the bottom band of the list, so it is a
+            768px strip painted OVER the messages: with the pointer live on it a
+            wheel over the strip scrolled nothing, a drag starting on it
+            selected nothing, and a click landed on a positioning box. It exists
+            only to place the control, so it is a hole for the pointer and the
+            button is the one thing that takes the pointer back. */}
+        <div class="pointer-events-none absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+          {/* The button carries the kit's own elevation. A shadow class here
+              would be a second one, decided by stylesheet order. */}
+          <ScrollButton />
         </div>
       </ChatContainer>
     </div>

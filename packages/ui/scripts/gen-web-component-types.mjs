@@ -264,8 +264,9 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
     .join('\n');
 
   // The declared (non-DOM) member list for one web component. Shared by the
-  // HTMLElement interfaces below and the Vue GlobalComponents props interfaces,
-  // so the two can never disagree about WHICH props a kai-* web component accepts.
+  // HTMLElement interfaces below and the Vue GlobalComponents / Svelte
+  // svelteHTML props interfaces, so the three can never disagree about WHICH
+  // props a kai-* web component accepts.
   //
   // `domSafe` is the one axis on which the two copies differ, and only for a prop
   // whose NAME re-declares a member HTMLElement already has (today: kai-confirm's
@@ -283,16 +284,17 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
   // consumer who turns it off. So in the ELEMENT interfaces a colliding prop is
   // emitted required, with `undefined` stripped — which is also what the runtime
   // does: `defineWebComponent` registers every prop with a default, so the
-  // property always exists on an upgraded element. The Vue props interfaces below
-  // don't extend HTMLElement and keep the prop optional (a Vue template legitimately
-  // omits it). Guarded by tests/web-components/types-lib-check.test.ts, which
+  // property always exists on an upgraded element. The Vue GlobalComponents and
+  // Svelte svelteHTML props interfaces below don't extend HTMLElement and keep the
+  // prop optional (a template legitimately omits it). Guarded by
+  // tests/web-components/types-lib-check.test.ts, which
   // compiles this file with `skipLibCheck: false`.
   //
   // `defaulted` generalises that same runtime fact to a second case. PASSING a
   // prop and READING one back are different contracts, and only the element
   // interfaces are the read side:
-  //   - KaiChatElementProps (Vue, and the React wrapper in gen-web-component-react.mjs)
-  //     is what a consumer CONSTRUCTS with. `messages` there is optional, because
+  //   - KaiChatElementProps (Vue, Svelte, and the React wrapper in
+  //     gen-web-component-react.mjs) is what a consumer CONSTRUCTS with. `messages` there is optional, because
   //     the element supplies `[]` — that is the whole point of the widening.
   //   - KaiChatElement is what `document.querySelector` hands back. The element
   //     registered a non-`undefined` default, and the React wrapper skips
@@ -358,24 +360,119 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
       ])
       .join('\n');
 
+  // ---- event maps --------------------------------------------------------------
+  // `el.addEventListener('kai-…', e => e.detail.…)` is the pattern every guide in this
+  // repo teaches, and it was TS2339 on `Event` for EVERY kai-* event: the .d.ts declared
+  // the payload types (`KaiChatElementEvents`, `KaiVoiceInputElementEvents`) for the Vue
+  // template layer and nothing `addEventListener` resolves against. Consumer code that
+  // followed the docs needed a cast, which is the one thing the docs said it did not need.
+  //
+  // TWO shapes, because one cannot be correct alone:
+  //
+  //   • a per-element `<ClassName>EventMap extends HTMLElementEventMap` carrying the
+  //     events THAT element declares, plus the four add/removeEventListener overloads
+  //     lib.dom gives HTMLVideoElement for the same reason (HTMLVideoElementEventMap).
+  //     Per element is what lets one event name carry a different payload on different
+  //     elements: `kai-change` is `{ checked: boolean }` on kai-checkbox and
+  //     `{ sizes: number[] }` on kai-resizable, and a single key in a single global
+  //     interface cannot be both (TS2717). Extending HTMLElementEventMap rather than
+  //     fresh-declaring is what keeps the DOM's own events (`click`, `input`) typed on an
+  //     upgraded element instead of shadowed by the listener overloads.
+  //
+  //   • a global HTMLElementEventMap augmentation for the event names whose payload type
+  //     is identical everywhere it is DECLARED — most of them. That half is what reaches
+  //     `document.getElementById('voice')`, still a plain HTMLElement, and it is the shape
+  //     the hand-authored src/web-components/resizable/resizable.globals.d.ts used for the
+  //     cross-element maximize pair before this generator covered them.
+  //
+  // A name declared on more than one element with DIFFERENT payloads is emitted per
+  // element only and left out of the global block: a global entry would have to pick one
+  // element's payload and be wrong for the rest (`kai-submit` is `{ value, attachments }`
+  // on kai-chat, `{ value }` on kai-search), or print a union no consumer can read through.
+  // The generator prints what it left out, so the gap is visible in the build log rather
+  // than a silent hole in the types.
+  //
+  // `detail === 'unknown'` is not a declaration: the name was inferred from a file-scoped
+  // `dispatch(…)` literal (kai-resizable-item inherits its parent's that way), so it is not
+  // emitted onto that element and the element that DID declare it is the source.
+  const declares = (el) => el.events.filter((e) => e.detail !== 'unknown');
+  const detailOf = (e) => clean(e.detail, false);
+  const eventMember = (e) =>
+    `  '${e.name}': CustomEvent${e.detail ? `<${detailOf(e)}>` : ''};`;
+
+  const listenerOverloads = (el) =>
+    declares(el).length
+      ? [
+          `  addEventListener<K extends keyof ${el.className}EventMap>(type: K, listener: (this: ${el.className}, ev: ${el.className}EventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;`,
+          `  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;`,
+          `  removeEventListener<K extends keyof ${el.className}EventMap>(type: K, listener: (this: ${el.className}, ev: ${el.className}EventMap[K]) => any, options?: boolean | EventListenerOptions): void;`,
+          `  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;`,
+        ].join('\n')
+      : '';
+
   const interfaces = elements
     .map((el) => {
-      const body = [propBody(el, true), methodBody(el)].filter(Boolean).join('\n');
+      const body = [propBody(el, true), methodBody(el), listenerOverloads(el)].filter(Boolean).join('\n');
       return `export interface ${el.className} extends HTMLElement {\n${body}\n}`;
     })
     .join('\n\n');
+
+  const eventMapInterfaces = elements
+    .filter((el) => declares(el).length)
+    .map((el) => {
+      const body = declares(el)
+        .flatMap((e) => [...(e.description ? [`  /** ${e.description} */`] : []), eventMember(e)])
+        .join('\n');
+      return `export interface ${el.className}EventMap extends HTMLElementEventMap {\n${body}\n}`;
+    })
+    .join('\n\n');
+
+  // name -> the set of distinct declared payloads for it ('' for a detail-less event).
+  // More than one means the name means something different on different elements.
+  const byEventName = new Map();
+  for (const el of elements) {
+    for (const e of declares(el)) {
+      if (!byEventName.has(e.name)) byEventName.set(e.name, new Set());
+      byEventName.get(e.name).add(e.detail ? detailOf(e) : '');
+    }
+  }
+  const globalEventNames = [...byEventName.keys()].filter((n) => byEventName.get(n).size === 1).sort();
+  const perElementOnly = [...byEventName.keys()].filter((n) => byEventName.get(n).size > 1).sort();
 
   const tagMap = elements.map((el) => `    '${el.tag}': ${el.className};`).join('\n');
 
   const banner = `// AUTO-GENERATED by scripts/gen-web-component-api.mjs — do not edit by hand.
 // Typed custom-element interfaces + HTMLElementTagNameMap augmentation, so
 // \`document.querySelector('kai-message')\` is typed and gets prop autocomplete.
+// Plus the event maps \`el.addEventListener('kai-…', e => e.detail.…)\` resolves against:
+// a per-element \`<ClassName>EventMap\` on the element, and an HTMLElementEventMap
+// entry for every event name whose payload is the same on every element that declares it.
 // Also augments React's JSX.IntrinsicElements (see below) so a raw <kai-chat>
-// written directly in TSX type-checks.`;
+// written directly in TSX type-checks, vue's GlobalComponents so a <kai-chat> in a
+// Vue template is checked, svelte's svelteHTML.IntrinsicElements so a <kai-chat>
+// in a Svelte markup is too, and solid-js's JSX.IntrinsicElements (the
+// \`solid-js/jsx-runtime\` subpath solid resolves through \`jsxImportSource\`) so a
+// <kai-chat> in a Solid JSX tree is too. The svelte block's registry drift is
+// guarded by src/web-components/web-component/svelte-html-elements.test.ts.`;
 
   const tagMapBlock = `declare global {
   interface HTMLElementTagNameMap {
 ${tagMap}
+  }
+}`;
+
+  // The single declared payload for a name, or '' when the event carries no detail
+  // (`CustomEvent`).
+  const solePayload = (name) => [...byEventName.get(name)][0];
+
+  const globalEventBlock = `declare global {
+  interface HTMLElementEventMap {
+${globalEventNames
+    .map((n) => {
+      const payload = solePayload(n);
+      return `    '${n}': CustomEvent${payload ? `<${payload}>` : ''};`;
+    })
+    .join('\n')}
   }
 }`;
 
@@ -473,7 +570,6 @@ ${jsxTagMap}
       return [`    '${el.tag}': ${t};`, `    ${pascal(el.tag)}: ${t};`];
     })
     .join('\n');
-
   const vueBlock = `/** Attributes every kai-* element tolerates in a Vue template on top of its own
  *  props: \`id\`, \`data-*\`, \`aria-*\`, directives. The index signature keeps those
  *  legal under \`strictTemplates\` WITHOUT weakening the declared props — an
@@ -492,6 +588,189 @@ export type KaiVueElement<Props, Events> = new () => {
 declare module 'vue' {
   interface GlobalComponents {
 ${vueTagMap}
+  }
+}`;
+
+  // Svelte resolves a markup tag against `svelteHTML.IntrinsicElements` — the
+  // namespace svelte's own svelte-html.d.ts declares globally and svelte-check
+  // loads — and WHOSE LAST MEMBER is an index signature,
+  // `[name: string]: { [name: string]: any }`. So an unregistered kai-* tag and
+  // every attribute on it is `any`, and svelte-check checks NOTHING about a kai
+  // markup: vue has the GlobalComponents block above, react the JSX one above
+  // that, and svelte had nothing. MEASURED, by the block compile cell that owns
+  // the svelte form (scripts/lib/block-compile-cells.mjs): `<kai-button
+  // variant="solid">` — a value kai-button's own prop union does not contain — is
+  // a hard error in the vue and react cells and passed silently in the svelte one
+  // until this block. This closes that gap from the same `elements` model as the
+  // two blocks above, so a prop reaches all three template type spaces or none.
+  //
+  // Shape notes, each established against svelte-check on the svelte starter's own
+  // pinned svelte (the cell runs the real `svelte-check`, not tsc):
+  //  - AUGMENTED INSIDE `declare global`, unlike the vue and react blocks, because
+  //    `svelteHTML` is a GLOBAL namespace and THIS FILE IS A MODULE (it exports,
+  //    so every top-level declaration in it is module-scoped). A bare
+  //    `declare namespace svelteHTML` here would merge with nothing and type no
+  //    tag. Measured both ways: inside `declare global` the wrong attribute is an
+  //    error; at file scope it passes exactly as before.
+  //  - KEBAB KEYS ONLY. Svelte reads a capitalised tag as an imported component
+  //    rather than an intrinsic element, so the PascalCase twin Volar wants has no
+  //    svelte meaning and is not emitted.
+  //  - Event handlers are keyed `on` + the event name VERBATIM (`onkai-submit`),
+  //    which is what the svelte form emits (`on${b.name}`, the same literal the
+  //    starter writes by hand) and what svelte-check looks up — where vue
+  //    camelizes to `onKaiSubmit` and the React wrappers strip the prefix. Keyed
+  //    per element for vue's reason: one attribute name means a different payload
+  //    on different elements (`kai-change`), and a single shared key could only be
+  //    one of them. Measured: a handler whose CustomEvent detail disagrees with
+  //    the declared one is an error, so these are checked and not merely accepted.
+  //  - Props are `Partial<>` for vue's reason: the kai- contract lets a consumer
+  //    set any prop imperatively through a ref, so flagging an absent prop in a
+  //    template would be a false positive.
+  //  - `KaiElementSvelteProps`'s index signature keeps arbitrary attributes and
+  //    svelte's own directive-generated attributes legal (id, data-*, aria-*,
+  //    `class:`/`style:`/`use:`/`bind:this`) on an explicitly typed tag, and an
+  //    explicitly declared member still WINS over it — which is what makes the
+  //    wrong-attribute error above a real error rather than a signature that
+  //    swallowed it. It is a second name for what `KaiElementVueProps` is, not a
+  //    second constraint: both are exported per framework, and the body is the
+  //    same because the tolerance is the same.
+  //
+  // Declared locally, with no reference to any identifier that only exists inside
+  // the real 'svelte' module — same constraint as the vue and react blocks, since
+  // this file loads for every framework via `import '@kitn.ai/ui/web-components'`.
+  const svelteEventKey = (name) => `on${name}`;
+
+  const svelteEventInterfaces = elements
+    .map((el) => {
+      const body = el.events.flatMap((e) => [
+        ...(e.description ? [`  /** ${e.description} */`] : []),
+        `  '${svelteEventKey(e.name)}'?: (event: CustomEvent${e.detail ? `<${clean(e.detail, false)}>` : ''}) => void;`,
+      ]);
+      return `export interface ${el.className}SvelteEvents {\n${body.join('\n')}\n}`;
+    })
+    .join('\n\n');
+
+  const svelteTagMap = elements
+    .map((el) => `      '${el.tag}': KaiSvelteElement<${el.className}Props, ${el.className}SvelteEvents>;`)
+    .join('\n');
+
+  const svelteBlock = `/** Attributes every kai-* element tolerates in a Svelte markup on top of its own
+ *  props: \`id\`, \`data-*\`, \`aria-*\`, and the attributes Svelte's own directives
+ *  compile to. The index signature keeps those legal on a tag this file types
+ *  WITHOUT weakening the declared props — an explicit member always wins over an
+ *  index signature. */
+export interface KaiElementSvelteProps {
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as Svelte's markup type-checker sees it. Props are
+ *  \`Partial\` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSvelteElement<Props, Events> = Partial<Props> & Events & KaiElementSvelteProps;
+
+declare global {
+  namespace svelteHTML {
+    interface IntrinsicElements {
+${svelteTagMap}
+    }
+  }
+}`;
+
+  // Solid's `JSX.IntrinsicElements` is a CLOSED set — `HTMLElementTags &
+  // SVGElementTags & MathMLElementTags` with no index signature — so an unknown
+  // tag is a hard error and not an `any`-typed one: `<kai-button>` in a .tsx
+  // tree is TS2339 ("Property 'kai-button' does not exist on type
+  // 'JSX.IntrinsicElements'"). MEASURED by the block compile cell that owns the
+  // solid form (scripts/lib/block-compile-cells.mjs): all nine emitted trees
+  // failed, 480 × TS2339, before this block existed — solid is the kit's own
+  // framework and its markup type-checked nothing about a kai tag. React, Vue
+  // and Svelte each had a block here; this closes the set from the same
+  // `elements` registry as the three above, so a prop reaches every template
+  // type space or none.
+  //
+  // Shape notes:
+  //  - AUGMENT `solid-js/jsx-runtime`, not a global: solid resolves JSX through
+  //    `jsxImportSource` (`jsx: preserve`, `jsxImportSource: solid-js` — the
+  //    project the scaffolder's own solid front end compiles under), and that
+  //    subpath's types are the ones exporting `namespace JSX`. There is no
+  //    global `JSX` namespace to merge with.
+  //  - PER ELEMENT, unlike the React block above, and for the same reason the
+  //    vue and svelte blocks are: a declared member WINS over an index
+  //    signature, so `<kai-button variant="solid">` — a value its own prop
+  //    union does not contain — is an error, where a single shared
+  //    `[attr: string]: unknown` interface would have accepted it. Solid reads
+  //    no kebab-to-camel mapping for an unknown tag, so a camelCase prop also
+  //    matches its authored kebab twin only through `KaiElementSolidProps`.
+  //  - KEBAB KEYS ONLY: solid reads a capitalised tag as a component reference,
+  //    so the PascalCase twin the vue block emits would type no tag here.
+  //  - `KaiElementSolidProps`'s index signature keeps the tolerance the other
+  //    three arms have: `id`, `slot`, `class`, `data-*`, `aria-*`, and the
+  //    `on:<name>` keys solid spells a custom-event listener with (the emitted
+  //    solid form writes `on:kai-submit`). Events are UNTYPED here on purpose:
+  //    a handler's shape is checked where it is written (the controller's own
+  //    action signature), and solid's handler union type is a member of the
+  //    `JSX` namespace this file deliberately does not reference.
+  //  - Props are `Partial<>` for vue's reason: the kai- contract allows setting
+  //    any prop imperatively through a ref, so flagging an absent prop in a
+  //    template would be a false positive.
+  const solidEventInterfaces = elements
+    .map((el) => {
+      const body = el.events.flatMap((e) => [
+        ...(e.description ? [`  /** ${e.description} */`] : []),
+        `  'on:${e.name}'?: (event: CustomEvent${e.detail ? `<${clean(e.detail, false)}>` : ''}) => void;`,
+      ]);
+      return `export interface ${el.className}SolidEvents {\n${body.join('\n')}\n}`;
+    })
+    .join('\n\n');
+
+  const solidTagMap = elements
+    .map((el) => `      '${el.tag}': KaiSolidElement<${el.className}Props, ${el.className}SolidEvents>;`)
+    .join('\n');
+
+  const solidBlock = `/** Attributes every kai-* element tolerates in a Solid JSX tree on top of its own
+ *  props: \`id\`, \`class\`, \`slot\`, \`style\`, \`data-*\`, \`aria-*\`, \`ref\`, and the
+ *  \`on:<name>\` keys solid spells a non-delegated listener with. The index
+ *  signature keeps those legal on a tag this file types WITHOUT weakening the
+ *  declared props — an explicit member always wins over an index signature.
+ *  It also carries the authored kebab spelling of a camelCase prop
+ *  (\`collapse-below\` for \`collapseBelow\`): solid maps no kebab tag attribute onto
+ *  a camelCase member. */
+export interface KaiElementSolidProps {
+  children?: unknown;
+  [attr: string]: unknown;
+}
+
+/** A kai-* custom element as solid-js's JSX type-checker sees it. Props are
+ *  \`Partial\` because the kai- contract allows setting any of them imperatively
+ *  through a ref instead of in the markup. */
+export type KaiSolidElement<Props, Events> = Partial<Props> & Events & KaiElementSolidProps & {
+  /** Solid assigns a \`ref\` as the element itself OR a callback with the element
+   *  as its parameter (\`ref={(el) => …}\`). It is typed \`HTMLElement\` — NOT the
+   *  element's own interface — and that is a MEASURED choice, not a default:
+   *
+   *   · \`unknown\`/\`any\` leaves the callback's parameter with no contextual type,
+   *     which is TS7006 under \`strict\` at every \`ref={(el) => …}\` in the tree.
+   *   · the element interface (\`KaiButtonElement\`) removes that, but makes the
+   *     kit's own \`el as HTMLElement & Record<string, unknown>\` idiom — how a
+   *     story sets a non-scalar prop imperatively, the kai- contract's own
+   *     pattern — TS2352 at 120 sites: an interface has no implicit index
+   *     signature, so that conversion is a mistake in both directions, while
+   *     \`HTMLElement\` itself converts cleanly because the target's own
+   *     \`HTMLElement\` constituent makes it comparable to the source.
+   *
+   *  WHAT IT DOES NOT WEAKEN: whether a kai-* ATTRIBUTE is checked is decided by
+   *  \`Partial<Props>\` above, not by \`ref\` — \`ref\` only types the element a
+   *  callback is handed. Pinned by the template plant in the solid cell of
+   *  scripts/lib/block-compile-cells.mjs, which fails if
+   *  \`<kai-button variant="solid">\` stops being a compile error. */
+  ref?: HTMLElement | ((el: HTMLElement) => void);
+};
+
+declare module 'solid-js/jsx-runtime' {
+  namespace JSX {
+    interface IntrinsicElements {
+${solidTagMap}
+    }
   }
 }`;
 
@@ -544,7 +823,11 @@ ${TOAST_TYPES}
 
 ${interfaces}
 
+${eventMapInterfaces}
+
 ${tagMapBlock}
+
+${globalEventBlock}
 
 ${jsxIntrinsicBlock}
 
@@ -553,6 +836,14 @@ ${vuePropsInterfaces}
 ${vueEventInterfaces}
 
 ${vueBlock}
+
+${svelteEventInterfaces}
+
+${svelteBlock}
+
+${solidEventInterfaces}
+
+${solidBlock}
 `;
   writeFileSync(resolve(root, 'src/web-components/web-component-types.d.ts'), srcOut);
   console.log(`✓ src/web-components/web-component-types.d.ts — ${elements.length} web components`);
@@ -572,7 +863,11 @@ ${TOAST_TYPES}
 
 ${interfaces}
 
+${eventMapInterfaces}
+
 ${tagMapBlock}
+
+${globalEventBlock}
 
 ${jsxIntrinsicBlock}
 
@@ -581,9 +876,27 @@ ${vuePropsInterfaces}
 ${vueEventInterfaces}
 
 ${vueBlock}
+
+${svelteEventInterfaces}
+
+${svelteBlock}
+
+${solidEventInterfaces}
+
+${solidBlock}
 `;
   const distDir = resolve(root, 'dist');
   if (!existsSync(distDir)) mkdirSync(distDir, { recursive: true });
   writeFileSync(resolve(distDir, 'web-components.d.ts'), distOut);
   console.log(`✓ dist/web-components.d.ts — ${elements.length} web components (self-contained)`);
+  console.log(
+    `  · event maps: ${elements.filter((el) => declares(el).length).length} elements, ` +
+      `${globalEventNames.length} names on HTMLElementEventMap`,
+  );
+  if (perElementOnly.length) {
+    console.log(
+      `  · ${perElementOnly.length} name(s) per-element only, because their payload differs by element: ` +
+        `${perElementOnly.join(', ')}`,
+    );
+  }
 }

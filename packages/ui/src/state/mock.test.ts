@@ -223,7 +223,10 @@ describe('createMockResponder — scripted tool calls (F-35)', () => {
     expect(turn.toolCalls[0].input).toEqual({ city: 'Oslo', units: 'metric' });
   });
 
-  it('text + tool call in one turn arrive as ordered text-then-tool parts', async () => {
+  it('text + tool call in one turn arrive as ordered tool-then-text parts', async () => {
+    // PRE-CHANGE this was `['text', 'tool']`. A turn that announced a call and
+    // then answered rendered the call BELOW the answer it produced; the call now
+    // emits first, so the tool row reads above the sentence it resulted in.
     const respond = createMockResponder({
       ...quiet,
       delayMs: 0,
@@ -234,9 +237,59 @@ describe('createMockResponder — scripted tool calls (F-35)', () => {
     });
     const { messages, turn } = await runTurn(respond);
 
-    expect(messages[0].parts.map((p) => p.type)).toEqual(['text', 'tool']);
+    expect(messages[0].parts.map((p) => p.type)).toEqual(['tool', 'text']);
     expect(turn.text).toBe('Let me check that for you.');
     expect(turn.toolCalls[0].id).toBe('call_mock_1');
+  });
+
+  it('the tool call lands at least a series of commits before the first content token', async () => {
+    // The part order above could hold while the stream interleaved; this pins
+    // that the call is ANNOUNCED and settled into the message before any text
+    // commit, which is what makes the rendering order deterministic.
+    const respond = createMockResponder({
+      ...quiet,
+      delayMs: 0,
+      replies: [{ text: 'Checking the forecast.', toolCalls: [{ name: 'get_weather', arguments: { city: 'Oslo' } }] }],
+    });
+    const { commits } = await runTurn(respond);
+
+    const firstTool = commits.findIndex((c) => c[0].parts.some((p) => p.type === 'tool'));
+    const firstText = commits.findIndex((c) =>
+      c[0].parts.some((p) => p.type === 'text' && (p as { text: string }).text !== ''),
+    );
+    expect(firstTool).toBeGreaterThanOrEqual(0);
+    expect(firstText).toBeGreaterThan(firstTool);
+  });
+
+  it('the tool frames precede the content frames on the wire, not only in the parts', async () => {
+    const respond = createMockResponder({
+      ...quiet,
+      delayMs: 0,
+      replies: [{ text: 'Checking the forecast.', toolCalls: [{ name: 'get_weather', arguments: { city: 'Oslo' } }] }],
+    });
+    const deltas = (await collect(respond('hi')))
+      .split('\n\n')
+      .filter((f) => f.startsWith('data: ') && !f.includes('[DONE]'))
+      .map((f) => JSON.parse(f.slice(6)) as { choices?: { delta?: Record<string, unknown> }[] })
+      .map((f) => f.choices?.[0]?.delta)
+      .filter((d): d is Record<string, unknown> => d !== undefined);
+
+    const firstToolFrame = deltas.findIndex((d) => d['tool_calls'] !== undefined);
+    const firstContentFrame = deltas.findIndex((d) => typeof d['content'] === 'string');
+    expect(firstToolFrame).toBeGreaterThanOrEqual(0);
+    expect(firstContentFrame).toBeGreaterThan(firstToolFrame);
+  });
+
+  it('a turn with text and NO tool call is unchanged by the reorder', async () => {
+    const respond = createMockResponder({
+      ...quiet,
+      delayMs: 0,
+      replies: [{ text: 'Just the answer.' }],
+    });
+    const { messages, turn } = await runTurn(respond);
+
+    expect(messages[0].parts.map((p) => p.type)).toEqual(['text']);
+    expect(turn.finishReason).toBe('stop');
   });
 
   it('argument JSON is streamed in fragments, not delivered in one frame', async () => {
@@ -315,6 +368,8 @@ describe('createMockResponder — scripted reasoning and citations (S-1)', () =>
     expect(turn.text).toBe('Here is the answer.');
   });
 
+  // Unaffected by the tool-before-text reorder on purpose: a citation annotates
+  // the ANSWER, so it stays after the text (and thus still above the action bar).
   it('scripted sources arrive as source parts AFTER the text, one per citation', async () => {
     const respond = createMockResponder({
       ...quiet,
@@ -340,7 +395,8 @@ describe('createMockResponder — scripted reasoning and citations (S-1)', () =>
     expect(second.source).toEqual({ url: 'https://ui.kitn.ai/state/' });
   });
 
-  it('a full turn orders parts reasoning -> text -> sources -> tool, and still finishes tool_calls', async () => {
+  // PRE-CHANGE this ended `['reasoning', 'text', 'source', 'tool']`.
+  it('a full turn orders parts reasoning -> tool -> text -> sources, and still finishes tool_calls', async () => {
     const respond = createMockResponder({
       ...quiet,
       delayMs: 0,
@@ -353,7 +409,7 @@ describe('createMockResponder — scripted reasoning and citations (S-1)', () =>
     });
     const { messages, turn } = await runTurn(respond);
 
-    expect(messages[0].parts.map((p) => p.type)).toEqual(['reasoning', 'text', 'source', 'tool']);
+    expect(messages[0].parts.map((p) => p.type)).toEqual(['reasoning', 'tool', 'text', 'source']);
     expect(turn.finishReason).toBe('tool_calls');
   });
 

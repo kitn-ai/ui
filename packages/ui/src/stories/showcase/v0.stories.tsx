@@ -46,7 +46,7 @@ declare module 'solid-js' {
       'kai-menu': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'trigger-icon'?: string; 'trigger-label'?: string; 'trigger-icon-trailing'?: string; label?: string; full?: boolean };
       'kai-badge': JSX.HTMLAttributes<HTMLElement> & { variant?: string };
       'kai-message': JSX.HTMLAttributes<HTMLElement>;
-      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; 'web-search'?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
+      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
       'kai-model-switcher': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'current-model'?: string };
       'kai-tooltip': JSX.HTMLAttributes<HTMLElement> & { content?: string; 'open-delay'?: number | string };
     }
@@ -440,6 +440,13 @@ export const V0: Story = {
 
     return (
       <div class="h-screen w-full">
+        {/* The version chips, through kai-badge's DOCUMENTED ::part(badge) restyle
+            hook. The variant list (default, count, citation) has no outlined member,
+            so an earlier generation takes the hollow look here rather than a variant
+            that does not exist, and the live chip keeps the real default pill. */}
+        <style>{`
+          .chip-earlier::part(badge){ background:transparent; color:var(--color-muted-foreground); box-shadow:inset 0 0 0 1px var(--color-border); }
+        `}</style>
         {/* The split shell: chat (left) | preview (right). Composed from
             kai-resizable + the chat + kai-artifact. */}
         <kai-resizable orientation="horizontal" class="block h-full">
@@ -453,7 +460,7 @@ export const V0: Story = {
               <header class="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-2.5">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-medium">Vesper editorial</span>
-                  <kai-badge variant="outline">Generating UI</kai-badge>
+                  <kai-badge>Generating UI</kai-badge>
                 </div>
                 <kai-tooltip content="Share this build">
                   <kai-button variant="ghost" size="sm" icon="share">Share</kai-button>
@@ -476,10 +483,12 @@ export const V0: Story = {
                         ></kai-message>
                         {/* A generation → a version chip + Restore. The chip marks
                             the version currently framed; Restore navigates the real
-                            artifact to an earlier generation. */}
+                            artifact to an earlier generation. The live chip is the
+                            plain default badge; an EARLIER one carries `chip-earlier`
+                            for the hollow pill the variant list cannot name. */}
                         <Show when={turn.version}>
                           <div class="flex items-center gap-2 pl-1">
-                            <kai-badge variant={turn.version === activeVersion() ? undefined : 'outline'}>
+                            <kai-badge class={turn.version === activeVersion() ? undefined : 'chip-earlier'}>
                               {turn.version}{turn.version === activeVersion() ? ' · showing' : ''}
                             </kai-badge>
                             <Show when={turn.version !== activeVersion()}>
@@ -597,7 +606,9 @@ export const V0: Story = {
     </header>
 
     <!-- Each assistant generation is a VERSION. kai-artifact has only URL history,
-         not a v2/v3 model, so the chip + Restore are hand-wired to navigate(). -->
+         not a v2/v3 model, so the chip + Restore are hand-wired to navigate(). The
+         live chip is the plain badge; earlier chips take the hollow look through
+         kai-badge's documented ::part(badge) restyle hook, no variant naming it. -->
     <kai-message><!-- message set as a property: the assistant turn --></kai-message>
     <kai-badge>v2</kai-badge>
     <kai-button variant="ghost">Restore this version</kai-button>

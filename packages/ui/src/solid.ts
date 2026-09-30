@@ -35,6 +35,10 @@ export type {
   DropdownSeparatorProps, DropdownLabelProps, DropdownCheckboxItemProps, DropdownRadioItemProps,
   DropdownSubProps, DropdownSubTriggerProps, DropdownSubContentProps,
 } from './components/dropdown/dropdown';
+// The declarative item ladder `<kai-menu>` and the composer's tools menu render from a
+// `KaiMenuItem[]` tree. A Solid consumer building the same menu needs the same component.
+export { DropdownItems } from './components/dropdown/dropdown-items';
+export type { DropdownItemsProps } from './components/dropdown/dropdown-items';
 export { clampBasis } from './components/resizable/resizable';
 export { Input } from './components/input/input';
 export type { InputProps } from './components/input/input';
@@ -123,6 +127,13 @@ export { VoiceOutput } from './components/voice/voice-output';
 export type { VoiceOutputProps, VoiceOutputController } from './components/voice/voice-output';
 export { CollapsedRail } from './components/conversation/conversation-list';
 export type { CollapsedRailProps } from './components/conversation/conversation-list';
+// ConversationPanel — the widget-box list view `<kai-chat>` swaps in for its
+// conversation view. Its siblings in the same family (ConversationList,
+// ConversationItem) were already public and its own Storybook page documents
+// `import { ConversationPanel } from '@kitn.ai/ui/solid'`, so that snippet named
+// a symbol only a deep import could reach.
+export { ConversationPanel } from './components/conversation/conversation-panel';
+export type { ConversationPanelProps } from './components/conversation/conversation-panel';
 
 // ---------------------------------------------------------------------------
 // Layer 3b: the composed thread/shell components the coarse elements wrap.

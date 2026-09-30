@@ -116,6 +116,24 @@ export const MultipleSuggestions: Story = {
 </div>`),
 };
 
+/** The same pills in a narrow column: the row wraps onto three lines at 14rem, so the pill's
+ *  box (32px tall, 12px inline) is what keeps a wrapped stack compact. */
+export const Narrow: Story = {
+  name: 'Narrow (wrapping)',
+  render: (args: { onClick?: (e: MouseEvent) => void }) => (
+    <div class="flex w-56 flex-wrap gap-2">
+      <PromptSuggestion onClick={args.onClick}>What is SolidJS?</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Explain reactive signals</PromptSuggestion>
+      <PromptSuggestion onClick={args.onClick}>Compare SolidJS vs React</PromptSuggestion>
+    </div>
+  ),
+  ...src(`<div class="flex w-56 flex-wrap gap-2">
+  <PromptSuggestion>What is SolidJS?</PromptSuggestion>
+  <PromptSuggestion>Explain reactive signals</PromptSuggestion>
+  <PromptSuggestion>Compare SolidJS vs React</PromptSuggestion>
+</div>`),
+};
+
 /** Filtered list with a highlighted match (showcase). */
 export const WithHighlightedSearch: Story = {
   render: (args: { onClick?: (e: MouseEvent) => void }) => (

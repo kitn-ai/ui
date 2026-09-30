@@ -38,7 +38,7 @@ declare module 'solid-js' {
       'kai-button': JSX.HTMLAttributes<HTMLElement> & { variant?: string; size?: string; icon?: string; 'icon-trailing'?: string; label?: string; disabled?: boolean; full?: boolean; align?: 'start' | 'center' | 'end' };
       'kai-menu': JSX.HTMLAttributes<HTMLElement> & { theme?: string; 'trigger-icon'?: string; 'trigger-label'?: string; 'trigger-icon-trailing'?: string; label?: string; full?: boolean };
       'kai-badge': JSX.HTMLAttributes<HTMLElement> & { variant?: string };
-      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; 'web-search'?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
+      'kai-prompt-input': JSX.HTMLAttributes<HTMLElement> & { theme?: string; placeholder?: string; loading?: boolean; disabled?: boolean; voice?: boolean; attach?: boolean; submit?: string; 'suggestion-mode'?: string };
       'kai-message': JSX.HTMLAttributes<HTMLElement>;
       'kai-tasks': JSX.HTMLAttributes<HTMLElement>;
       'kai-file-tree': JSX.HTMLAttributes<HTMLElement>;
@@ -335,7 +335,7 @@ function HelmApp(props: { narrow: boolean }) {
                       <div class="truncate text-xs text-muted-foreground">{c.email}</div>
                     </div>
                     <Show when={!props.narrow}>
-                      <kai-badge variant={c.plan === 'Free' ? 'outline' : 'secondary'}>{c.plan}</kai-badge>
+                      <kai-badge>{c.plan}</kai-badge>
                     </Show>
                     <div class="w-14 text-right text-sm font-medium tabular-nums">{c.mrr}</div>
                     <span class="size-2 shrink-0 rounded-full" classList={{ 'bg-tool-green': c.ok, 'bg-tool-red': !c.ok }}></span>
@@ -477,7 +477,7 @@ export const Lovable: Story = {
                     style={{ display: 'block' }}
                   ></kai-message>
                   <div class="flex items-center gap-2">
-                    <kai-badge variant="secondary">v1</kai-badge>
+                    <kai-badge>v1</kai-badge>
                     <span class="text-xs text-muted-foreground">Checkpoint saved</span>
                     <kai-button variant="ghost" size="sm" icon="rotate-cw" class="ml-auto">Restore</kai-button>
                   </div>
@@ -522,7 +522,7 @@ export const Lovable: Story = {
                     <kai-tooltip content={d.label}>
                       <kai-button
                         ref={(el) => { el.addEventListener('kai-click', () => setDevice(d.id)); }}
-                        variant={device() === d.id ? 'secondary' : 'ghost'}
+                        variant={device() === d.id ? 'default' : 'ghost'}
                         size="icon-sm"
                         label={d.label}
                       ><d.Icon slot="icon" class="size-4" /></kai-button>
@@ -621,7 +621,7 @@ export const Lovable: Story = {
     <kai-tasks><!-- the build plan: data = { mode:'progress', tasks:[...] } --></kai-tasks>
     <div class="build-log"><!-- Created src/App.tsx, Created StatCard.tsx, ... --></div>
     <kai-message><!-- "Helm is live - preview it on the right." --></kai-message>
-    <kai-badge variant="secondary">v1</kai-badge> Checkpoint saved
+    <kai-badge>v1</kai-badge> Checkpoint saved
     <kai-button variant="ghost" icon="rotate-cw">Restore</kai-button>
 
     <!-- composer pinned at the bottom -->
@@ -637,7 +637,7 @@ export const Lovable: Story = {
   <section class="preview">
     <div class="toolbar">
       <kai-button size="icon-sm" label="Refresh"><svg slot="icon"></svg></kai-button>
-      <!-- device toggle: active = variant="secondary", others ghost -->
+      <!-- device toggle: active = variant="default", others ghost -->
       <kai-button label="Desktop"><svg slot="icon"></svg></kai-button>
       <kai-button label="Tablet"><svg slot="icon"></svg></kai-button>
       <kai-button label="Mobile"><svg slot="icon"></svg></kai-button>

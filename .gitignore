@@ -58,3 +58,15 @@ packages/ui/.kai-test-cache/
 # source checkout installs THAT checkout's build into the generated project
 # (see construct/local-kit.ts), cached here keyed by dist/'s fingerprint.
 packages/ui/.kai-local-kit/
+
+# TypeScript scratch dirs left by ad-hoc typechecks (a stale copy inside one
+# makes lint:dangling-imports report a specifier that never existed)
+.tc-tmp/
+
+# Browser-test artifacts: a failing run leaves these behind, and an
+# unignored artifact in a lint-walked tree is a trap for the next round.
+.vitest-attachments/
+tests/browser/__screenshots__/
+
+# Ad-hoc measurement scripts (a scratch file a lint walks is a trap)
+.measure*.mjs

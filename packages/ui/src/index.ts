@@ -40,8 +40,14 @@ export type { PdfPreviewOptions } from './primitives/pdf-preview';
 // so a no-bundler CDN page can't load it — the stores subpath is the raw-URL
 // route to the same module. Keep BOTH: removing these re-exports would break
 // every existing bundler consumer for no gain.
-export { localStorageStore, fetchStore, byRecency, isConversationUnread, LEGACY_THREAD_MIGRATED_TITLE } from './primitives/conversation-store';
+export { localStorageStore, fetchStore, byRecency, byPinnedThenRecency, orderedSummaries, orderedGroups, mostRecentSummary, isConversationUnread, LEGACY_THREAD_MIGRATED_TITLE } from './primitives/conversation-store';
 export type { ConversationStore } from './primitives/conversation-store';
+// The roving tab list: the keyboard half of a list rail — one tab stop, arrow traversal,
+// Home/End and activation over rows the CALLER resolves. Public so an application
+// arranging its own rows gets the same keyboard instead of rebuilding it; the conversation
+// rail's items controller runs on it.
+export { createRovingTabList } from './primitives/roving-tab-list';
+export type { RovingTabList, RovingTabListOptions } from './primitives/roving-tab-list';
 
 // Toasts: imperative `toast()` API + the reactive store behind <kai-toast-region>
 export { toast, configureToasts, ensureMounted as ensureToastRegion, getToasts } from './primitives/toast-store';
@@ -246,6 +252,9 @@ export {
 export type {
   ChatContainerProps, ChatContainerRootProps, ChatContainerContentProps, ChatContainerScrollAnchorProps,
 } from './components/chat/chat-container';
+// The name of the thread density axis, exportable like `ConversationRowDensity` (the
+// row's own axis) so a consumer can type a wrapper prop without inlining the union.
+export type { ThreadDensity } from './components/chat/thread-density';
 export { Message, MessageAvatar, MessageContent, MessageActions, MessageAction, MessageCopyButton, MessageBody } from './components/message/message';
 export type {
   MessageProps, MessageAvatarProps, MessageContentProps, MessageActionsProps,
@@ -267,12 +276,18 @@ export type {
 } from './components/response/response-compare';
 export { MessageSkills } from './components/message/message-skills';
 export type { MessageSkillsProps, Skill as MessageSkill } from './components/message/message-skills';
+// `PromptInputBand` is exported for `ComposerChips`' reason one line down: a host
+// hand-wiring the composer primitives has to put a row above the editable, and the
+// band is the only thing that keeps that row on its own line instead of becoming a
+// flex ROW ITEM beside the text (where it clips the placeholder). Un-exported, the
+// only way to get it was a deep path into `components/prompt/prompt-input`.
 export {
   PromptInput, PromptInputTextarea, PromptInputActions, PromptInputAction,
-  usePromptInput,
+  PromptInputBand, usePromptInput,
 } from './components/prompt/prompt-input';
 export type {
   PromptInputProps, PromptInputTextareaProps, PromptInputActionsProps, PromptInputActionProps,
+  PromptInputBandProps,
 } from './components/prompt/prompt-input';
 export { ResponseStream } from './components/response/response-stream';
 export type { ResponseStreamProps } from './components/response/response-stream';
@@ -307,6 +322,16 @@ export { Source, SourceTrigger, SourceContent, SourceList } from './components/s
 export type { SourceProps, SourceTriggerProps, SourceContentProps, SourceListProps } from './components/source/source';
 export { PromptSuggestion } from './components/prompt/prompt-suggestion';
 export type { PromptSuggestionProps } from './components/prompt/prompt-suggestion';
+// The composer's active-capability chips. Exported so a host can render the row itself
+// (or its own equivalent) against the SAME `checked` field the `+` menu renders, which
+// is what stops the two disagreeing about what is on. `chipItems` stays internal: where
+// a chip comes from is the composer's business, not a host's.
+export { ComposerChips } from './components/prompt/composer-chips';
+export type { ComposerChipsProps } from './components/prompt/composer-chips';
+// The `+` menu's item type, exportable for the same reason `<kai-menu>`'s `KaiMenuItem` is:
+// a named type reaching a `kai-*` element's props has to be importable from the root entry,
+// and the shipped element declarations reference it by name.
+export type { ComposerToolItem } from './components/prompt/default-input';
 export {
   Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription, EmptyContent, emptyMediaVariants,
 } from './components/empty/empty';

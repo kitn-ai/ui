@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal, For, Show } from 'solid-js';
 import {
-  PromptInput, PromptInputTextarea, PromptInputActions,
+  PromptInput, PromptInputTextarea, PromptInputActions, PromptInputBand,
   PromptSuggestion, ModelSwitcher, Loader, Button,
   Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove,
 } from '../index';
@@ -379,8 +379,16 @@ export const WithFileAttachments: Story = {
           }}
         />
         <PromptInput value={value()} onValueChange={setValue} onSubmit={handleSubmit}>
+          {/* The chips ride in a BAND, not a bare `<div>`. A bare div is a ROW ITEM of
+              the composer's frame: it shares the editable's line, so the placeholder
+              clips to whatever room is left beside the chips. `PromptInputBand` is
+              `order-first basis-full`, so it claims a line of its own and the text
+              follows beneath it — the same band (and the same `mb-5`) the kit's own
+              `DefaultPromptInput` projects its attachments in. `pt-3 pl-4` on the
+              editable went with the div: that was the manual compensation for the row
+              the chips were stealing, and the band no longer steals one. */}
           <Show when={attachments().length > 0}>
-            <div class="px-3 pt-3">
+            <PromptInputBand class="mb-5">
               <Attachments variant="inline">
                 <For each={attachments()}>
                   {(att) => (
@@ -392,9 +400,9 @@ export const WithFileAttachments: Story = {
                   )}
                 </For>
               </Attachments>
-            </div>
+            </PromptInputBand>
           </Show>
-          <PromptInputTextarea placeholder="Describe or ask about the attached files..." class="pt-3 pl-4" />
+          <PromptInputTextarea placeholder="Describe or ask about the attached files..." />
           <PromptInputActions class="justify-between">
             <Button
               variant="ghost"
@@ -474,8 +482,12 @@ let fileInput: HTMLInputElement | undefined;
   }}
 />
 <PromptInput value={value()} onValueChange={setValue} onSubmit={send}>
+  {/* Chips in a BAND: PromptInputBand is order-first basis-full, so it takes a line
+      of its own above the text. A bare <div> here is a row item and shares the
+      editable's line, which clips the placeholder beside the chips. Until the band
+      is exported from '@kitn.ai/ui', import it from '../components/prompt/prompt-input'. */}
   <Show when={attachments().length > 0}>
-    <div class="px-3 pt-3">
+    <PromptInputBand class="mb-5">
       <Attachments variant="inline">
         <For each={attachments()}>
           {(att) => (
@@ -487,9 +499,9 @@ let fileInput: HTMLInputElement | undefined;
           )}
         </For>
       </Attachments>
-    </div>
+    </PromptInputBand>
   </Show>
-  <PromptInputTextarea placeholder="Describe or ask about the attached files..." class="pt-3 pl-4" />
+  <PromptInputTextarea placeholder="Describe or ask about the attached files..." />
   <PromptInputActions class="justify-between">
     <Button variant="ghost" size="icon-sm" aria-label="Attach file" onClick={() => fileInput?.click()}><Paperclip class="size-4 text-muted-foreground" /></Button>
     <Button variant="default" size="icon-sm" class="rounded-full" disabled={!value() && attachments().length === 0} aria-label="Send message">
@@ -497,7 +509,7 @@ let fileInput: HTMLInputElement | undefined;
     </Button>
   </PromptInputActions>
 </PromptInput>`,
-    `import { PromptInput, PromptInputTextarea, PromptInputActions, Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove, Button } from '@kitn.ai/ui';
+    `import { PromptInput, PromptInputTextarea, PromptInputActions, PromptInputBand, Attachments, Attachment, AttachmentPreview, AttachmentInfo, AttachmentRemove, Button } from '@kitn.ai/ui';
 import type { AttachmentData } from '@kitn.ai/ui';
 import { createSignal, Show, For } from 'solid-js';
 import { ArrowUp, Paperclip } from 'lucide-solid';`,

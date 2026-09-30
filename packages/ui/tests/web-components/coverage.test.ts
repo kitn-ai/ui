@@ -45,7 +45,9 @@
  *   • the analyzer counted `<kai-dialog>` inside a COMMENT as construction, so it
  *     reported an untested web component as tested — the very mistake it was written to
  *     stop. Hence `stripNonCode`. Fixing it exposed a NINETEENTH uncovered web component,
- *     `kai-empty`, whose only test-file hits are a doc comment and a fixture string.
+ *     `kai-empty`, which at the time had no test-file hits beyond a doc comment and a
+ *     fixture string — and which `tests/web-components/empty-element.test.tsx` now mounts
+ *     and asserts, so the tense is what this line used to get wrong.
  *   • the guard scanned ITSELF, and its deliberately construction-shaped fixtures
  *     credited three of the web components it exempts. The stale-exemption test is what
  *     named them. A guard's own fixtures are not coverage.
@@ -436,10 +438,6 @@ const EXEMPT: Record<string, { kind: 'story-only' | 'nothing'; reason: string }>
   'kai-avatar': {
     kind: 'story-only',
     reason: 'rendered by seven showcase stories; no test asserts fallback initials, image failure, or size. Grep hits on "avatar" in the thread/message suites are a DIFFERENT component.',
-  },
-  'kai-empty': {
-    kind: 'story-only',
-    reason: 'story-only (chat-slots); no behavioural test. It read as covered until this analyzer learned to strip comments — its only test-file hits are a `<kai-empty>` in a doc comment in slot-registry-coverage.test.ts and a registry fixture string in slots.test.ts.',
   },
   'kai-icon': {
     kind: 'story-only',

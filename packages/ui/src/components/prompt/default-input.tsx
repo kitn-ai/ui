@@ -1,11 +1,16 @@
 import { For, Show } from 'solid-js';
-import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
+import { cn } from '../../utils/cn';
+import { PromptInput, PromptInputTextarea, PromptInputBand } from './prompt-input';
+import { ComposerChips, chipItems } from './composer-chips';
 import type { TriggerDef, ComposerChange } from '../composer/composer';
 import { type ComposerDoc, normalizeValue, serializeToText } from '../../primitives/composer-model';
 import { PromptSuggestion } from './prompt-suggestion';
 import { Button } from '../button/button';
 import { Tooltip } from '../tooltip/tooltip';
-import { Paperclip, Globe, Mic, Square } from 'lucide-solid';
+import { Mic, Plus, Square } from 'lucide-solid';
+import { Dropdown, DropdownTrigger, DropdownContent } from '../dropdown/dropdown';
+import { DropdownItems } from '../dropdown/dropdown-items';
+import type { KaiMenuItem } from '../../web-components/web-component/web-component-data-types';
 import {
   Attachments,
   Attachment,
@@ -42,13 +47,78 @@ export interface RejectedAttachment {
   reason: 'filtered' | 'unsupported';
 }
 
+/** A tool the host declares for the composer's `+` menu. `chip` is the ONE field
+ *  `<kai-menu>` does not read: the composer's chip row reads it to decide whether an
+ *  active item also shows as a chip in the control row, and the menu ignores it. It lives
+ *  here rather than on `KaiMenuItem` so the menu's own item type does not carry a field
+ *  that only one caller reads. */
+export interface ComposerToolItem extends KaiMenuItem {
+  /** Ask the composer to also show this item's state as a removable chip in the
+   *  control row. Ignored by `<kai-menu>`. */
+  chip?: boolean;
+}
+
+// Reported once per process, like `resolveThreadDensity`'s latch: the mistake is a static
+// authoring one, and a component that re-renders per keystroke must not repeat itself.
+const reportedTools = new Set<string>();
+
+/** The `tools` tree, with the untyped boundary handled the way the kit handles its other
+ *  array props.
+ *
+ *  WHY THIS EXISTS AT ALL. `tools` is declared on the elements so it is observable, and
+ *  that declaration is what lets an ATTRIBUTE reach it, where an array cannot travel, so
+ *  what arrives is a string. Nothing downstream would notice: `buildComposerTools` would
+ *  spread that string's characters into the menu, and `chipItems` would walk them. The
+ *  result is a nonsense menu rather than a missing one, which is exactly the silent
+ *  wrong-ness a boundary check is for. Not an array means reported once, then absent. */
+function resolveTools(value: unknown): ComposerToolItem[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (Array.isArray(value)) return value as ComposerToolItem[];
+  if (!reportedTools.has('tools')) {
+    reportedTools.add('tools');
+    console.error(
+      'tools: expected an array of items; rendering the built-in rows only. An array cannot travel as an attribute, so set the property instead (`el.tools = [...]`).',
+    );
+  }
+  return undefined;
+}
+
+/** The id of the built-in file item, so a host can recognise it in its own tree. */
+export const COMPOSER_FILE_ITEM_ID = 'files';
+
+/** The `+` menu's tree: the built-in file item, then the host's items verbatim. Exported
+ *  so the assembly is tested without rendering anything. */
+export function buildComposerTools(options: {
+  attach: boolean;
+  tools?: ComposerToolItem[];
+}): KaiMenuItem[] {
+  const host = options.tools ?? [];
+  if (!options.attach) return host;
+  const fileItem: KaiMenuItem = {
+    id: COMPOSER_FILE_ITEM_ID,
+    label: 'Add files or photos',
+    icon: 'paperclip',
+  };
+  // The separator is DERIVED from the tree rather than declared by the host, and derived
+  // only when the host's own tree does not already open with one. Two dividers in a row is
+  // the same defect as a divider with nothing above it, for exactly the input this rule
+  // exists to guard.
+  const needsDerivedSeparator = host.length > 0 && host[0].separator !== true;
+  return needsDerivedSeparator ? [fileItem, { separator: true }, ...host] : [fileItem, ...host];
+}
+
 export interface DefaultPromptInputProps {
   /** String = controlled text mirror; ComposerDoc = a seed that pre-populates pills. */
   value: string | ComposerDoc;
   placeholder?: string;
   disabled?: boolean;
   loading?: boolean;
+  /** Pins the box's layout: `true` two rows, `false` one row, omitted derives it. */
+  expanded?: boolean;
   suggestions?: string[];
+  /** How `suggestions` render. `'pill'` is the default; the alternative renders
+   *  each suggestion as a full-width list row. */
+  suggestionsLayout?: 'pill' | 'block';
   /** Attachments staged in the input. Provide `onAttachmentsChange` to enable
    *  the attach button + removable previews. */
   attachments?: AttachmentData[];
@@ -64,8 +134,6 @@ export interface DefaultPromptInputProps {
   /** Fired with the files `accept` excluded, as facts (name, media type, reason); it
    *  renders nothing itself. */
   onAttachmentsRejected?: (rejected: RejectedAttachment[]) => void;
-  /** Show a web-search (Globe) button in the left toolbar; calls `onWebSearch`. */
-  webSearch?: boolean;
   /** Show a Voice (Mic) button in the left toolbar; calls `onVoice`. */
   voice?: boolean;
   // Hiding it entirely (Enter-only) is pure CSS: `::part(send){display:none}`, no prop
@@ -76,7 +144,6 @@ export interface DefaultPromptInputProps {
   onSubmit: () => void;
   onSuggestionClick: (v: string) => void;
   onAttachmentsChange?: (attachments: AttachmentData[]) => void;
-  onWebSearch?: () => void;
   onVoice?: () => void;
   /** When `true` and `loading` is also `true`, the send button is replaced by
    *  a Stop button that calls `onStop`. */
@@ -87,6 +154,10 @@ export interface DefaultPromptInputProps {
   toolbarActions?: CustomAction[];
   /** Called when a custom toolbar action button is clicked, with the action id. */
   onAction?: (id: string) => void;
+  /** Extra items for the `+` menu, appended after the built-in file item. */
+  tools?: ComposerToolItem[];
+  /** A chosen menu item, carrying its new state when the item is a toggle. */
+  onToolSelect?: (detail: { id: string; checked?: boolean }) => void;
   /** Rich entity triggers (`/` skills, `@` agents) passed to the composer. */
   triggers?: TriggerDef[];
   /** Default icon per entity kind (kind → image src) passed to the composer. */
@@ -212,13 +283,31 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
     return mode === 'always' || (mode === 'auto' && hasContent());
   };
 
+  // The file item and the picker it opens are ONE feature, so the condition that admits
+  // them is stated once. `buildComposerTools` takes the same value the `<input>`'s own
+  // gate uses, which is what keeps a menu item from existing without a picker behind it.
+  const canOfferFiles = () => canAttach() && props.attach !== false;
+  const tools = () => resolveTools(props.tools);
+  const toolItems = () => buildComposerTools({ attach: canOfferFiles(), tools: tools() });
+  // Read from the host's own declaration, NOT from the assembled tree:
+  // `buildComposerTools` returns `KaiMenuItem[]`, which is the menu's own vocabulary and
+  // does not carry `chip`. The menu renders the tree; the chip row renders the
+  // declaration — and both go through `tools()`, so one boundary check covers each.
+  const chips = () => chipItems(tools());
+
   return (
     <>
       <Show when={props.suggestions?.length}>
-        <div class="mb-2 flex flex-wrap gap-2">
+        <div
+          class={cn(
+            'mb-2',
+            // The container follows the variant: pills wrap side by side, rows stack.
+            props.suggestionsLayout === 'block' ? 'flex flex-col gap-1.5' : 'flex flex-wrap gap-2',
+          )}
+        >
           <For each={props.suggestions}>
             {(s) => (
-              <PromptSuggestion onClick={() => props.onSuggestionClick(s)}>{s}</PromptSuggestion>
+              <PromptSuggestion block={props.suggestionsLayout === 'block'} onClick={() => props.onSuggestionClick(s)}>{s}</PromptSuggestion>
             )}
           </For>
         </div>
@@ -229,10 +318,24 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
         onSubmit={props.onSubmit}
         isLoading={props.loading}
         disabled={props.disabled}
+        expanded={props.expanded}
+        attachmentCount={attachments().length}
         class="relative"
       >
         <Show when={canAttach() && attachments().length}>
-          <div class="px-3 pt-3">
+          {/* First in the DOM: the editable below carries the same `order-first` so it can
+              claim its own line, and without this the chips would be lifted BELOW the
+              paragraph they belong above. `PromptInputBand` gives the band its own line and
+              the content column's 6px inset in the expanded layout, so the chips and the
+              prose under them start on one edge at 16px while the controls ride the
+              frame's 10px.
+
+              `mb-5` is the measured 20px between the chip band and the text's line box: in
+              the reference the chips' ink ends at 52 and the text's line box starts at
+              about 71.5 with a 21px line advance. It used to be `mb-3.5` plus the frame's
+              6px row gap; the row gap is gone, because it would be charged to every
+              composer that projects nothing. A tidier `mb-2` would land 6px tight. */}
+          <PromptInputBand class="mb-5">
             <Attachments variant="inline">
               <For each={attachments()}>
                 {(att) => (
@@ -244,20 +347,51 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 )}
               </For>
             </Attachments>
-          </div>
+          </PromptInputBand>
         </Show>
-        {/* Consumer-injected content inside the card, above the textarea (e.g. an
-            inline status strip). A shadow-internal hole — unreachable from outside.
-            Native slot; inert outside a shadow root, projected by the custom element. */}
-        <slot name="input-top" />
-        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} class="min-h-[44px] pt-3 pl-4" triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
-        <PromptInputActions class="mt-2 flex w-full items-center justify-between gap-2 px-3 pb-0">
-          <div class="flex items-center gap-2">
+        {/* Consumer-injected content inside the card, above the textarea (e.g. an inline
+            status strip). A shadow-internal hole — unreachable from outside. Native slot;
+            inert outside a shadow root, projected by the custom element.
+
+            It rides in a BAND, so it takes its own line above the text in both layouts
+            rather than becoming a row item that shoves the leading cluster sideways — which
+            is what it did while it sat here as a bare slot, and it showed as an 8px indent
+            on the `+`. The band carries no margin of its own: it renders even when nothing
+            is projected, so a margin would be charged to every composer, and the space
+            between a band and the text belongs to the host's own content. */}
+        <PromptInputBand>
+          <slot name="input-top" />
+        </PromptInputBand>
+        {/* The LEADING cluster, and it sits BEFORE the editable in the DOM: collapsed
+            these controls share the text's row and belong to its left, and expanded the
+            editable's own `order-first` is what moves the text onto the line above
+            them. Deliberately no order of its own — the ordering lives in one place,
+            on the body wrapper, rather than in three class strings that have to agree.
+
+            A plain `div` carrying `contents`, NOT `PromptInputActions`: that component is
+            the BOX form, for a caller whose own `justify-*` needs a width to distribute
+            across. Nothing here has to state which layout it is in — collapsed the
+            body's `flex-1` absorbs the free space ahead of it, expanded the frame's
+            `justify-between` places it at the start of the wrapped row. `contents`
+            contributes no box, so the item the frame actually lays out is the group div
+            below — which is what keeps this cluster ONE item on whichever row it lands. */}
+        <div data-cluster="leading" class="contents">
+          {/* `shrink-0` belongs HERE, not on the cluster above: a `contents` wrapper has
+              no box, so the frame's flex items are these group divs and they are what
+              would be squeezed.
+
+              It holds the width for ONE case — when the groups ALONE exceed the frame.
+              Then, without it, they shrink and clip their chips; with it, the row
+              overflows and the chips stay legible. It is NOT what makes the text wrap:
+              the collapsed body is `flex-1`, i.e. `flex-basis: 0%`, so the base sizes
+              sum to the groups' widths, free space is positive, and the body takes
+              whatever they leave — wrapping on that width whatever they do. */}
+          <div class="flex shrink-0 items-center gap-2">
             {/* Consumer-injected leading toolbar controls (e.g. a + menu). display:contents
                 ensures an empty slot adds no stray gap; projected nodes lay out as toolbar
                 items. Native slot; projected by the custom element. */}
             <slot name="toolbar-start" style={{ display: 'contents' }} />
-            <Show when={canAttach() && props.attach !== false}>
+            <Show when={canOfferFiles()}>
               <input
                 ref={fileInput}
                 type="file"
@@ -276,44 +410,63 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                   e.currentTarget.value = ''; // allow re-picking the same file
                 }}
               />
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                class="rounded-full"
-                aria-label="Attach files"
-                disabled={props.disabled}
-                onClick={() => fileInput?.click()}
-              >
-                <Paperclip class="size-4" />
-              </Button>
             </Show>
-            <Show when={props.webSearch}>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                class="rounded-pill gap-1"
-                aria-label="Search the web"
-                disabled={props.disabled}
-                onClick={() => props.onWebSearch?.()}
-              >
-                <Globe class="size-4" />
-                Search
-              </Button>
+            {/* The `+` menu replaced the paperclip that used to sit here, and the tooltip
+                cases in this file moved onto it. The tip is a DESCRIPTION: the name stays
+                `More tools`, because a tip that becomes the accessible name is a defect the
+                kit has already shipped once.
+
+                The trigger goes through `as` so it IS the kit's `Button` rather than a
+                native button carrying a copy of its variant classes — a copy silently stops
+                matching every other control in this row the day Button is restyled. The
+                ref hop this costs (the surface's trigger ref travels `As` -> the function's
+                props -> Button's `rest` -> the real `<button>`) is asserted rather than
+                assumed: `the surface's trigger ref reaches the real button` in the test
+                file fails if it lands on a wrapper or on nothing, because the close path
+                focuses `ctx.trigger()` and the assertion reads `document.activeElement`.
+                `type` is supplied here because the surface only stamps it when it renders
+                the button itself. */}
+            <Show when={toolItems().length > 0}>
+              <Dropdown disabled={props.disabled}>
+                <Tooltip content="More tools">
+                  <DropdownTrigger
+                    as={(p) => (
+                      <Button {...p} type="button" variant="subtle" size="icon-sm" class="rounded-full" part="tools" aria-label="More tools" disabled={props.disabled}>
+                        <Plus class="size-4" />
+                      </Button>
+                    )}
+                  />
+                </Tooltip>
+                <DropdownContent>
+                  <DropdownItems
+                    items={toolItems()}
+                    onSelect={(detail) => {
+                      // The built-in file item is the composer's own, so it opens the
+                      // picker here rather than being reported as a tool the host never
+                      // declared and would have to handle.
+                      if (detail.id === COMPOSER_FILE_ITEM_ID) {
+                        fileInput?.click();
+                        return;
+                      }
+                      props.onToolSelect?.(detail);
+                    }}
+                  />
+                </DropdownContent>
+              </Dropdown>
             </Show>
-            <Show when={props.voice}>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon-sm"
-                class="rounded-full"
-                aria-label="Voice input"
+            {/* Active capabilities, one view of the same `checked` field the menu
+                renders. Inside the leading group so the cluster stays ONE item on
+                whichever row it lands — a sibling would make it two and the frame's
+                `justify-between` would spread the wrong things. */}
+            <Show when={chips().length > 0}>
+              <span class="bg-border h-4 w-px shrink-0" aria-hidden="true" />
+              <ComposerChips
+                items={chips()}
                 disabled={props.disabled}
-                onClick={() => props.onVoice?.()}
-              >
-                <Mic class="size-4" />
-              </Button>
+                // The SAME event the menu fires when the item is chosen, so a chip and a
+                // menu row are one code path rather than two that have to agree.
+                onRemove={(id) => props.onToolSelect?.({ id, checked: false })}
+              />
             </Show>
             <For each={props.toolbarActions ?? []}>
               {(action) => {
@@ -322,7 +475,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
                 const btn = (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="subtle"
                     size="icon-sm"
                     class="rounded-full"
                     aria-label={action.label}
@@ -339,12 +492,41 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               }}
             </For>
           </div>
-          {/* Right cluster — consumer trailing controls (model/effort/voice…)
-              hug the send button, right-aligned. The `toolbar-end` slot and the send
-              button live together so justify-between pins them to the right edge
-              (left group stays left). Native slot; projected by the element. */}
-          <div class="flex items-center gap-2">
+        </div>
+        <PromptInputTextarea placeholder={props.placeholder} aria-label={props.placeholder || 'Message'} triggers={props.triggers} kindIcons={props.kindIcons} onComposerChange={props.onComposerChange} />
+        {/* The TRAILING cluster. It reaches the far edge of whichever row it lands on
+            without asking for one: collapsed the body's `flex-1` absorbs the free space
+            ahead of it, expanded the frame's `justify-between` puts it last. The
+            `toolbar-end` slot and the send button live together so they stay adjacent
+            at that edge. Native slot; projected by the element.
+
+            `contents` for the same reason as the leading cluster: the frame lays out
+            the group div, not this wrapper, and the frame's own distribution is what
+            spreads the two clusters. */}
+        <div data-cluster="trailing" class="contents">
+          {/* `shrink-0` here for the same reason as the leading group — see that site
+              for what it is and is not for. The cluster has no box, so this div is the
+              item the frame lays out and `justify-between` places. */}
+          <div class="flex shrink-0 items-center gap-2">
             <slot name="toolbar-end" />
+            {/* VOICE sits beside SUBMIT, not beside the input affordances. Both
+                references put it here, and the reason is what it produces: a microphone
+                makes a message, like the send button, rather than adding something to
+                one. Same `voice` prop, rendered at the other end of the row — this is a
+                placement change and nothing else. */}
+            <Show when={props.voice}>
+              <Button
+                type="button"
+                variant="subtle"
+                size="icon-sm"
+                class="rounded-full"
+                aria-label="Voice input"
+                disabled={props.disabled}
+                onClick={() => props.onVoice?.()}
+              >
+                <Mic class="size-4" />
+              </Button>
+            </Show>
             <Show
               when={showStop()}
               fallback={
@@ -377,7 +559,7 @@ export function DefaultPromptInput(props: DefaultPromptInputProps) {
               </Button>
             </Show>
           </div>
-        </PromptInputActions>
+        </div>
       </PromptInput>
     </>
   );

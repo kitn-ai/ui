@@ -54,6 +54,16 @@ describe('DefaultPromptInput stoppable Stop button', () => {
     expect(queryByTestId('send')).not.toBeInTheDocument();
   });
 
+  it('Stop button is an icon button: an svg glyph, no visible text, still named "Stop"', () => {
+    const { getByTestId } = render(() => (
+      <DefaultPromptInput {...baseProps} loading={true} stoppable={true} />
+    ));
+    const stop = getByTestId('stop');
+    expect(stop.querySelector('svg')).not.toBeNull();
+    expect(stop.textContent?.trim()).toBe('');
+    expect(stop).toHaveAttribute('aria-label', 'Stop');
+  });
+
   it('Stop button has accessible label "Stop"', () => {
     const { getByLabelText } = render(() => (
       <DefaultPromptInput {...baseProps} loading={true} stoppable={true} />

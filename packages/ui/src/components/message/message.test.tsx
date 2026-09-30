@@ -2,9 +2,10 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
-import { groupMessageParts, MessageBody } from './message';
+import { groupMessageParts, Message, MessageBody } from './message';
 import { appendReasoningPart, appendTextPart, upsertToolPart } from '../../state/parts';
 import type { MessagePart } from '../../web-components/chat/chat-types';
+import type { ThreadDensity } from '../chat/thread-density';
 
 // jsdom has no ResizeObserver; the reasoning disclosure wires one when its
 // content mounts (same stub as response-compare.test.tsx / thread.test.tsx).
@@ -405,6 +406,11 @@ describe('MessageBody reasoningMode (Task 10b)', () => {
     expect(container.textContent).toContain('Reasoning');
     // No expandable detail: the reasoning TEXT itself is not rendered.
     expect(container.textContent).not.toContain('Considering the options.');
+    // The shimmer row carries its own bottom margin (the owner's tweak: mb-3, the
+    // same step the tool panel uses above), pinned as a class rather than as a
+    // computed style jsdom cannot resolve from the compiled stylesheet.
+    expect(container.querySelector('.mb-3')?.textContent).toContain('Reasoning');
+    expect(container.querySelector('.mb-2')).toBeNull();
   });
 
   it('"compact" renders nothing once the part has settled (not streaming)', () => {
@@ -421,6 +427,38 @@ describe('MessageBody reasoningMode (Task 10b)', () => {
 
     const settledCase = renderMode('off', false);
     expect(settledCase.container.textContent).toBe('');
+  });
+});
+
+// ─── The row gap, the density axis at the message scale ──────────────────────
+//
+// A `<Message>` on its own knows nothing of a thread, so an unset `density` has to land
+// on the shipped spacing rather than on whichever value happens to be the tighter one.
+// The threads passing their own RESOLVED value down are pinned in `thread.test.tsx` and
+// `chat-thread.test.tsx`; this pins the row itself, both halves.
+describe('Message row gap', () => {
+  const row = (c: HTMLElement) => c.querySelector('[part="row"]') as HTMLElement;
+
+  it('renders the shipped gap-3 with no density, and for an explicit `default`', () => {
+    const unset = render(() => <Message>Hello</Message>).container;
+    const explicit = render(() => <Message density="default">Hello</Message>).container;
+    for (const c of [unset, explicit]) {
+      expect(row(c).getAttribute('class')).toBe('flex items-start gap-3');
+    }
+  });
+
+  it("renders gap-0 for `compact`", () => {
+    const { container } = render(() => <Message density="compact">Hello</Message>);
+    expect(row(container).getAttribute('class')).toBe('flex items-start gap-0');
+  });
+
+  it('falls back to `default`, loudly, for an unknown value arriving as a string', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(() => <Message density={'cosy' as unknown as ThreadDensity}>Hello</Message>);
+    expect(row(container).getAttribute('class')).toBe('flex items-start gap-3');
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(String(error.mock.calls[0][0])).toContain('Message');
+    error.mockRestore();
   });
 });
 
