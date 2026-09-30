@@ -9,6 +9,7 @@ import {
   type LucideProps,
 } from 'lucide-solid';
 import '../../web-components/register/register'; // every kai-* element used below
+import { composeArtifactToolbar } from './artifact-toolbar-slot';
 import { type AgentStatus, type AgentStatusTone } from '../../components/agent-card/agent-card';
 import { cn } from '../../utils/cn';
 import type { KaiNavItem } from '../../components/nav/nav';
@@ -1883,8 +1884,8 @@ export const SplitWorkspace: Story = {
                               art.src = tab.src;
                               art.displayUrl = tab.url;
                               art.iframeTitle = tab.title;
-                              art.noTabs = true;
-                              art.openInTab = true;
+                              // The built-in bar without its Preview|Code toggle, composed in the toolbar slot.
+                              composeArtifactToolbar(art, { back: true, forward: true, reload: true, home: true, address: tab.url, open: true });
                             }}
                             style={{ display: 'block', height: '100%' }}
                           ></kai-artifact>
@@ -2157,6 +2158,7 @@ type Agent = {
         {/* BROWSER — full-screen kai-artifact + your own preview tab strip */}
         <Match when={topView() === 'browser'}>
           <PreviewTabs tabs={browserTabs()} />
+          {/* The built-in toolbar is the default; a slot="toolbar" child replaces it. */}
           <kai-artifact src={activeTab().src} displayUrl={activeTab().url} />
         </Match>
       </Switch>

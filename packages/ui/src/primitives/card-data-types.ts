@@ -239,7 +239,7 @@ export type ArtifactCardTab = 'preview' | 'code';
  *
  *  A card envelope is written by a model, so the surface it can reach has to be
  *  the part that describes WHAT to show, not how the viewer behaves. Toolbar
- *  composition (`showNav`/`showTabs`/…), view-state (`maximized`), the iframe
+ *  composition (the `toolbar` slots), view-state (`maximized`), the iframe
  *  `sandbox` and the imperative `controllerRef` are all host concerns and stay
  *  off the wire: a model must not be able to widen its own sandbox or hide the
  *  chrome the user needs to inspect what it built. */
