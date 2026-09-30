@@ -42,7 +42,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
+/* STATIC on purpose, see the note where this block ends. */
+@theme static {
   --color-background: var(--kai-color-background, light-dark(hsl(0 0% 100%), hsl(50 2% 9%)));
   --color-foreground: var(--kai-color-foreground, light-dark(hsl(240 10% 3.9%), hsl(0 0% 98%)));
   --color-card: var(--kai-color-card, light-dark(hsl(0 0% 100%), hsl(45 4% 12%)));
@@ -205,6 +206,14 @@
   --color-tool-amber: var(--kai-color-tool-amber, light-dark(hsl(38 92% 28%), hsl(38 92% 50%)));
   --color-tool-green: var(--kai-color-tool-green, light-dark(hsl(142 71% 26%), hsl(142 71% 45%)));
   --color-tool-red: var(--kai-color-tool-red, light-dark(hsl(0 72% 42%), hsl(0 84% 70%)));
+}
+
+/* Everything below is the ordinary (tree-shaken) theme: only variables a used class reads are emitted.
+   The colour group above is `static` so the whole palette is emitted in every sheet, whether or not a
+   shipped class reads a token: consumers reach tokens from `::part` CSS and their own rules inside the
+   shadow root, and eight tokens used to vanish from the sheet (light AND dark) purely because nothing
+   in the kit read them. */
+@theme {
 
   /* Every rung derives from --radius. A rung left at Tailwind's stock value is a
      component that silently ignores the knob (`rounded-2xl` did, before these).

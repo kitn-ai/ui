@@ -36,8 +36,10 @@
      checkbox/radio fallbacks, scrollbars) must follow the kit's light/dark
      mode — NOT the OS — so e.g. the native calendar icon never renders black
      on a dark surface. `color-scheme` drives that native rendering; we set it
-     from the resolved mode (the `.dark` scope the element factory toggles). */
+     from the resolved mode: `.dark` / `.light` on any ancestor (a facade wrapper
+     sets `color-scheme` itself from `--kai-color-scheme`). */
   .dark { color-scheme: dark; }
+  .light { color-scheme: light; }
 
   /* One token-driven focus ring for EVERY focusable element in the shadow root.
      Blue by default (via --color-ring), consistent in light + dark, and

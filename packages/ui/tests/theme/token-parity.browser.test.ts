@@ -8,26 +8,24 @@ import { COLOR_TOKENS, mount, resolveTokens } from './token-probe';
  * (commit "capture every colour token's light and dark value before the theme migration") and is
  * never regenerated to make this pass.
  *
- * Eight tokens are ABSENT from the light snapshot (they resolve transparent): Tailwind tree-shakes
- * unused `@theme` variables out of `:root,:host`, while the plain `.dark {}` rule kept them, so the old
- * sheet defined them in dark only, by accident, and no shipped class reads them. `UNDEFINED_IN_LIGHT` is
- * DERIVED from the fixture, not typed. With the `.dark` block gone they are absent in BOTH schemes: that
- * is the one recorded drift, and it is asserted as "equal to the old value OR absent" so it can neither
- * hide a changed value nor grow to a ninth token.
+ * NO allowance for absent tokens: eight of them used to vanish from the sheet in light because Tailwind
+ * tree-shakes unused `@theme` variables, and the colour group is now `@theme static`, so every one of the
+ * tokens is emitted in both schemes. A token that goes missing again resolves transparent and fails here.
  */
 const TRANSPARENT = 'rgba(0, 0, 0, 0)';
 const F = fixture as unknown as { light: Record<string, string>; dark: Record<string, string> };
-const UNDEFINED_IN_LIGHT = COLOR_TOKENS.filter((t) => F.light[t] === TRANSPARENT);
+// The fixture recorded these as absent in LIGHT (transparent) because the old sheet never emitted them.
+// Their light value is therefore not a regression to compare against; every other cell is.
+const NOT_IN_OLD_LIGHT = new Set(COLOR_TOKENS.filter((t) => F.light[t] === TRANSPARENT));
 
 const live: HTMLElement[] = [];
 afterEach(() => { live.splice(0).forEach((e) => e.remove()); });
 
 describe('colour token parity against the pre-migration fixture', () => {
-  it('the fixture covers every token theme.css declares, and the derived absent set is the known small one', () => {
+  it('the fixture covers every token theme.css declares', () => {
     expect(Object.keys(F.light).sort()).toEqual(COLOR_TOKENS);
     expect(Object.keys(F.dark).sort()).toEqual(COLOR_TOKENS);
-    expect(UNDEFINED_IN_LIGHT.length).toBeGreaterThan(0);
-    expect(UNDEFINED_IN_LIGHT.length).toBeLessThan(15);
+    expect(NOT_IN_OLD_LIGHT.size).toBe(8);
   });
 
   for (const tag of ['kai-button', 'kai-thread', 'kai-prompt-input']) {
@@ -36,12 +34,11 @@ describe('colour token parity against the pre-migration fixture', () => {
         const el = await mount(tag, { theme: scheme });
         live.push(el);
         const { resolved } = resolveTokens(el);
-        const absentOk = new Set(UNDEFINED_IN_LIGHT);
-        const shifted = COLOR_TOKENS.filter((t) => resolved[t] !== F[scheme][t] && !(absentOk.has(t) && resolved[t] === TRANSPARENT))
+        const shifted = COLOR_TOKENS.filter((t) => !(scheme === 'light' && NOT_IN_OLD_LIGHT.has(t)) && resolved[t] !== F[scheme][t])
           .map((t) => `${t}: was ${F[scheme][t]} now ${resolved[t]}`);
         expect(shifted).toEqual([]);
-        const absentNow = COLOR_TOKENS.filter((t) => resolved[t] === TRANSPARENT);
-        expect(absentNow.every((t) => absentOk.has(t))).toBe(true);
+        // Every token is emitted, in both schemes: nothing resolves transparent any more.
+        expect(COLOR_TOKENS.filter((t) => resolved[t] === TRANSPARENT)).toEqual([]);
         // A vacuity guard: the two schemes must actually differ, or "equal to the fixture" proves nothing.
         expect(COLOR_TOKENS.filter((t) => F.light[t] !== F.dark[t]).length).toBeGreaterThan(30);
       });
