@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { fn } from 'storybook/test';
 import { createSignal } from 'solid-js';
+import { Square } from 'lucide-solid';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
@@ -207,17 +208,21 @@ export const Loading: Story = {
       <PromptInput isLoading value="" onValueChange={args.onValueChange} onSubmit={args.onSubmit}>
         <PromptInputTextarea placeholder="Generating response..." />
         <PromptInputActions>
-          <Button variant="outline" size="sm">
-            Stop
+          <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
+            <Square class="size-3" />
           </Button>
         </PromptInputActions>
       </PromptInput>
     </div>
   ),
-  ...src(`<PromptInput isLoading value={value()} onValueChange={setValue}>
+  ...src(`import { Square } from 'lucide-solid';
+
+<PromptInput isLoading value={value()} onValueChange={setValue}>
   <PromptInputTextarea placeholder="Generating response..." />
   <PromptInputActions>
-    <Button variant="outline" size="sm">Stop</Button>
+    <Button variant="outline" size="icon-sm" class="rounded-full" aria-label="Stop">
+      <Square class="size-3" />
+    </Button>
   </PromptInputActions>
 </PromptInput>`),
 };
