@@ -23,7 +23,7 @@ beforeEach(() => {
 });
 afterEach(() => { vi.restoreAllMocks(); document.documentElement.className = ''; });
 
-const scheme = (el = document.createElement('div')) => {
+const scheme = (el: HTMLElement = document.createElement('div')) => {
   let dispose = () => {};
   const get = createRoot((d) => { dispose = d; return createResolvedColorScheme(el); });
   return { get, dispose };
@@ -63,7 +63,7 @@ describe('createResolvedColorScheme', () => {
     const wrap = document.createElement('div');
     const el = document.createElement('span');
     wrap.append(el); document.body.append(wrap);
-    const s = scheme(el as unknown as HTMLElement);
+    const s = scheme(el);
     knob = 'dark';
     wrap.className = 'dark';
     await flush();
