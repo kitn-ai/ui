@@ -31,8 +31,8 @@ interface Props extends Record<string, unknown> {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. */
-  size?: 'sm' | 'md';
+  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  size?: 'xs' | 'sm' | 'md';
   /** Disable interaction. */
   disabled?: boolean;
   /** Make the input read-only. */
@@ -395,7 +395,7 @@ defineWebComponent<Props, Events>('kai-input', {
         label={props.label as string | undefined}
         hint={props.hint as string | undefined}
         error={props.error as string | undefined}
-        size={(props.size as 'sm' | 'md' | undefined) ?? 'md'}
+        size={(props.size as 'xs' | 'sm' | 'md' | undefined) ?? 'md'}
         invalid={flag('invalid')}
         disabled={flag('disabled')}
         readonly={flag('readonly')}

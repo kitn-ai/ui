@@ -12,8 +12,8 @@ interface Props extends Record<string, unknown> {
   options: KaiSegmentedOption[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. */
-  size?: 'sm' | 'md';
+  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  size?: 'xs' | 'sm' | 'md';
 }
 
 /** Events fired by `<kai-segmented>`. */
@@ -103,7 +103,7 @@ defineWebComponent<Props, Events>('kai-segmented', {
       <Segmented
         options={resolved()}
         value={value()}
-        size={(props.size as 'sm' | 'md' | undefined) ?? 'md'}
+        size={(props.size as 'xs' | 'sm' | 'md' | undefined) ?? 'md'}
         aria-label={forwardedName()}
         onChange={(next) => apply(next)}
       />

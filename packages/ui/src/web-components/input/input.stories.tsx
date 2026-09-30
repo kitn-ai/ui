@@ -77,15 +77,17 @@ export const Error: StoryObj = {
 ></kai-input>`),
 };
 
-/** Both densities, side by side. */
+/** Every density, side by side. `xs` is a 28px field for a toolbar row. */
 export const Sizes: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', 'flex-direction': 'column', gap: '0.75rem', 'max-width': '24rem', padding: '1rem' }}>
+      <kai-input size="xs" label="Extra small" placeholder="28px, for a toolbar row"></kai-input>
       <kai-input size="sm" label="Small" placeholder="Compact density"></kai-input>
       <kai-input size="md" label="Medium" placeholder="Default density"></kai-input>
     </div>
   ),
-  parameters: src(`<kai-input size="sm" label="Small" placeholder="Compact density"></kai-input>
+  parameters: src(`<kai-input size="xs" label="Extra small" placeholder="28px, for a toolbar row"></kai-input>
+<kai-input size="sm" label="Small" placeholder="Compact density"></kai-input>
 <kai-input size="md" label="Medium" placeholder="Default density"></kai-input>`),
 };
 

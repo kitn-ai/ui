@@ -16,13 +16,15 @@ export interface SegmentedProps {
   /** Fires with the next `value` when a segment is chosen. */
   onChange: (value: string) => void;
   /** Control density. Defaults to `md`. */
-  size?: 'sm' | 'md';
+  size?: 'xs' | 'sm' | 'md';
   /** Accessible name for the group, rendered as `aria-label` on the track. */
   'aria-label'?: string;
   class?: string;
 }
 
-const SIZE: Record<'sm' | 'md', string> = {
+const SIZE: Record<'xs' | 'sm' | 'md', string> = {
+  // h-6 inside the track's p-0.5 makes a 28px track: the height of a kai-button `icon-sm`.
+  xs: 'h-6 px-2 text-xs',
   sm: 'h-7 px-2 text-xs',
   md: 'h-8 px-3 text-sm',
 };

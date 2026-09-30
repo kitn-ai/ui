@@ -23,8 +23,8 @@ const meta = {
   argTypes: {
     size: {
       control: 'select',
-      options: ['sm', 'md'],
-      description: 'Control density.',
+      options: ['xs', 'sm', 'md'],
+      description: 'Control density. `xs` is 28px, for a compact toolbar row.',
       table: { defaultValue: { summary: 'md' } },
     },
     label: { control: 'text', description: 'Field label, linked to the input.' },
@@ -132,15 +132,17 @@ export const Error: Story = {
 />`),
 };
 
-/** Both densities, side by side. */
+/** Every density, side by side. `xs` is a 28px field for a toolbar row. */
 export const Sizes: Story = {
   render: () => (
     <div class="flex max-w-sm flex-col gap-3">
+      <Input size="xs" placeholder="Extra small (28px)" />
       <Input size="sm" placeholder="Small" />
       <Input size="md" placeholder="Medium (default)" />
     </div>
   ),
-  ...src(`<Input size="sm" placeholder="Small" />
+  ...src(`<Input size="xs" placeholder="Extra small (28px)" />
+<Input size="sm" placeholder="Small" />
 <Input size="md" placeholder="Medium (default)" />`),
 };
 

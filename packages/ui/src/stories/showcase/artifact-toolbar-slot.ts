@@ -49,14 +49,18 @@ export function composeArtifactToolbar(art: HTMLElement, controls: ToolbarContro
   if (controls.reload) bar.append(button('rotate-cw', 'Reload', () => el.reload()));
   if (controls.home) bar.append(button('home', 'Home', () => el.home()));
 
-  // A native read-only input, styled to the built-in field's box (kai-input is taller).
-  const address = document.createElement('input');
-  address.readOnly = true;
+  // A kit input at the bar's 28px row height (`size="xs"`). Its own name comes from the host
+  // `aria-label`; the address text keeps the mono face the built-in field draws, through the
+  // input's `input` part (this bar is light DOM, so the page's own style reaches it).
+  const address = document.createElement('kai-input') as HTMLElement & { value: string };
+  address.setAttribute('size', 'xs');
+  address.setAttribute('readonly', '');
   address.setAttribute('aria-label', 'Address');
-  address.style.cssText =
-    'flex:1;min-width:0;height:1.75rem;box-sizing:border-box;padding:0 0.625rem;border-radius:0.375rem;' +
-    'border:1px solid var(--color-border);background:color-mix(in srgb,var(--color-muted) 40%,transparent);' +
-    'color:var(--color-foreground);font:12px ui-monospace,SFMono-Regular,Menlo,monospace;outline:none';
+  address.style.cssText = 'flex:1;min-width:0';
+  const face = document.createElement('style');
+  face.textContent =
+    'kai-input[aria-label="Address"]::part(input){font-family:ui-monospace,SFMono-Regular,Menlo,monospace}';
+  bar.append(face);
   bar.append(address);
   if (expand) bar.append(expand);
   if (open) bar.append(open);
@@ -83,40 +87,23 @@ export function composeArtifactToolbar(art: HTMLElement, controls: ToolbarContro
   }
 
   if (controls.tabs) {
-    // Native buttons in the built-in toggle's box: kai-segmented is taller than the bar's 28px row.
-    const list = document.createElement('div');
-    list.setAttribute('role', 'tablist');
-    list.setAttribute('aria-label', 'View');
-    list.style.cssText =
-      'display:flex;flex-shrink:0;align-items:center;gap:0.125rem;padding:0.125rem;border-radius:0.375rem;background:var(--color-muted)';
-    const tabs = (['preview', 'code'] as const).map((value) => {
-      const t = document.createElement('button');
-      t.type = 'button';
-      t.setAttribute('role', 'tab');
-      const icon = document.createElement('kai-icon');
-      icon.setAttribute('name', value === 'preview' ? 'eye' : 'code');
-      icon.setAttribute('size', 'sm');
-      t.append(icon, value === 'preview' ? 'Preview' : 'Code');
-      t.addEventListener('click', () => { el.tab = value; });
-      list.append(t);
-      return { value, t };
-    });
-    const paint = () => {
-      const current = (el.tab as string | undefined) ?? (el.defaultTab as string | undefined) ?? 'preview';
-      for (const { value, t } of tabs) {
-        const on = value === current;
-        t.setAttribute('aria-selected', String(on));
-        t.style.cssText =
-          'display:inline-flex;align-items:center;gap:0.375rem;height:1.5rem;padding:0 0.5rem;border:0;border-radius:0.25rem;' +
-          'font:500 12px system-ui,sans-serif;cursor:pointer;' +
-          (on ? 'background:var(--color-background);color:var(--color-foreground);box-shadow:0 1px 2px rgb(0 0 0/0.08)' : 'background:transparent;color:var(--color-muted-foreground)');
-      }
-    };
+    // The built-in toggle, from the kit: a 28px `kai-segmented` (`size="xs"`) in the 28px row.
+    const toggle = document.createElement('kai-segmented') as HTMLElement & { options: unknown; value: string };
+    toggle.setAttribute('size', 'xs');
+    toggle.setAttribute('aria-label', 'View');
+    toggle.style.flexShrink = '0';
+    toggle.options = [
+      { value: 'preview', label: 'Preview', icon: 'eye' },
+      { value: 'code', label: 'Code', icon: 'code' },
+    ];
+    const current = () => (el.tab as string | undefined) ?? (el.defaultTab as string | undefined) ?? 'preview';
+    const paint = () => { toggle.value = current(); };
     paint();
+    toggle.addEventListener('kai-change', (e) => { el.tab = (e as CustomEvent<{ value: string }>).detail.value; });
     art.addEventListener('kai-tab-change', paint);
-    // `kai-tab-change` reports the user's tab choice, not a `tab` assignment, and the toggle sets
-    // `el.tab` itself, so repaint on every write. The element installs its own `tab` accessor when
-    // it upgrades, so the wrap goes on after that, and wraps that accessor.
+    // `kai-tab-change` reports the user's tab choice, not a `tab` assignment, so repaint on every
+    // write. The element installs its own `tab` accessor when it upgrades, so the wrap goes on
+    // after that, and wraps that accessor.
     customElements.whenDefined('kai-artifact').then(() => queueMicrotask(() => {
       const desc = Object.getOwnPropertyDescriptor(el, 'tab');
       if (!desc?.get || !desc.set) return;
@@ -129,7 +116,7 @@ export function composeArtifactToolbar(art: HTMLElement, controls: ToolbarContro
       });
       paint();
     }));
-    bar.append(list);
+    bar.append(toggle);
   }
   art.append(bar);
 }

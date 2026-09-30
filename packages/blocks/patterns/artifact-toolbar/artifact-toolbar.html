@@ -14,11 +14,9 @@
         border-bottom: 1px solid var(--kai-color-border, #e5e5e5);
         background: var(--kai-color-surface, #fafafa);
       }
-      .bar input {
-        flex: 1; min-width: 0; height: 1.75rem; box-sizing: border-box; padding: 0 0.625rem;
-        border: 1px solid var(--kai-color-border, #e5e5e5); border-radius: 0.375rem;
-        font: 12px ui-monospace, monospace; background: transparent; color: inherit;
-      }
+      .bar kai-input { flex: 1; min-width: 0; }
+      /* size="xs" is the 28px field: the same row height as an icon-sm button. */
+      .bar kai-input::part(input) { font-family: ui-monospace, monospace; }
       nav { display: flex; gap: 0.5rem; padding: 0.5rem; }
     </style>
   </head>
@@ -30,9 +28,8 @@
         <kai-button id="back" variant="ghost" size="icon-sm" icon="arrow-left" label="Back" disabled></kai-button>
         <kai-button id="forward" variant="ghost" size="icon-sm" icon="arrow-right" label="Forward" disabled></kai-button>
         <kai-button id="reload" variant="ghost" size="icon-sm" icon="rotate-cw" label="Reload"></kai-button>
-        <!-- A native input: its aria-label names the control itself, which a label on a
-             kai-input host would not. -->
-        <input id="address" readonly aria-label="Address" />
+        <!-- size="xs" fits the 28px row. The host aria-label names the input inside. -->
+        <kai-input id="address" size="xs" readonly aria-label="Address"></kai-input>
         <kai-button id="open" variant="ghost" size="icon-sm" icon="external-link" label="Open in new tab" disabled></kai-button>
       </div>
     </kai-artifact>

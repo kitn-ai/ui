@@ -4991,12 +4991,12 @@
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"md\"",
+        "type": "undefined | \"xs\" | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density. Defaults to `md`.",
+        "description": "Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row.",
         "default": "'md'",
-        "displayType": "undefined | \"sm\" | \"md\""
+        "displayType": "undefined | \"xs\" | \"sm\" | \"md\""
       },
       {
         "name": "disabled",
@@ -8659,12 +8659,12 @@
       },
       {
         "name": "size",
-        "type": "undefined | \"sm\" | \"md\"",
+        "type": "undefined | \"xs\" | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density. Defaults to `md`.",
+        "description": "Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row.",
         "default": "'md'",
-        "displayType": "undefined | \"sm\" | \"md\""
+        "displayType": "undefined | \"xs\" | \"sm\" | \"md\""
       }
     ],
     "events": [

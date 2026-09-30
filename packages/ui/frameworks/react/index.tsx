@@ -1154,8 +1154,8 @@ export interface InputProps extends WebComponentProps {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
   /** Make the input read-only. */
@@ -1922,8 +1922,8 @@ export interface SegmentedProps extends WebComponentProps {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
   /** A segment was chosen. */
   onChange?: (event: CustomEvent<{ value: string }>) => void;
 }

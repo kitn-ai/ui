@@ -16,8 +16,8 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   hint?: string;
   /** Error text; rendered below the control and flips the field invalid. */
   error?: string;
-  /** Control density. Defaults to `md`. */
-  size?: 'sm' | 'md';
+  /** Control density. Defaults to `md`. `xs` is a 28px (`h-7`) field for a compact toolbar row. */
+  size?: 'xs' | 'sm' | 'md';
   /** Force the invalid (destructive-border) state without an `error` string. */
   invalid?: boolean;
   /** Affix inside the field row before the input, wrapped by the row's focus ring. */
@@ -83,6 +83,11 @@ const ROW_INPUT =
   'min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed';
 
 const SIZE_SM = 'px-2.5 py-1';
+// 28px, so a toolbar row built from kit parts (kai-button `icon-sm` is 28px too) holds one height.
+// `py-0` because the height is fixed rather than derived from line-height plus padding.
+const SIZE_XS = 'h-7 px-2.5 py-0 text-xs';
+const sizeClass = (size: 'xs' | 'sm' | 'md' | undefined) =>
+  size === 'xs' ? SIZE_XS : size === 'sm' ? SIZE_SM : undefined;
 // The invalid-state border, EXPORTED because `src/components/select/select.tsx` renders the same
 // field box and a second hand-typed copy of this string is exactly the kind of
 // restatement that rots (`docs/coupling-map.md` owns that list). `INVALID` stays as the local
@@ -328,7 +333,7 @@ export function Input(props: InputProps): JSX.Element {
   );
 
   const fieldClass = () =>
-    cn(FIELD_BASE, local.size === 'sm' && SIZE_SM, isInvalid() && INVALID, local.class);
+    cn(FIELD_BASE, sizeClass(local.size), isInvalid() && INVALID, local.class);
 
   // Created on first use and then REUSED, so toggling an affix on or off does
   // not discard a focused input either. The lazy cache also keeps the unused
@@ -362,7 +367,7 @@ export function Input(props: InputProps): JSX.Element {
           part="field"
           class={cn(
             FIELD_ROW,
-            local.size === 'sm' && SIZE_SM,
+            sizeClass(local.size),
             isInvalid() && INVALID,
             local.disabled && 'opacity-50 pointer-events-none',
             local.class,

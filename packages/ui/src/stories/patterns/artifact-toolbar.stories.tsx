@@ -27,7 +27,7 @@ export const ComposedToolbar: Story = {
     <kai-button id="back" icon="arrow-left" label="Back" disabled></kai-button>
     <kai-button id="forward" icon="arrow-right" label="Forward" disabled></kai-button>
     <kai-button id="reload" icon="rotate-cw" label="Reload"></kai-button>
-    <input id="address" readonly aria-label="Address" />
+    <kai-input id="address" size="xs" readonly aria-label="Address"></kai-input>
     <kai-button id="open" icon="external-link" label="Open in new tab" disabled></kai-button>
   </div>
 </kai-artifact>

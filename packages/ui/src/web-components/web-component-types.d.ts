@@ -1129,8 +1129,8 @@ export interface KaiInputElement extends HTMLElement {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
   /** Make the input read-only. */
@@ -1793,8 +1793,8 @@ export interface KaiSegmentedElement extends HTMLElement {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
   addEventListener<K extends keyof KaiSegmentedElementEventMap>(type: K, listener: (this: KaiSegmentedElement, ev: KaiSegmentedElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
   removeEventListener<K extends keyof KaiSegmentedElementEventMap>(type: K, listener: (this: KaiSegmentedElement, ev: KaiSegmentedElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
@@ -3811,8 +3811,8 @@ export interface KaiInputElementProps {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
   /** Make the input read-only. */
@@ -4315,8 +4315,8 @@ export interface KaiSegmentedElementProps {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. */
-  size?: "sm" | "md";
+  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  size?: "xs" | "sm" | "md";
 }
 
 export interface KaiSelectElementProps {

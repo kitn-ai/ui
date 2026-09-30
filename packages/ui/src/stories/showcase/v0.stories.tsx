@@ -591,15 +591,17 @@ export const V0: Story = {
   // The composed Preview|Code toggle has to follow the tab it sets itself.
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     const art = canvasElement.querySelector('kai-artifact') as HTMLElement;
-    const tab = (name: string) => art.querySelector(`[slot="toolbar"] [role="tab"]:nth-child(${name === 'Preview' ? 1 : 2})`) as HTMLElement;
-    await waitFor(() => expect(tab('Preview')).not.toBeNull());
-    await expect(tab('Preview').getAttribute('aria-selected')).toBe('true');
-    tab('Code').click();
-    await waitFor(() => expect(tab('Code').getAttribute('aria-selected')).toBe('true'));
-    await expect(tab('Preview').getAttribute('aria-selected')).toBe('false');
+    const toggle = () => art.querySelector('[slot="toolbar"] kai-segmented') as HTMLElement | null;
+    // The segments live in the toggle's shadow root; `aria-pressed` is the selected state.
+    const seg = (name: string) => toggle()?.shadowRoot?.querySelectorAll('button')[name === 'Preview' ? 0 : 1] as HTMLElement;
+    await waitFor(() => expect(seg('Preview')).toBeTruthy());
+    await expect(seg('Preview').getAttribute('aria-pressed')).toBe('true');
+    seg('Code').click();
+    await waitFor(() => expect(seg('Code').getAttribute('aria-pressed')).toBe('true'));
+    await expect(seg('Preview').getAttribute('aria-pressed')).toBe('false');
     // An assignment from outside the toolbar moves it too.
     (art as HTMLElement & { tab: string }).tab = 'preview';
-    await waitFor(() => expect(tab('Preview').getAttribute('aria-selected')).toBe('true'));
+    await waitFor(() => expect(seg('Preview').getAttribute('aria-pressed')).toBe('true'));
   },
   parameters: {
     docs: {

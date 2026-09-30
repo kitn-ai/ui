@@ -2604,7 +2604,7 @@ A grouped, filterable command / mention palette (the `@`-picker pattern).
 | `label` | `label` | `undefined | string` | — | Field label, linked to the input. |
 | `hint` | `hint` | `undefined | string` | — | Helper text below the control. |
 | `error` | `error` | `undefined | string` | — | Error text; flips the field invalid (`aria-invalid` + destructive border). |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
+| `size` | `size` | `undefined | "xs" | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. |
 | `disabled` | `disabled` | `undefined | false | true` | — | Disable interaction. |
 | `readonly` | `readonly` | `undefined | false | true` | — | Make the input read-only. |
 | `required` | `required` | `undefined | false | true` | — | Mark the input required. |
@@ -2979,7 +2979,7 @@ An accessible tab strip, selection only: set `items` as a JS property, listen fo
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `options` | — | `{ value: string; label: string; icon?: undefined | string }[]` | `[]` | The selectable segments, left to right. Set as a JS property (array). |
 | `value` | `value` | `undefined | string` | — | Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. |
-| `size` | `size` | `undefined | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. |
+| `size` | `size` | `undefined | "xs" | "sm" | "md"` | `'md'` | Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. |
 
 #### Events
 
