@@ -82,7 +82,8 @@ interface Props extends Record<string, unknown> {
   markdown?: boolean;
   /** Text/markdown sizing for the message body. */
   proseSize?: ProseSize;
-  /** Shiki theme name used for fenced code blocks in the content. */
+  // Default: `'github-light'` in light mode, `'github-dark-dimmed'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
@@ -165,7 +166,7 @@ defineWebComponent<Props, Events>('kai-message', {
   role: 'assistant',
   markdown: undefined,
   proseSize: 'sm',
-  codeTheme: 'github-dark-dimmed',
+  codeTheme: undefined,
   codeHighlight: true,
   // NO default here, deliberately: `resolveActionsReveal` keys an omitted value to the
   // message's own role (a user row reveals on hover or focus, an assistant row stays

@@ -207,7 +207,7 @@ interface Events {
 defineWebComponent<Props, Events>('kai-chat', {
   messages: [], value: undefined, placeholder: 'Send a message...', loading: false,
   suggestions: undefined, suggestionsLayout: 'pill', suggestionMode: 'submit', persistSuggestions: false, proseSize: 'sm',
-  codeTheme: 'github-dark-dimmed', codeHighlight: true, chatTitle: undefined,
+  codeTheme: undefined, codeHighlight: true, chatTitle: undefined,
   models: undefined, currentModel: undefined, context: undefined, scrollButton: true,
   attach: true, tools: undefined, expanded: undefined, voice: false, triggers: undefined, kindIcons: undefined,
   // No default, deliberately: an omitted value keys the reveal to each message's own role

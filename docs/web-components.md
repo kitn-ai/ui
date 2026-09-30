@@ -149,7 +149,7 @@ Every web component also accepts a `theme` attribute (`'light' | 'dark' | 'auto'
 | `suggestionMode` | `suggestion-mode` | `undefined | "submit" | "fill"` | `'submit'` | What clicking a suggestion does. Default sends it immediately; `'fill'` places it in the input without sending. |
 | `persistSuggestions` | `persist-suggestions` | `undefined | false | true` | `false` | Keep suggestions visible after the conversation starts; they otherwise hide once `messages` is non-empty. Default false. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown. Defaults to `'sm'`. |
-| `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
+| `codeTheme` | `code-theme` | `undefined | string` | — | Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). |
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | — | How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Renders plain `<pre>` blocks with no highlighter load when false. Default true. |
 | `reasoningOpen` | `reasoning-open` | `undefined | false | true` | — | Seeds the reasoning disclosure open and keeps it tracking the stream. Default false; inert unless `reasoning` is `'full'`. |
@@ -555,7 +555,7 @@ Standalone prompt input with a send button. Use when you want just the input are
 | `role` | `role` | `undefined | "user" | "assistant"` | `'assistant'` | Who is speaking. NOT an ARIA role: it renders role="article" with a named aria-label instead, and shadows the ARIA role attribute (see the note above). |
 | `markdown` | `markdown` | `undefined | false | true` | — | Force markdown on/off. Defaults to on for assistant, off for user. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text/markdown sizing for the message body. |
-| `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name used for fenced code blocks in the content. |
+| `codeTheme` | `code-theme` | `undefined | string` | — | Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting for code blocks (no Shiki loads). |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | — | Whether the action bar stays visible or appears on pointer-over; omitted keys the default to the turn, so a user row reveals and an assistant row stays visible. |
 | `avatarSrc` | `avatar-src` | `undefined | string` | — | Convenience avatar image URL (used when `message.avatar` is not set). |
@@ -635,7 +635,7 @@ A single message row: renders markdown/plain content, reasoning, tool calls, att
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `content` | `content` | `string` | `''` | The markdown source. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Text and markdown sizing. |
-| `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme for fenced code blocks. |
+| `codeTheme` | `code-theme` | `undefined | string` | — | Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Set false to render plain `pre` blocks, with no highlighter load. |
 
 #### Composed from
@@ -663,7 +663,7 @@ No events.
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
 | `code` | `code` | `string` | `''` | The source code to render. |
 | `language` | `language` | `undefined | string` | — | Language grammar (e.g. `js`, `python`). Defaults to `tsx`. |
-| `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name. |
+| `codeTheme` | `code-theme` | `undefined | string` | — | Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Disable syntax highlighting (renders plain text, no Shiki). |
 | `copy` | `copy` | `undefined | false | true` | `true` | Show the copy button. **Defaults to ON**, because this element is documented as shipping one. Opt out with `copy="false"` or `el.copy = false`. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Code text sizing. |
@@ -1516,7 +1516,7 @@ No events.
 | `messages` | — | `undefined | { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: undefined | { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: undefined | string; index?: undefined | number; streamId?: undefined | string; signature?: undefined | string; timing?: undefined | { startedAt: number; endedAt?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: undefined | "command" | "file-change" | "file-read" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: undefined | Record<string, unknown>; rawInput?: undefined | string; output?: undefined | Record<string, unknown>; toolCallId?: undefined | string; errorText?: undefined | string; raw?: undefined | { source: string; payload: unknown }; timing?: undefined | { startedAt: number; endedAt?: undefined | number } }; raw?: undefined | { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: undefined | string; resolution?: undefined | { kind: "action"; action: string; payload?: unknown; at?: undefined | string } | { kind: "submit"; data: unknown; at?: undefined | string } | { kind: "dismissed"; at?: undefined | string } | { kind: "expired"; reason?: undefined | string; at?: undefined | string } }; raw?: undefined | { source: string; payload: unknown } } | { type: "source"; source: { id?: undefined | string; url?: undefined | string; title?: undefined | string; snippet?: undefined | string; index?: undefined | number }; raw?: undefined | { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: undefined | string; mediaType?: undefined | string; url?: undefined | string; title?: undefined | string }; raw?: undefined | { source: string; payload: unknown } })[]; actions?: undefined | ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: undefined | string; tooltip?: undefined | string })[]; avatar?: undefined | { src?: undefined | string; fallback?: undefined | string; alt?: undefined | string }; feedback?: undefined | "like" | "dislike" }[]` | — | The message thread to render, newest last. JS property; pass a NEW array per chunk. Ignored while `<kai-message>` children exist. |
 | `loading` | `loading` | `undefined | false | true` | `false` | Show a typing indicator on the pending assistant turn. Set it while awaiting the assistant's reply. |
 | `proseSize` | `prose-size` | `undefined | "xs" | "sm" | "base" | "lg"` | `'sm'` | Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. |
-| `codeTheme` | `code-theme` | `undefined | string` | `'github-dark-dimmed'` | Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). |
+| `codeTheme` | `code-theme` | `undefined | string` | — | Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). |
 | `codeHighlight` | `code-highlight` | `undefined | false | true` | `true` | Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. |
 | `imagePreview` | `image-preview` | `undefined | "hover" | "lightbox"` | `'hover'` | How an image tile reveals its full size. Default is the pointer-only hover card; the modal on click is the only one keyboard and touch reach. |
 | `actionsReveal` | `actions-reveal` | `undefined | "always" | "hover"` | — | Whether each row's action bar is visible at rest or on pointer-over; omitted keys it to the turn, so a user row reveals and an assistant row does not. |

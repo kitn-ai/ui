@@ -44,7 +44,7 @@ Set `content` in JavaScript with your markdown string:
 
 - **`content`**: assign it in JavaScript; multiline strings don't survive HTML attributes cleanly.
 - **`prose-size`** — scales body text: `xs`, `sm` (default), `base`, `lg`. Use `sm` in message bubbles, `base`/`lg` for doc pages.
-- **`code-theme`** — defaults to `github-dark-dimmed`; any [Shiki theme](https://shiki.style/themes) works.
+- **`code-theme`** — follows the colour scheme by default (`github-light` in light mode, `github-dark-dimmed` in dark, live with `html.dark`); set it and it stays put. Any [Shiki theme](https://shiki.style/themes) works.
 - **`code-highlight="false"`** — skips Shiki entirely, rendering code fences as plain monospace.
 
 ## Examples

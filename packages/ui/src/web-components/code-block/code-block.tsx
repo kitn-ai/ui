@@ -7,7 +7,8 @@ interface Props extends Record<string, unknown> {
   code: string;
   /** Language grammar (e.g. `js`, `python`). Defaults to `tsx`. */
   language?: string;
-  /** Shiki theme name. */
+  // Default: `'github-light'` in light mode, `'github-dark-dimmed'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Disable syntax highlighting (renders plain text, no Shiki). */
   codeHighlight?: boolean;
@@ -27,7 +28,7 @@ interface Props extends Record<string, unknown> {
 defineWebComponent<Props>('kai-code-block', {
   code: '',
   language: undefined,
-  codeTheme: 'github-dark-dimmed',
+  codeTheme: undefined,
   codeHighlight: true,
   copy: true,
   proseSize: 'sm',

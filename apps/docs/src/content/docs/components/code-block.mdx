@@ -46,7 +46,7 @@ Set `code` in JavaScript (multiline strings don't survive HTML attributes) and `
 
 - **`code`** — assign it in JavaScript; multiline strings won't survive HTML attribute serialization.
 - **`language`** defaults to `tsx`. Pass any [Shiki grammar name](https://shiki.style/languages): `ts`, `python`, `bash`, `json`, `html`.
-- **`code-theme`** defaults to `github-dark-dimmed`. Any [Shiki theme](https://shiki.style/themes) works.
+- **`code-theme`** follows the colour scheme by default (`github-light` in light mode, `github-dark-dimmed` in dark, live with `html.dark`); set it and it stays put. Any [Shiki theme](https://shiki.style/themes) works.
 - **`code-highlight="false"`** skips Shiki entirely — useful for raw log output.
 
 ## Examples

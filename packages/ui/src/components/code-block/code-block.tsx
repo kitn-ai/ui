@@ -1,7 +1,8 @@
-import { type JSX, splitProps, createResource, createSignal, onCleanup, Show } from 'solid-js';
+import { type JSX, splitProps, createResource, createSignal, createMemo, onCleanup, Show } from 'solid-js';
 import { Copy, Check } from 'lucide-solid';
 import { cn } from '../../utils/cn';
-import { useChatConfig } from '../../primitives/chat-config';
+import { useChatConfig, DEFAULT_CODE_THEME } from '../../primitives/chat-config';
+import { createResolvedColorScheme } from '../../primitives/color-scheme';
 import { highlight, isCodeHighlightingEnabled } from '../../primitives/highlighter';
 
 // --- CodeBlock (Root) ---
@@ -100,13 +101,31 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
   const config = useChatConfig();
 
   const lang = () => local.language ?? 'tsx';
-  const theme = () => local.theme ?? config.codeTheme();
+  // The scheme is read off the block's own element (the inherited `--kai-color-scheme`), so it is
+  // only known once a node exists. Until then, with no explicit theme, `theme()` is undefined and
+  // the plain `<pre>` shows: no Shiki chunk is fetched for a theme that is about to change.
+  const [probe, setProbe] = createSignal<HTMLElement>();
+  const scheme = createMemo(() => {
+    const el = probe();
+    return el ? createResolvedColorScheme(el) : undefined;
+  });
+  // A memo, so the string only notifies when it CHANGES: the probe swaps when the highlighted
+  // node replaces the plain one, and that must not re-run the highlight.
+  const theme = createMemo<string | undefined>(() => {
+    const explicit = local.theme ?? config.codeTheme();
+    if (explicit) return explicit;
+    const s = scheme()?.();
+    return s ? DEFAULT_CODE_THEME[s] : undefined;
+  });
   const highlightingOn = () => isCodeHighlightingEnabled() && config.codeHighlight();
 
   // When highlighting is off, the source is null so the fetcher never runs and
   // no Shiki code is ever imported — the plain `<pre>` fallback renders instead.
   const [highlighted] = createResource(
-    () => (highlightingOn() ? { code: local.code, lang: lang(), theme: theme() } : null),
+    () => {
+      const t = theme();
+      return highlightingOn() && t ? { code: local.code, lang: lang(), theme: t } : null;
+    },
     (src) => highlight(src.code, src.lang, src.theme)
   );
 
@@ -137,12 +156,12 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
     <Show
       when={highlighted()}
       fallback={
-        <div class={classNames()} tabindex={0} {...rest}>
+        <div ref={setProbe} class={classNames()} tabindex={0} {...rest}>
           <pre><code>{local.code}</code></pre>
         </div>
       }
     >
-      <div class={classNames()} tabindex={0} innerHTML={highlighted()} {...rest} />
+      <div ref={setProbe} class={classNames()} tabindex={0} innerHTML={highlighted()} {...rest} />
     </Show>
   );
 }

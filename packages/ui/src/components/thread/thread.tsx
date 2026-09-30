@@ -53,8 +53,8 @@ export interface ThreadProps {
   loading?: boolean;
   /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: ProseSize;
-  /** Shiki theme name for syntax-highlighted code blocks (e.g.
-   *  `'github-dark-dimmed'`). */
+  // Default: `'github-light'` in light mode, `'github-dark-dimmed'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Shiki syntax highlighting in code blocks; off renders plain `<pre>` with no highlighter load. Default true. */
   codeHighlight?: boolean;

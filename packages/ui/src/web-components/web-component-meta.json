@@ -1609,8 +1609,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -2724,8 +2723,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -5817,8 +5815,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme for fenced code blocks.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -6082,8 +6079,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name used for fenced code blocks in the content.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -10500,8 +10496,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
