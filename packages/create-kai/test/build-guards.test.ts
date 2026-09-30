@@ -15,6 +15,7 @@
 import { readFileSync } from 'node:fs';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type * as TSApi from 'typescript';
@@ -25,6 +26,8 @@ import {
   GITIGNORE_SOURCE_NAME,
   appPathProblem,
   blocksSourceRootProblem,
+  patternsSourceRootProblem,
+  zeroPatternsCopiedProblem,
   bundleGraphProblem,
   declaredPathsProblem,
   emittedContentProblem,
@@ -549,6 +552,14 @@ describe('the zero-blocks guard', () => {
 
   it('accepts a copy that landed at least one block directory', () => {
     expect(zeroBlocksCopiedProblem(3)).toBeNull();
+  });
+
+  it('refuses a missing patterns directory and an empty pattern copy, by name', () => {
+    const absent = path.join(tmpdir(), 'no-such-patterns-dir-xyz');
+    expect(patternsSourceRootProblem(absent, existsSync)).toContain('no patterns directory');
+    expectRejected(zeroPatternsCopiedProblem(0), 'copied zero pattern directories from @kitn.ai/blocks');
+    expect(zeroPatternsCopiedProblem(1)).toBeNull();
+    expect(patternsSourceRootProblem(tmpdir(), existsSync)).toBeNull();
   });
 });
 

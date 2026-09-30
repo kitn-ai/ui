@@ -39,3 +39,16 @@ export function installRoot(framework: TargetFramework, blockId: string): string
 export function fileTarget(framework: TargetFramework, blockId: string, fileName: string): string {
   return `${installRoot(framework, blockId)}/${fileName}`;
 }
+
+/**
+ * Where a PATTERN's files land. One root for every framework, because a
+ * pattern is plain HTML and one script: there is no per-framework form to
+ * place. `create-kai add <pattern>` writes here and the /patterns page shows
+ * the same path.
+ */
+export const PATTERN_INSTALL_ROOT = 'src/patterns';
+
+/** The project-relative target of one pattern file. */
+export function patternTarget(patternId: string, fileName: string): string {
+  return `${PATTERN_INSTALL_ROOT}/${patternId}/${fileName}`;
+}

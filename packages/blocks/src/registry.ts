@@ -630,6 +630,52 @@ export function generateCdnForm(block: Block, opts: CdnFormOptions): { html?: st
 // ------------------------------------------------ structural contract check
 
 /**
+ * The per-file `kai-` contract checks, shared by blocks and patterns: one
+ * definition of "what breaks the contract", so a pattern is held to exactly
+ * the rules a block is.
+ */
+function fileContractErrors(
+  where: string,
+  filePath: string,
+  content: string,
+  nonscalarByTag: Readonly<Record<string, readonly string[]>>,
+): string[] {
+  const errors: string[] = [];
+  const kebab = (p: string) => p.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+
+  if (/<\/?kitn-/.test(content) || /['"`]kitn-/.test(content)) {
+    errors.push(`${where}: uses the legacy "kitn-" prefix; web components are kai-*`);
+  }
+  if (/(document|window)\.addEventListener\(\s*['"`]kai-/.test(content)) {
+    errors.push(`${where}: listens for a kai-* event on document/window; kai-* events do not bubble, listen on the element`);
+  }
+  if (/new\s+EventSource\(|text\/event-stream|\.getReader\(/.test(content)) {
+    errors.push(`${where}: hand-rolls a stream reader; use the @kitn.ai/ui/wire readers (readOpenAIStream / readAnthropicStream / readModelStream)`);
+  }
+
+  if (filePath.endsWith('.html')) {
+    // Rich props as attributes: scan each kai-* open tag for its tag's
+    // non-scalar prop names in attribute position (camelCase or kebab-case).
+    for (const tagMatch of content.matchAll(/<(kai-[\w-]+)([^>]*)>/g)) {
+      const [, tag, attrs] = tagMatch;
+      for (const prop of nonscalarByTag[tag] ?? []) {
+        // The prefix is part of the match, not skipped by it. `:messages=`
+        // and `seed:messages=` are a non-scalar in ATTRIBUTE position
+        // exactly as a bare `messages=` is; only `.prop=` and `*for=`
+        // legitimately carry a non-scalar (spec 3.1, amendment 8a.2). The
+        // old form required whitespace immediately before the name, so
+        // every prefixed spelling slipped past it.
+        const attrRe = new RegExp(`(?:^|\\s)(?::|seed:)?(?:${prop}|${kebab(prop)})\\s*=`, 'i');
+        if (attrRe.test(attrs)) {
+          errors.push(`${where}: <${tag}> sets non-scalar prop "${prop}" as an HTML attribute; array/object props are JS properties only`);
+        }
+      }
+    }
+  }
+  return errors;
+}
+
+/**
  * Structural checks over a block's AUTHORED source — the generator refuses to
  * emit a form that breaks the kai- contract or hand-rolls the wire:
  * - a non-scalar prop appearing as an HTML attribute (list DERIVED from
@@ -645,42 +691,11 @@ export function checkBlockContracts(
   nonscalarByTag: Readonly<Record<string, readonly string[]>>,
 ): string[] {
   const errors: string[] = [];
-  const kebab = (p: string) => p.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 
   for (const entry of block.manifest.files) {
     const content = block.files.get(entry.path);
     if (content === undefined) continue;
-    const where = `${block.name}/${entry.path}`;
-
-    if (/<\/?kitn-/.test(content) || /['"`]kitn-/.test(content)) {
-      errors.push(`${where}: uses the legacy "kitn-" prefix; web components are kai-*`);
-    }
-    if (/(document|window)\.addEventListener\(\s*['"`]kai-/.test(content)) {
-      errors.push(`${where}: listens for a kai-* event on document/window; kai-* events do not bubble, listen on the element`);
-    }
-    if (/new\s+EventSource\(|text\/event-stream|\.getReader\(/.test(content)) {
-      errors.push(`${where}: hand-rolls a stream reader; use the @kitn.ai/ui/wire readers (readOpenAIStream / readAnthropicStream / readModelStream)`);
-    }
-
-    if (entry.path.endsWith('.html')) {
-      // Rich props as attributes: scan each kai-* open tag for its tag's
-      // non-scalar prop names in attribute position (camelCase or kebab-case).
-      for (const tagMatch of content.matchAll(/<(kai-[\w-]+)([^>]*)>/g)) {
-        const [, tag, attrs] = tagMatch;
-        for (const prop of nonscalarByTag[tag] ?? []) {
-          // The prefix is part of the match, not skipped by it. `:messages=`
-          // and `seed:messages=` are a non-scalar in ATTRIBUTE position
-          // exactly as a bare `messages=` is; only `.prop=` and `*for=`
-          // legitimately carry a non-scalar (spec 3.1, amendment 8a.2). The
-          // old form required whitespace immediately before the name, so
-          // every prefixed spelling slipped past it.
-          const attrRe = new RegExp(`(?:^|\\s)(?::|seed:)?(?:${prop}|${kebab(prop)})\\s*=`, 'i');
-          if (attrRe.test(attrs)) {
-            errors.push(`${where}: <${tag}> sets non-scalar prop "${prop}" as an HTML attribute; array/object props are JS properties only`);
-          }
-        }
-      }
-    }
+    errors.push(...fileContractErrors(`${block.name}/${entry.path}`, entry.path, content, nonscalarByTag));
   }
 
   // The GRAMMAR has one owner. Rather than restating the binding rules here,
@@ -709,4 +724,219 @@ export function checkBlockContracts(
   }
 
   return errors;
+}
+
+// ================================================================ patterns
+//
+// The PATTERN tier (composition round, spec A section 7): a small copyable
+// composition of PLAIN web components -- one .html page, at most one .js
+// script, optional .css. A pattern has no controller, no binding grammar and
+// no generated framework forms, which is what separates it from a block. It
+// lives at `packages/blocks/patterns/<id>/` beside `blocks/`, and the same
+// registry module understands both layouts so validation, path safety and the
+// `kai-` contract checks are written once.
+
+/** The file types a pattern may ship, and the extension each must carry. */
+const PATTERN_FILE_TYPES: Readonly<Record<string, string>> = { html: '.html', js: '.js', css: '.css' };
+
+export interface PatternFileEntry {
+  path: string;
+  type: 'html' | 'js' | 'css';
+}
+
+export interface PatternManifest {
+  /** Must equal the directory name. */
+  name: string;
+  kind: 'pattern';
+  title: string;
+  description: string;
+  files: PatternFileEntry[];
+}
+
+export interface Pattern {
+  name: string;
+  manifest: PatternManifest;
+  files: ReadonlyMap<string, string>;
+}
+
+/** A tag attribute in template-DSL position: `.prop=`, `:prop=`, `@event=`,
+ *  `#ref=`, `*directive=`. A pattern is plain HTML the reader can copy into any
+ *  framework, so none of them belongs in it. */
+const TEMPLATE_BINDING = /\s[.:@#*][a-z][\w-]*=/;
+
+/** Validate one parsed pattern manifest against its directory. Human-readable
+ *  errors, each naming the pattern and the file; empty means valid. */
+export function validatePatternManifest(raw: unknown, dirName: string, fileNames: readonly string[]): string[] {
+  const errors: string[] = [];
+  if (!isRecord(raw)) return [`${dirName}: registry-item.json is not an object`];
+  const m = raw;
+
+  for (const field of ['name', 'title', 'description'] as const) {
+    if (typeof m[field] !== 'string' || (m[field] as string).length === 0) {
+      errors.push(`${dirName}: "${field}" must be a non-empty string`);
+    }
+  }
+  if (typeof m.name === 'string') {
+    if (m.name !== dirName) errors.push(`${dirName}: manifest name "${m.name}" must equal the directory name (one identity, derived)`);
+    const nameProblem = unsafeNameReason(m.name);
+    if (nameProblem) errors.push(`${dirName}: name "${m.name}" ${nameProblem}`);
+  }
+  if (m.kind !== 'pattern') errors.push(`${dirName}: "kind" must be "pattern", got ${JSON.stringify(m.kind)}`);
+  for (const field of ['title', 'description'] as const) {
+    if (typeof m[field] === 'string') errors.push(...proseErrors(`${dirName}: ${field}`, m[field] as string));
+  }
+
+  if (!Array.isArray(m.files) || m.files.length === 0) {
+    errors.push(`${dirName}: "files" must be a non-empty array`);
+    return errors;
+  }
+  const seen = new Set<string>();
+  const count = { html: 0, js: 0, css: 0 };
+  for (const f of m.files) {
+    if (!isRecord(f) || typeof f.path !== 'string' || typeof f.type !== 'string') {
+      errors.push(`${dirName}: each files[] entry needs string "path" and "type"`);
+      continue;
+    }
+    if (f.path.endsWith('.tsx')) {
+      errors.push(`${dirName}: files["${f.path}"]: .tsx is not allowed; a pattern is plain ESM JavaScript (use JSDoc for types), so its one script is a .js file`);
+    } else if (f.path.endsWith('.ts')) {
+      errors.push(`${dirName}: files["${f.path}"]: .ts is not allowed; a pattern must run in a browser as it is, so its one script is a .js file (use JSDoc for types)`);
+    }
+    const ext = PATTERN_FILE_TYPES[f.type];
+    if (ext === undefined) {
+      errors.push(`${dirName}: files["${f.path}"] has unknown type "${f.type}" (a pattern's file types are ${Object.keys(PATTERN_FILE_TYPES).join(', ')})`);
+    } else {
+      count[f.type as keyof typeof count] += 1;
+      if (!/\.tsx?$/.test(f.path) && !f.path.endsWith(ext)) errors.push(`${dirName}: files["${f.path}"] is type "${f.type}" but does not end in ${ext}`);
+    }
+    if (seen.has(f.path)) errors.push(`${dirName}: files[] lists "${f.path}" twice`);
+    seen.add(f.path);
+    if (!fileNames.includes(f.path)) errors.push(`${dirName}: files[] lists "${f.path}" but the directory scan found no such file`);
+    const pathProblem = unsafeFilePathReason(f.path);
+    if (pathProblem) errors.push(`${dirName}: files["${f.path}"] ${pathProblem}`);
+  }
+  if (count.html !== 1) errors.push(`${dirName}: exactly one "html" file is required, found ${count.html}`);
+  if (count.js > 1) errors.push(`${dirName}: at most one "js" file is allowed, found ${count.js}; a pattern is one page and one script`);
+  return errors;
+}
+
+/**
+ * The page and the manifest must agree about which sibling files exist. A page
+ * that loads `./x.js` the manifest does not list installs a page pointing at a
+ * file that was never written; a listed script or stylesheet the page never
+ * references installs a file nothing uses. Absolute and protocol URLs are the
+ * page's own business and are skipped.
+ */
+function crossCheckPatternReferences(dirName: string, htmlPath: string, html: string, manifest: PatternManifest): string[] {
+  const errors: string[] = [];
+  const referenced = new Set<string>();
+  for (const tag of html.matchAll(/<(?:script|link)\b[^>]*>/gi)) {
+    const ref = /\b(?:src|href)\s*=\s*["']([^"']+)["']/i.exec(tag[0])?.[1];
+    if (ref === undefined || /^([a-z][a-z0-9+.-]*:|\/\/|\/|#)/i.test(ref)) continue;
+    const file = ref.replace(/^\.\//, '');
+    referenced.add(file);
+    if (!manifest.files.some((f) => f.path === file)) {
+      errors.push(`${dirName}/${htmlPath}: references "${ref}" but files[] does not list it`);
+    }
+  }
+  for (const entry of manifest.files) {
+    if (entry.type !== 'html' && !referenced.has(entry.path)) {
+      errors.push(`${dirName}: files[] lists "${entry.path}" but ${htmlPath} never references it`);
+    }
+  }
+  return errors;
+}
+
+/** Parse + validate every scanned pattern directory. A pattern with errors is
+ *  excluded from the result rather than half-loaded. */
+export function discoverPatterns(sources: readonly RawBlockSource[]): { patterns: Pattern[]; errors: string[] } {
+  const patterns: Pattern[] = [];
+  const errors: string[] = [];
+  for (const src of [...sources].sort((a, b) => a.dirName.localeCompare(b.dirName))) {
+    let raw: unknown;
+    try {
+      raw = JSON.parse(src.manifestJson);
+    } catch (err) {
+      errors.push(`${src.dirName}: registry-item.json does not parse (${String(err)})`);
+      continue;
+    }
+    const errs = validatePatternManifest(raw, src.dirName, src.files.map((f) => f.name));
+    if (errs.length === 0) {
+      // Shape is valid, so the page can be read for template syntax.
+      const manifest = raw as PatternManifest;
+      for (const entry of manifest.files) {
+        if (entry.type !== 'html') continue;
+        const html = src.files.find((f) => f.name === entry.path)?.content ?? '';
+        for (const tag of html.matchAll(/<[a-z][^>]*>/gi)) {
+          const hit = TEMPLATE_BINDING.exec(tag[0]);
+          if (hit) {
+            errs.push(
+              `${src.dirName}/${entry.path}: template binding syntax "${hit[0].trim()}" in ${tag[0].slice(0, 60)}; a pattern is plain HTML, so set properties from the script and listen for events there`,
+            );
+          }
+        }
+        errs.push(...crossCheckPatternReferences(src.dirName, entry.path, html, manifest));
+      }
+    }
+    if (errs.length) { errors.push(...errs); continue; }
+    patterns.push({
+      name: src.dirName,
+      manifest: raw as PatternManifest,
+      files: new Map(src.files.map((f) => [f.name, f.content])),
+    });
+  }
+  return { patterns, errors };
+}
+
+/** The `kai-` contract checks over a pattern's authored files: the same
+ *  per-file rules a block is held to (shared, not restated). */
+export function checkPatternContracts(
+  pattern: Pattern,
+  nonscalarByTag: Readonly<Record<string, readonly string[]>>,
+): string[] {
+  const errors: string[] = [];
+  for (const entry of pattern.manifest.files) {
+    const content = pattern.files.get(entry.path);
+    if (content === undefined) continue;
+    errors.push(...fileContractErrors(`${pattern.name}/${entry.path}`, entry.path, content, nonscalarByTag));
+  }
+  return errors;
+}
+
+/** The derived pattern index: manifests only, contents omitted. The docs
+ *  /patterns page lists patterns from this, never from a hand-typed list. */
+export function buildPatternIndex(patterns: readonly Pattern[]): { name: string; homepage: string; items: PatternManifest[] } {
+  return { name: 'kai-patterns', homepage: 'https://ui.kitn.ai/patterns', items: patterns.map((p) => p.manifest) };
+}
+
+/** The per-pattern item JSON (`r/<name>.json` shape): the manifest with each
+ *  files[] entry carrying its `content`. `create-kai add <url>` resolves it. */
+export function buildPatternItem(pattern: Pattern): Omit<PatternManifest, 'files'> & { files: (PatternFileEntry & { content: string })[] } {
+  return {
+    ...pattern.manifest,
+    files: pattern.manifest.files.map((entry) => ({ ...entry, content: pattern.files.get(entry.path) as string })),
+  };
+}
+
+/**
+ * Point a pattern script's kit imports at the pinned CDN entries and touch
+ * nothing else. Relative imports stay (the sibling files are written beside
+ * it); a bare import outside the proven CDN set is a loud error, the same
+ * closed set a block's CDN form uses.
+ */
+export function rewritePatternScript(js: string, opts: CdnFormOptions): { code?: string; errors: string[] } {
+  const base = opts.base ?? `https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${opts.version}/dist/`;
+  const annotate = base.includes('@kitn.ai/ui@');
+  const errors: string[] = [];
+  const out: string[] = [];
+  scanImports(js, (clause, spec) => {
+    if (spec.startsWith('./') || spec.startsWith('../')) {
+      out.push(`import ${clause ? `${clause} from ` : ''}'${spec}';`);
+      return;
+    }
+    const resolved = rewriteBareImport(spec, base);
+    if (resolved.error) { errors.push(resolved.error); return; }
+    out.push(`import ${clause ? `${clause} from ` : ''}'${resolved.url}';${annotate ? ' // x-release-please-version' : ''}`);
+  }, (line) => out.push(line));
+  return errors.length ? { errors } : { code: out.join('\n'), errors };
 }

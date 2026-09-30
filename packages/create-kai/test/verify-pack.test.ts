@@ -91,6 +91,7 @@ const tree = (over: Tree = {}): Tree => ({
   // One block, so the "no dist/blocks/**" rule sees the same believable-built
   // shape the templates already give it.
   'blocks/assistant/registry-item.json': '{"name":"assistant"}\n',
+  'patterns/hello-pattern/registry-item.json': '{"name":"hello-pattern"}\n',
   // The files the CLI patches in these two templates, so a clean fixture is
   // clean by the completeness rule too.
   ...patchedFixtureFiles('react'),
@@ -269,6 +270,7 @@ describe('verify:pack still detects', () => {
       'templates/tanstack-start/_gitignore': 'node_modules/\n',
       ...patchedFixtureFiles('tanstack-start'),
       'blocks/assistant/registry-item.json': '{"name":"assistant"}\n',
+      'patterns/hello-pattern/registry-item.json': '{"name":"hello-pattern"}\n',
     });
     const { code, output } = runVerifier(root);
 
@@ -306,6 +308,14 @@ describe('verify:pack still detects', () => {
 
     expect(code, 'a tarball with no blocks at all was accepted').toBe(1);
     expect(output).toContain('no dist/blocks/**');
+  });
+
+  it('fires when the tarball has no dist/patterns/** at all', () => {
+    const root = fixtureRoot(tree({ 'patterns/hello-pattern/registry-item.json': null }));
+    const { code, output } = runVerifier(root);
+
+    expect(code, 'a tarball with no patterns at all was accepted').toBe(1);
+    expect(output).toContain('no dist/patterns/**');
   });
 
   /**

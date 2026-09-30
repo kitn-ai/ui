@@ -28,7 +28,9 @@
  * as `registry.ts`: this file typechecks under the package's browser tsconfig
  * (the /blocks page imports the form axis directly) and bundles into the CLI.
  */
-import type { Block, CdnFormOptions } from '../registry';
+import type { Block, CdnFormOptions, Pattern } from '../registry';
+import { rewritePatternScript } from '../registry';
+import { patternTarget } from '../targets';
 import type { FormFile } from '../contract/types';
 import { renderHtmlForm } from './html';
 import { renderReactForm } from './react';
@@ -127,4 +129,25 @@ export function renderBlockForm(block: Block, form: BlockFormId, opts: { cdn: Cd
     case 'react': return renderReactForm(block);
     case 'cdn': return renderCdnFormFiles(block, opts.cdn);
   }
+}
+
+// ----------------------------------------------------------------- patterns
+
+/**
+ * Render a pattern: its files VERBATIM under `src/patterns/<id>/`. There is no
+ * form axis (a pattern is plain HTML plus one ES module). The only variant is the
+ * no-project paste, where `opts.cdn` rewrites the script's kit import onto the
+ * pinned CDN URL and changes nothing else. A pattern the rewrite cannot
+ * resolve throws with the reason rather than emitting a broken file.
+ */
+export function renderPattern(pattern: Pattern, opts: { cdn?: CdnFormOptions } = {}): FormFile[] {
+  return pattern.manifest.files.map((entry) => {
+    let content = pattern.files.get(entry.path) as string;
+    if (opts.cdn && entry.type === 'js') {
+      const rewritten = rewritePatternScript(content, opts.cdn);
+      if (rewritten.errors.length) throw new Error(`${pattern.name}/${entry.path}: ${rewritten.errors.join('; ')}`);
+      content = rewritten.code as string;
+    }
+    return { path: entry.path, content, target: patternTarget(pattern.name, entry.path.split('/').pop() as string) };
+  });
 }

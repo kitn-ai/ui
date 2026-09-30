@@ -28,10 +28,12 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
-import { discoverBlocks, unsafeFilePathReason, unsafeNameReason } from '@kitn.ai/blocks';
+import { discoverBlocks, discoverPatterns, unsafeFilePathReason, unsafeNameReason } from '@kitn.ai/blocks';
 import type {
   Block,
   BlockManifest,
+  Pattern,
+  PatternManifest,
   RawBlockSource,
 } from '@kitn.ai/blocks';
 // The FORM RENDERING is the kit's shared pure module too (same bundle-import
@@ -44,6 +46,7 @@ import {
   adaptRegistrationForBundler,
   componentName,
   renderBlockForm,
+  renderPattern,
   type BlockFormId,
   type FormFile,
 } from '@kitn.ai/blocks/forms';
@@ -56,7 +59,7 @@ import { getFramework } from './frameworks';
 import { emitRoute } from './routes';
 import type { EmittedFile } from './routes';
 
-export type { Block, BlockManifest };
+export type { Block, BlockManifest, Pattern, PatternManifest };
 export { adaptRegistrationForBundler };
 
 // ---------------------------------------------------------------- discovery
@@ -475,4 +478,86 @@ function planRoutes(resolved: ResolvedAdd, opts: PlanOptions, plan: AddPlan): vo
       plan.notes.push(`route ${integration.id} needs ${envVar} set where the route runs`);
     }
   }
+}
+
+// ----------------------------------------------------------------- patterns
+
+/** Read one directory of `<id>/` dirs into scan sources: a directory is an
+ *  item when it holds a `registry-item.json`. */
+async function scanItemDirs(root: string): Promise<RawBlockSource[]> {
+  const sources: RawBlockSource[] = [];
+  for (const entry of await readdir(root, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const dir = path.join(root, entry.name);
+    const names = (await readdir(dir, { withFileTypes: true })).filter((f) => f.isFile()).map((f) => f.name);
+    if (!names.includes('registry-item.json')) continue;
+    const files = await Promise.all(
+      names
+        .filter((name) => name !== 'registry-item.json')
+        .map(async (name) => ({ name, content: await readFile(path.join(dir, name), 'utf8') })),
+    );
+    sources.push({ dirName: entry.name, manifestJson: await readFile(path.join(dir, 'registry-item.json'), 'utf8'), files });
+  }
+  return sources;
+}
+
+/**
+ * Load the bundled pattern registry (`dist/patterns/<id>/`). Throws on a
+ * validation error like `loadBlocks`. A root that does not exist is an empty
+ * tier, not an error: the real CLI's build refuses to ship without the copy,
+ * so absence here only ever means a caller pointed at a blocks-only directory.
+ */
+export async function loadPatterns(patternsRoot: string): Promise<Pattern[]> {
+  let sources: RawBlockSource[];
+  try {
+    sources = await scanItemDirs(patternsRoot);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
+    throw error;
+  }
+  const { patterns, errors } = discoverPatterns(sources);
+  if (errors.length) throw new Error(`the bundled pattern registry does not validate:\n  ${errors.join('\n  ')}`);
+  return patterns;
+}
+
+/** A fetched pattern item JSON (files carrying content) as a `Pattern`,
+ *  through the same name and path rules a fetched block passes. */
+export function patternFromItemJson(raw: unknown, sourceUrl: string): { pattern?: Pattern; errors: string[] } {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { errors: [`${sourceUrl}: the item JSON is not an object`] };
+  const item = raw as { name?: unknown; files?: { path?: unknown; content?: unknown }[] };
+  const files = new Map<string, string>();
+  for (const entry of Array.isArray(item.files) ? item.files : []) {
+    if (typeof entry.path === 'string' && typeof entry.content === 'string') files.set(entry.path, entry.content);
+  }
+  const manifest = { ...(raw as Record<string, unknown>) } as Record<string, unknown>;
+  manifest.files = (Array.isArray(item.files) ? item.files : []).map(({ content: _content, ...entry }) => entry);
+  const name = typeof item.name === 'string' ? item.name : '';
+  const { patterns, errors } = discoverPatterns([
+    {
+      dirName: name,
+      manifestJson: JSON.stringify(manifest),
+      files: [...files].map(([fileName, content]) => ({ name: fileName, content })),
+    },
+  ]);
+  if (errors.length || patterns.length === 0) return { errors: errors.map((e) => `${sourceUrl}: ${e}`) };
+  return { pattern: patterns[0], errors: [] };
+}
+
+/**
+ * Plan a pattern's writes. Pure, like `planAdd`. A pattern has no per-framework
+ * form: its files go verbatim under `src/patterns/<id>/`. With no project
+ * around it (`cdn`), the script's kit import is pinned to the CDN and nothing
+ * else changes. Inside a project the pattern needs the kit installed, so the
+ * dependency rides the CLI's pin, the same as a block's.
+ */
+export function planPattern(pattern: Pattern, opts: { cdn: boolean; kitRange: string; kitVersion: string }): AddPlan {
+  const plan: AddPlan = { files: [], dependencies: {}, docs: [], notes: [] };
+  planFiles(renderPattern(pattern, opts.cdn ? { cdn: { version: opts.kitVersion } } : {}), plan);
+  if (opts.cdn) {
+    plan.notes.push(`${pattern.name}: no project here, so the script's @kitn.ai/ui import is pinned to jsDelivr; open ${pattern.name}.html in a browser as it is.`);
+  } else {
+    plan.dependencies['@kitn.ai/ui'] = opts.kitRange;
+    plan.notes.push(`${pattern.name}: copied verbatim under src/patterns/${pattern.name}/. Import or open its .html through your dev server.`);
+  }
+  return plan;
 }

@@ -17,6 +17,10 @@ import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 export default defineConfig({
   site: 'https://ui.kitn.ai',
   base: '/',
+  // /blocks was the gallery's only page; the tier is now Patterns. The static
+  // files under public/blocks/ (registry JSON, previews) keep their URLs: they
+  // are asset paths, not pages, and nothing links to them from outside.
+  redirects: { '/blocks': '/patterns/' },
   vite: { plugins: [tailwindcss(), Icons({ compiler: 'solid' })] },
   // Render the heading anchor as a CHILD of the heading (behavior: 'append'),
   // so the heading can be a flex row [text · #] — clean gap + hover reveal,

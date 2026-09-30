@@ -182,9 +182,10 @@ export const topics = [
   },
   {
     label: 'Patterns',
-    link: '/patterns/popover-menu/',
+    link: '/patterns/',
     id: 'patterns',
     items: [
+      { label: 'Patterns', slug: 'patterns' },
       { label: 'Button and popover menu', slug: 'patterns/popover-menu' },
       { label: 'Resizable split', slug: 'patterns/resizable-split' },
       { label: 'Empty & first-run state', slug: 'patterns/empty-state' },
@@ -214,12 +215,6 @@ export const topics = [
       { label: 'Custom theme', slug: 'examples/custom-theme' },
       { label: 'Remote cards', slug: 'examples/remote-cards' },
     ],
-  },
-  {
-    label: 'Blocks',
-    link: '/blocks/',
-    id: 'blocks',
-    items: [{ label: 'Blocks', slug: 'blocks' }],
   },
   {
     label: 'Integrations',
