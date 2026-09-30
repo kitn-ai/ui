@@ -175,9 +175,9 @@ describe('pattern contract checks', () => {
     return checkPatternContracts(patterns[0], nonscalar);
   };
 
-  it('is clean on hello-pattern', () => {
+  it('is clean on every shipped pattern', () => {
     const { patterns } = discoverPatterns(scan());
-    expect(checkPatternContracts(patterns[0], nonscalar)).toEqual([]);
+    for (const pattern of patterns) expect(checkPatternContracts(pattern, nonscalar), pattern.name).toEqual([]);
   });
 
   it('catches the kitn- prefix, a non-scalar attribute, a document listener, a hand-rolled reader', () => {
@@ -190,7 +190,8 @@ describe('pattern contract checks', () => {
 
 describe('pattern index, item JSON and rendering', () => {
   const { patterns } = discoverPatterns(scan());
-  const hello = patterns[0];
+  // The fixture is picked by name: directory order puts other patterns first.
+  const hello = patterns.find((p) => p.name === 'hello-pattern')!;
 
   it('the index lists patterns by manifest, contents omitted', () => {
     const index = buildPatternIndex(patterns);

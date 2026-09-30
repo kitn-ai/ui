@@ -1,0 +1,10 @@
+{
+  "name": "artifact-toolbar",
+  "kind": "pattern",
+  "title": "Artifact toolbar",
+  "description": "A kai-artifact toolbar composed in its toolbar slot: back and forward that follow the history state, reload, a read-only address, and an open button that stays inert unless the url is safe. Swap the slot's contents, or leave it empty for a viewer with no bar.",
+  "files": [
+    { "path": "artifact-toolbar.html", "type": "html" },
+    { "path": "artifact-toolbar.js", "type": "js" }
+  ]
+}
