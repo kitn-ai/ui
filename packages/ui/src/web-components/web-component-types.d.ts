@@ -171,16 +171,6 @@ export interface KaiArtifactElement extends HTMLElement {
   expandable?: boolean;
   /** Show the open-in-new-tab button (OPT-IN). */
   openInTab?: boolean;
-  /** Hide back/forward. */
-  noNav?: boolean;
-  /** Hide reload. */
-  noReload?: boolean;
-  /** Hide home. */
-  noHome?: boolean;
-  /** Hide the address field. */
-  noPathField?: boolean;
-  /** Hide the Preview|Code toggle. */
-  noTabs?: boolean;
   /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
@@ -2361,6 +2351,8 @@ export interface KaiAgentCardElementEventMap extends HTMLElementEventMap {
 export interface KaiArtifactElementEventMap extends HTMLElementEventMap {
   /** Fired when a file is selected. `detail.path`. */
   'kai-file-select': CustomEvent<{ path: string }>;
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  'kai-history-change': CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'kai-maximize-change': CustomEvent<{ maximized: boolean }>;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -2950,6 +2942,7 @@ declare global {
     'kai-file-select': CustomEvent<{ path: string }>;
     'kai-files-added': CustomEvent<{ files: File[] }>;
     'kai-focus': CustomEvent<{ originalEvent: FocusEvent }>;
+    'kai-history-change': CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>;
     'kai-home-link': CustomEvent<{ entry: { label: string; href?: undefined | string; description?: undefined | string; icon?: undefined | string } }>;
     'kai-input-rejected': CustomEvent<{ reason: "full" | "wrong-class" | "over-capacity" | "format-change-clipped"; data: string }>;
     'kai-maximize': CustomEvent<{ maximized: boolean }>;
@@ -3146,16 +3139,6 @@ export interface KaiArtifactElementProps {
   expandable?: boolean;
   /** Show the open-in-new-tab button (OPT-IN). */
   openInTab?: boolean;
-  /** Hide back/forward. */
-  noNav?: boolean;
-  /** Hide reload. */
-  noReload?: boolean;
-  /** Hide home. */
-  noHome?: boolean;
-  /** Hide the address field. */
-  noPathField?: boolean;
-  /** Hide the Preview|Code toggle. */
-  noTabs?: boolean;
   /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
@@ -4772,6 +4755,8 @@ export interface KaiAgentCardElementEvents {
 export interface KaiArtifactElementEvents {
   /** Fired when a file is selected. `detail.path`. */
   onKaiFileSelect?: (event: CustomEvent<{ path: string }>) => void;
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  onKaiHistoryChange?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   onKaiMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -5597,6 +5582,8 @@ export interface KaiAgentCardElementSvelteEvents {
 export interface KaiArtifactElementSvelteEvents {
   /** Fired when a file is selected. `detail.path`. */
   'onkai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  'onkai-history-change'?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'onkai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -6323,6 +6310,8 @@ export interface KaiAgentCardElementSolidEvents {
 export interface KaiArtifactElementSolidEvents {
   /** Fired when a file is selected. `detail.path`. */
   'on:kai-file-select'?: (event: CustomEvent<{ path: string }>) => void;
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  'on:kai-history-change'?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   'on:kai-maximize-change'?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */

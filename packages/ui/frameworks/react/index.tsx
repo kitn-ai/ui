@@ -165,16 +165,6 @@ export interface ArtifactProps extends WebComponentProps {
   expandable?: boolean;
   /** Show the open-in-new-tab button (OPT-IN). */
   openInTab?: boolean;
-  /** Hide back/forward. */
-  noNav?: boolean;
-  /** Hide reload. */
-  noReload?: boolean;
-  /** Hide home. */
-  noHome?: boolean;
-  /** Hide the address field. */
-  noPathField?: boolean;
-  /** Hide the Preview|Code toggle. */
-  noTabs?: boolean;
   /** Standalone chrome: rounded corners + border (else square, borderless in-panel). */
   standalone?: boolean;
   /** Show the address but make it read-only (visible, nav-tracking, non-editable). */
@@ -183,6 +173,8 @@ export interface ArtifactProps extends WebComponentProps {
   displayUrl?: string;
   /** Fired when a file is selected. `detail.path`. */
   onFileSelect?: (event: CustomEvent<{ path: string }>) => void;
+  /** The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. */
+  onHistoryChange?: (event: CustomEvent<{ url: string; canGoBack: boolean; canGoForward: boolean }>) => void;
   /** Artifact's own maximize button toggled (consumer-observable; non-bubbling). */
   onMaximizeChange?: (event: CustomEvent<{ maximized: boolean }>) => void;
   /** The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. */
@@ -195,8 +187,8 @@ export interface ArtifactProps extends WebComponentProps {
 
 export const Artifact = /*#__PURE__*/ createWebComponent<ArtifactProps, KaiArtifactElement>(
   'kai-artifact',
-  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","noNav","noReload","noHome","noPathField","noTabs","standalone","readonlyPath","displayUrl"],
-  { onFileSelect: 'kai-file-select', onMaximizeChange: 'kai-maximize-change', onMaximizeIntent: 'kai-maximize-intent', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
+  ["theme","src","files","tab","defaultTab","activeFile","sandbox","iframeTitle","maximized","expandable","openInTab","standalone","readonlyPath","displayUrl"],
+  { onFileSelect: 'kai-file-select', onHistoryChange: 'kai-history-change', onMaximizeChange: 'kai-maximize-change', onMaximizeIntent: 'kai-maximize-intent', onNavigate: 'kai-navigate', onTabChange: 'kai-tab-change' },
   () => import('@kitn.ai/ui/web-components/artifact'),
 );
 

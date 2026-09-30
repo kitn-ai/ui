@@ -1578,11 +1578,6 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | `maximized` | `maximized` | `undefined | false | true` | `false` | Reflects the artifact's own maximized view-state (usually driven by the protocol). |
 | `expandable` | `expandable` | `undefined | false | true` | `false` | Show the expand-to-fill button (OPT-IN). |
 | `openInTab` | `open-in-tab` | `undefined | false | true` | `false` | Show the open-in-new-tab button (OPT-IN). |
-| `noNav` | `no-nav` | `undefined | false | true` | `false` | Hide back/forward. |
-| `noReload` | `no-reload` | `undefined | false | true` | `false` | Hide reload. |
-| `noHome` | `no-home` | `undefined | false | true` | `false` | Hide home. |
-| `noPathField` | `no-path-field` | `undefined | false | true` | `false` | Hide the address field. |
-| `noTabs` | `no-tabs` | `undefined | false | true` | `false` | Hide the Preview|Code toggle. |
 | `standalone` | `standalone` | `undefined | false | true` | `false` | Standalone chrome: rounded corners + border (else square, borderless in-panel). |
 | `readonlyPath` | `readonly-path` | `undefined | false | true` | `false` | Show the address but make it read-only (visible, nav-tracking, non-editable). |
 | `displayUrl` | `display-url` | `undefined | string` | — | Friendly read-only address shown in the path field instead of the real url. Attribute: `display-url`. |
@@ -1592,6 +1587,7 @@ The message list on its own: renders a `messages` array (roles, ordered `parts`,
 | Event | `detail` | Description |
 |-------|-----------|-------------|
 | `kai-file-select` | `{ path: string }` | Fired when a file is selected. `detail.path`. |
+| `kai-history-change` | `{ url: string; canGoBack: false | true; canGoForward: false | true }` | The history state changed (fires once per navigation, back and forward included). Drives a composed toolbar's back/forward buttons. |
 | `kai-maximize-change` | `{ maximized: false | true }` | Artifact's own maximize button toggled (consumer-observable; non-bubbling). |
 | `kai-maximize-intent` | `{ requested: false | true }` | The maximize PROTOCOL intent, as a raw bubbling + composed CustomEvent. |
 | `kai-navigate` | `{ url: string }` | The preview navigated. `detail.url` is the raw new location. |
@@ -1612,6 +1608,16 @@ Call these on the element instance: `document.querySelector('kai-artifact').back
 | `openExternal` | `(): void` | Open the current url in a new browser tab (no-op when there's no concrete url). Named openExternal, NOT openInTab, which is a prop (toolbar button visibility). |
 | `maximize` | `(): void` | Enter the maximized view-state (fires kai-maximize-change{maximized:true}). Named maximize, NOT maximized, which is a prop. |
 | `restore` | `(): void` | Exit the maximized view-state (fires kai-maximize-change{maximized:false}). |
+
+#### Slots
+
+Project your own markup with `slot="name"` on a light-DOM child.
+
+| Slot | Mode | Description |
+|------|------|-------------|
+| `toolbar` | replace | Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host's `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). |
+| `toolbar-start` | inject | Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled). |
+| `toolbar-end` | inject | Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled). |
 
 #### Composed from
 
