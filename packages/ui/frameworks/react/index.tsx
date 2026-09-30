@@ -1603,11 +1603,15 @@ export interface PromptDockProps extends WebComponentProps {
   frame?: "inset" | "edge" | "none";
   /** How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. */
   appearance?: "soft" | "outlined" | "filled" | "plain";
+  /** Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy. */
+  topOpen?: boolean;
+  /** Drives the `bottom` band directly, the same way as `topOpen`. */
+  bottomOpen?: boolean;
 }
 
 export const PromptDock = /*#__PURE__*/ createWebComponent<PromptDockProps, KaiPromptDockElement>(
   'kai-prompt-dock',
-  ["theme","frame","appearance"],
+  ["theme","frame","appearance","topOpen","bottomOpen"],
   {  },
   () => import('@kitn.ai/ui/web-components/prompt-dock'),
 );

@@ -7150,6 +7150,22 @@
         "description": "How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`.",
         "default": "'soft'",
         "displayType": "undefined | \"soft\" | \"outlined\" | \"filled\" | \"plain\""
+      },
+      {
+        "name": "topOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "bottomOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drives the `bottom` band directly, the same way as `topOpen`.",
+        "displayType": "undefined | false | true"
       }
     ],
     "events": [],

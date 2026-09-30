@@ -3631,6 +3631,8 @@ The corner launcher: a floating button pinned to a viewport corner, with a panel
 | `theme` | `theme` | `"light" | "dark" | "auto"` | `'auto'` | Color mode (`auto` follows prefers-color-scheme). |
 | `frame` | `frame` | `undefined | "inset" | "edge" | "none"` | `'inset'` | How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. |
 | `appearance` | `appearance` | `undefined | "soft" | "outlined" | "filled" | "plain"` | `'soft'` | How the tray surface looks, the VISUAL axis: `soft` (default), `outlined`, `filled`, or `plain`. |
+| `topOpen` | `top-open` | `undefined | false | true` | — | Drives the `top` band directly: `false` fades it out, and unset returns to slot occupancy. |
+| `bottomOpen` | `bottom-open` | `undefined | false | true` | — | Drives the `bottom` band directly, the same way as `topOpen`. |
 
 #### Slots
 

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
-import { type JSX } from 'solid-js';
+import { type JSX, createSignal, Show } from 'solid-js';
 import { PromptDock, type PromptDockProps } from './prompt-dock';
 import { PromptInput, PromptInputTextarea, PromptInputActions } from './prompt-input';
 import { Button } from '../button/button';
@@ -453,5 +453,60 @@ export const Appearances: Story = {
   }
 >
   {/* ...same PromptInput... */}
+</PromptDock>`),
+};
+
+/** Bands slide open and closed with their content: height grows from 0 to the measured
+ *  content height (180ms ease-out, with opacity), and content that grows while open
+ *  animates to its new height. Under `prefers-reduced-motion: reduce` both are instant. */
+export const BandEntersAndLeaves: Story = {
+  name: 'Band Enters And Leaves',
+  render: () => {
+    const [top, setTop] = createSignal(false);
+    const [bottom, setBottom] = createSignal(false);
+    const [tall, setTall] = createSignal(false);
+    return (
+      <div class="flex max-w-xl flex-col gap-3">
+        <div class="flex gap-2">
+          <Button size="sm" variant="outline" data-testid="toggle-top" onClick={() => setTop(!top())}>Toggle top</Button>
+          <Button size="sm" variant="outline" data-testid="toggle-bottom" onClick={() => setBottom(!bottom())}>Toggle bottom</Button>
+          <Button size="sm" variant="outline" data-testid="toggle-tall" onClick={() => setTall(!tall())}>Grow top</Button>
+        </div>
+        <PromptDock
+          top={
+            top() ? (
+              <div class="flex flex-col gap-1">
+                <span>Heads up, context is getting long.</span>
+                <Show when={tall()}>
+                  <span>A second line arrives while the band is open.</span>
+                  <span>And a third, so the band grows to fit.</span>
+                </Show>
+              </div>
+            ) : undefined
+          }
+          bottom={
+            bottom() ? (
+              <div class="flex items-center gap-2">
+                <Pill>Project or folder</Pill>
+                <Pill>Ask</Pill>
+              </div>
+            ) : undefined
+          }
+        >
+          <DockedInput />
+        </PromptDock>
+      </div>
+    );
+  },
+  ...src(`const [top, setTop] = createSignal(false);
+
+// A band is present while its prop is truthy; it slides in and out on its own.
+<PromptDock top={top() ? <span>Heads up, context is getting long.</span> : undefined}>
+  <PromptInput>
+    <PromptInputTextarea placeholder="Ask anything..." />
+    <PromptInputActions class="w-full justify-end px-1 pb-0.5">
+      <Button variant="default" size="sm">Send</Button>
+    </PromptInputActions>
+  </PromptInput>
 </PromptDock>`),
 };
