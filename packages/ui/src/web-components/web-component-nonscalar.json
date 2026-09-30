@@ -124,6 +124,14 @@
     "triggers",
     "value"
   ],
+  "kai-question": [
+    "fields"
+  ],
+  "kai-question-panel": [
+    "defaultValue",
+    "questions",
+    "value"
+  ],
   "kai-radio-group": [
     "options"
   ],

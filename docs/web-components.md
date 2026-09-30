@@ -3,14 +3,14 @@
 ## Overview
 
 <!-- spec:overview -->
-`@kitn.ai/ui` ships 99 framework-agnostic custom elements built on the SolidJS kit.
+`@kitn.ai/ui` ships 103 framework-agnostic custom elements built on the SolidJS kit.
 
 | Tag | Purpose |
 |-----|---------|
 | `<kai-chat>` | Full chat UI — message list plus prompt input |
 | `<kai-conversations>` | Sidebar conversation browser with group support |
 | `<kai-prompt-input>` | Standalone text-input area with send button |
-| + 96 composable custom elements | See the full roster below |
+| + 100 composable custom elements | See the full roster below |
 <!-- /spec:overview -->
 
 Each web component renders into its own **Shadow DOM** so the host page's CSS cannot leak in, and the kit's Tailwind classes cannot leak out. SolidJS and all kit dependencies are bundled inside the web-components bundle — the host does not need SolidJS.

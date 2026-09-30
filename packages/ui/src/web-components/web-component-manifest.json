@@ -97,7 +97,11 @@
     "kai-view-stack": "view-stack",
     "kai-view": "view",
     "kai-row": "row",
-    "kai-row-group": "row-group"
+    "kai-row-group": "row-group",
+    "kai-question-panel": "question-panel",
+    "kai-question": "question",
+    "kai-question-option": "question-option",
+    "kai-questions-waiting": "questions-waiting"
   },
   "files": {
     "conversation-list": [
@@ -387,6 +391,18 @@
     ],
     "row-group": [
       "kai-row-group"
+    ],
+    "question-panel": [
+      "kai-question-panel"
+    ],
+    "question": [
+      "kai-question"
+    ],
+    "question-option": [
+      "kai-question-option"
+    ],
+    "questions-waiting": [
+      "kai-questions-waiting"
     ]
   }
 }

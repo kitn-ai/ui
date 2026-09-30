@@ -3822,6 +3822,241 @@
       "tokens": []
     },
     {
+      "tag": "kai-question",
+      "description": "One question of a `<kai-question-panel>`, declared as a child.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "questionId",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "header",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "question",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "kind",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "multiSelect",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "placeholder",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "required",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "allowOther",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "fields",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [],
+      "tokens": []
+    },
+    {
+      "tag": "kai-question-option",
+      "description": "One option of a `<kai-question>`.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "description",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "preview",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [],
+      "tokens": []
+    },
+    {
+      "tag": "kai-question-panel",
+      "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "questions",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "toolCallId",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "value",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultValue",
+          "scalar": false,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "activeIndex",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "defaultActiveIndex",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "dismissLabel",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "submitLabel",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "label",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "focusOnOpen",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-active-change",
+        "kai-answer-change",
+        "kai-questions-dismiss",
+        "kai-questions-submit"
+      ],
+      "methods": [
+        "next",
+        "back",
+        "select",
+        "submit",
+        "focus"
+      ],
+      "parts": [],
+      "composedFrom": [
+        "QuestionPanel"
+      ],
+      "tokens": []
+    },
+    {
+      "tag": "kai-questions-waiting",
+      "description": "The quiet \"N of M questions waiting\" line with a Reopen control.",
+      "props": [
+        {
+          "name": "theme",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "count",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "total",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        },
+        {
+          "name": "reopenLabel",
+          "scalar": true,
+          "optional": true,
+          "fn": false
+        }
+      ],
+      "events": [
+        "kai-reopen"
+      ],
+      "methods": [],
+      "parts": [],
+      "composedFrom": [
+        "QuestionsWaiting"
+      ],
+      "tokens": []
+    },
+    {
       "tag": "kai-radio-group",
       "description": "A bordered list of rows that selects exactly one of them.",
       "props": [

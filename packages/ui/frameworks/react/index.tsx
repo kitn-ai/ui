@@ -67,6 +67,10 @@ import type {
   KaiProgressBarElement,
   KaiPromptDockElement,
   KaiPromptInputElement,
+  KaiQuestionElement,
+  KaiQuestionOptionElement,
+  KaiQuestionPanelElement,
+  KaiQuestionsWaitingElement,
   KaiRadioGroupElement,
   KaiReasoningElement,
   KaiRemoteElement,
@@ -1641,6 +1645,106 @@ export const PromptInput = /*#__PURE__*/ createWebComponent<PromptInputProps, Ka
   ["theme","value","placeholder","disabled","loading","suggestions","suggestionsLayout","suggestionMode","tools","expanded","voice","stoppable","submit","attach","attachments","triggers","kindIcons"],
   { onAttachmentsChange: 'kai-attachments-change', onSelect: 'kai-select', onStop: 'kai-stop', onSubmit: 'kai-submit', onSuggestionClick: 'kai-suggestion-click', onToolbarAction: 'kai-toolbar-action', onValueChange: 'kai-value-change', onVoice: 'kai-voice' },
   () => import('@kitn.ai/ui/web-components/prompt-input'),
+);
+
+export interface QuestionProps extends WebComponentProps {
+  /** The question's identity, echoed in its answer. Defaults to `q<index>` from its position. */
+  questionId?: string;
+  /** The short tab label (keep it under about twelve characters). */
+  header?: string;
+  /** The question itself, shown above the options. */
+  question?: string;
+  /** What kind of answer it takes. Default `choice`. */
+  kind?: "choice" | "confirm" | "tasks" | "text" | "form";
+  /** Let the user pick several options (checkboxes). A `tasks` question is always multiple. */
+  multiSelect?: boolean;
+  /** Hint text of the free-text field (the `text` kind, or the Other row). */
+  placeholder?: string;
+  /** Whether the question must be answered before Submit. Default true; `required="false"` turns it off. */
+  required?: boolean;
+  /** Offer the Other row (the user's own words). Default true for choice, confirm and tasks; `allow-other="false"` turns it off. */
+  allowOther?: boolean;
+  /** The `form` kind's fields: a JSON Schema object with `properties`, and `required` for the fields that must be filled. JS property. */
+  fields?: Record<string, unknown>;
+}
+
+export const Question = /*#__PURE__*/ createWebComponent<QuestionProps, KaiQuestionElement>(
+  'kai-question',
+  ["theme","questionId","header","question","kind","multiSelect","placeholder","required","allowOther","fields"],
+  {  },
+  () => import('@kitn.ai/ui/web-components/question'),
+);
+
+export interface QuestionOptionProps extends WebComponentProps {
+  /** The option's label, and the value that comes back in `selected`. The element's own text is the fallback. */
+  label?: string;
+  /** One line under the label. */
+  description?: string;
+  /** Code or config text shown beside the list while this option is focused. Rendered as plain text, never markup. */
+  preview?: string;
+}
+
+export const QuestionOption = /*#__PURE__*/ createWebComponent<QuestionOptionProps, KaiQuestionOptionElement>(
+  'kai-question-option',
+  ["theme","label","description","preview"],
+  {  },
+  () => import('@kitn.ai/ui/web-components/question-option'),
+);
+
+export interface QuestionPanelProps extends WebComponentProps {
+  /** The questions to ask, in order. JS property; `questionsFromToolCall` output fits. Ignored while `<kai-question>` children exist. */
+  questions?: { id: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; multiSelect?: boolean; options?: { label: string; description?: string; preview?: string }[]; placeholder?: string; fields?: Record<string, unknown>; required: boolean }[];
+  /** The provider's tool call id. Echoed in `kai-questions-submit` and `kai-questions-dismiss` so the host settles the right call, and a new one resets the answers. */
+  toolCallId?: string;
+  /** Controlled answers, one per answered question. JS property. Omit to let the panel keep its own. */
+  value?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** The answers to start from when uncontrolled (a Reopen with the answers kept). JS property. */
+  defaultValue?: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: string[]; text?: string; values?: Record<string, unknown> }[];
+  /** Controlled step: the question index, or the question count for the Review step. Omit to let the panel keep its own. */
+  activeIndex?: number;
+  /** The step to start on when uncontrolled. */
+  defaultActiveIndex?: number;
+  /** Text of the dismiss button. Replace the whole control with the `dismiss` slot. */
+  dismissLabel?: string;
+  /** Text of the final action. */
+  submitLabel?: string;
+  /** Accessible name of the panel and its tab list. */
+  label?: string;
+  /** Move focus into the panel when it appears. Default true; turn it off for a panel that is on the page from the start. */
+  focusOnOpen?: boolean;
+  /** The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. */
+  onActiveChange?: (event: CustomEvent<{ index: number; questionId?: undefined | string }>) => void;
+  /** An answer changed. `answers` is the whole current set, one entry per answered question. */
+  onAnswerChange?: (event: CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user chose to chat instead. `answers` are the partial answers so far. This does not settle the call. */
+  onQuestionsDismiss?: (event: CustomEvent<{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }>) => void;
+  /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
+  onQuestionsSubmit?: (event: CustomEvent<{ toolCallId?: undefined | string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" | "confirm" | "tasks" | "text" | "form"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }>) => void;
+}
+
+export const QuestionPanel = /*#__PURE__*/ createWebComponent<QuestionPanelProps, KaiQuestionPanelElement>(
+  'kai-question-panel',
+  ["theme","questions","toolCallId","value","defaultValue","activeIndex","defaultActiveIndex","dismissLabel","submitLabel","label","focusOnOpen"],
+  { onActiveChange: 'kai-active-change', onAnswerChange: 'kai-answer-change', onQuestionsDismiss: 'kai-questions-dismiss', onQuestionsSubmit: 'kai-questions-submit' },
+  () => import('@kitn.ai/ui/web-components/question-panel'),
+);
+
+export interface QuestionsWaitingProps extends WebComponentProps {
+  /** How many questions still have no answer. */
+  count?: number;
+  /** How many questions the call asked in all. */
+  total?: number;
+  /** Text of the reopen control. */
+  reopenLabel?: string;
+  /** The reopen control was pressed. The host brings the panel back and calls its `focus()`. */
+  onReopen?: (event: CustomEvent<Record<string, never>>) => void;
+}
+
+export const QuestionsWaiting = /*#__PURE__*/ createWebComponent<QuestionsWaitingProps, KaiQuestionsWaitingElement>(
+  'kai-questions-waiting',
+  ["theme","count","total","reopenLabel"],
+  { onReopen: 'kai-reopen' },
+  () => import('@kitn.ai/ui/web-components/questions-waiting'),
 );
 
 export interface RadioGroupProps extends WebComponentProps {

@@ -52,7 +52,15 @@
 // been drift with a receipt that no longer describes the tree. 324 KiB is the same ~3%
 // headroom over the measurement that the baseline and the previous raise used. If this file
 // grows again, the note above explains what to measure and what to trim first.
-const MAX_LLMS_FULL_BYTES = 324 * 1024; // 331,776
+// 2026-09-30 raise: 324 -> 343 KiB. Measured 340,235 bytes at 103 elements / 154 state/wire
+// exports, against a 330,354-byte baseline on the branch before the question panel. What grew
+// (9.9 KB): four new elements (`kai-question-panel`, `kai-question`, `kai-question-option`,
+// `kai-questions-waiting`), of which `kai-question-panel` is 5.5 KB alone because its `questions`,
+// `value` and `defaultValue` props are `Question[]` / `Answer[]` and the generator inlines every
+// structural type by design (`kai-thread`'s `messages` row is larger still). Trimming lost: the
+// descriptions are already one sentence, and a narrower type would take the typed React wrapper
+// down with it. 343 KiB is ~3% headroom over the measurement, the same margin the earlier raises used.
+const MAX_LLMS_FULL_BYTES = 343 * 1024; // 351,232
 
 // THE FLOOR IS A TRUNCATION TRIPWIRE, NOT A TARGET. This repo has already
 // shipped the failure it guards: running gen-llms.mjs standalone silently

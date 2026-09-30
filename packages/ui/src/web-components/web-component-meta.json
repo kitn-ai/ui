@@ -7424,6 +7424,398 @@
     ]
   },
   {
+    "tag": "kai-question",
+    "className": "KaiQuestionElement",
+    "displayName": "Question",
+    "description": "One question of a `<kai-question-panel>`, declared as a child.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "questionId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The question's identity, echoed in its answer. Defaults to `q<index>` from its position.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "header",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The short tab label (keep it under about twelve characters).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "question",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The question itself, shown above the options.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "kind",
+        "type": "undefined | \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"",
+        "optional": true,
+        "scalar": true,
+        "description": "What kind of answer it takes. Default `choice`.",
+        "displayType": "undefined | \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\""
+      },
+      {
+        "name": "multiSelect",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Let the user pick several options (checkboxes). A `tasks` question is always multiple.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "placeholder",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Hint text of the free-text field (the `text` kind, or the Other row).",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "required",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the question must be answered before Submit. Default true; `required=\"false\"` turns it off.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "allowOther",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Offer the Other row (the user's own words). Default true for choice, confirm and tasks; `allow-other=\"false\"` turns it off.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "fields",
+        "type": "undefined | Record<string, unknown>",
+        "optional": true,
+        "scalar": false,
+        "description": "The `form` kind's fields: a JSON Schema object with `properties`, and `required` for the fields that must be filled. JS property.",
+        "displayType": "undefined | Record<string, unknown>"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The question's `<kai-question-option>` rows, in order. \"Other\" is added after them by the panel."
+      }
+    ]
+  },
+  {
+    "tag": "kai-question-option",
+    "className": "KaiQuestionOptionElement",
+    "displayName": "QuestionOption",
+    "description": "One option of a `<kai-question>`.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The option's label, and the value that comes back in `selected`. The element's own text is the fallback.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "description",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "One line under the label.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "preview",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Code or config text shown beside the list while this option is focused. Rendered as plain text, never markup.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [],
+    "tokens": []
+  },
+  {
+    "tag": "kai-question-panel",
+    "className": "KaiQuestionPanelElement",
+    "displayName": "QuestionPanel",
+    "description": "The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "questions",
+        "type": "undefined | { id: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; multiSelect?: undefined | false | true; options?: undefined | { label: string; description?: undefined | string; preview?: undefined | string }[]; placeholder?: undefined | string; fields?: undefined | Record<string, unknown>; required: false | true }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The questions to ask, in order. JS property; `questionsFromToolCall` output fits. Ignored while `<kai-question>` children exist.",
+        "typeName": "Question[]",
+        "typeShape": "{ id: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; multiSelect?: undefined | false | true; options?: undefined | { label: string; description?: undefined | string; preview?: undefined | string }[]; placeholder?: undefined | string; fields?: undefined | Record<string, unknown>; required: false | true }[]",
+        "typeImport": "Question",
+        "displayType": "undefined | { id: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; multiSelect?: undefined | false | true; options?: undefined | { label: string; description?: undefined | string; preview?: undefined | string }[]; placeholder?: undefined | string; fields?: undefined | Record<string, unknown>; required: false | true }[]"
+      },
+      {
+        "name": "toolCallId",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The provider's tool call id. Echoed in `kai-questions-submit` and `kai-questions-dismiss` so the host settles the right call, and a new one resets the answers.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "value",
+        "type": "undefined | { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Controlled answers, one per answered question. JS property. Omit to let the panel keep its own.",
+        "typeName": "Answer[]",
+        "typeShape": "{ questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]",
+        "typeImport": "Answer",
+        "displayType": "undefined | { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]"
+      },
+      {
+        "name": "defaultValue",
+        "type": "undefined | { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "The answers to start from when uncontrolled (a Reopen with the answers kept). JS property.",
+        "typeName": "Answer[]",
+        "typeShape": "{ questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]",
+        "typeImport": "Answer",
+        "displayType": "undefined | { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[]"
+      },
+      {
+        "name": "activeIndex",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "Controlled step: the question index, or the question count for the Review step. Omit to let the panel keep its own.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "defaultActiveIndex",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "The step to start on when uncontrolled.",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "dismissLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Text of the dismiss button. Replace the whole control with the `dismiss` slot.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "submitLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Text of the final action.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Accessible name of the panel and its tab list.",
+        "displayType": "undefined | string"
+      },
+      {
+        "name": "focusOnOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Move focus into the panel when it appears. Default true; turn it off for a panel that is on the page from the start.",
+        "default": "true",
+        "displayType": "undefined | false | true"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-active-change",
+        "detail": "{ index: number; questionId?: undefined | string }",
+        "description": "The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step.",
+        "displayDetail": "{ index: number; questionId?: undefined | string }"
+      },
+      {
+        "name": "kai-answer-change",
+        "detail": "{ answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }",
+        "description": "An answer changed. `answers` is the whole current set, one entry per answered question.",
+        "displayDetail": "{ answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }"
+      },
+      {
+        "name": "kai-questions-dismiss",
+        "detail": "{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }",
+        "description": "The user chose to chat instead. `answers` are the partial answers so far. This does not settle the call.",
+        "displayDetail": "{ toolCallId?: undefined | string; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] }"
+      },
+      {
+        "name": "kai-questions-submit",
+        "detail": "{ toolCallId?: undefined | string; result: { status: \"answered\"; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: \"dismissed\"; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }",
+        "description": "The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result.",
+        "displayDetail": "{ toolCallId?: undefined | string; result: { status: \"answered\"; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } | { status: \"dismissed\"; answers: { questionId: string; header: string; question: string; kind: \"choice\" | \"confirm\" | \"tasks\" | \"text\" | \"form\"; selected?: undefined | string[]; text?: undefined | string; values?: undefined | Record<string, unknown> }[] } }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "next",
+        "params": "",
+        "returns": "void",
+        "description": "Go to the next step."
+      },
+      {
+        "name": "back",
+        "params": "",
+        "returns": "void",
+        "description": "Go to the previous step."
+      },
+      {
+        "name": "select",
+        "params": "index: number",
+        "returns": "void",
+        "description": "Go to a step by index; the question count is the Review step."
+      },
+      {
+        "name": "submit",
+        "params": "",
+        "returns": "void",
+        "description": "Submit, when every required question is answered. Fires `kai-questions-submit`."
+      },
+      {
+        "name": "focus",
+        "params": "",
+        "returns": "void",
+        "description": "Focus the active step's first control. Call it when a dismissed panel is reopened."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "QuestionPanel",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "Your own `<kai-question>` children (item mode: the app owns the questions). `questions` is ignored while any are present. The panel keeps the tabs, Back and Next, the review step and Submit."
+      },
+      {
+        "name": "dismiss",
+        "mode": "replace",
+        "doc": "Replaces the \"Let's chat\" button. A click anywhere in it dismisses the panel, so a slotted `<button>` or `<kai-button>` needs no handler of its own."
+      }
+    ]
+  },
+  {
+    "tag": "kai-questions-waiting",
+    "className": "KaiQuestionsWaitingElement",
+    "displayName": "QuestionsWaiting",
+    "description": "The quiet \"N of M questions waiting\" line with a Reopen control.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "count",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "How many questions still have no answer.",
+        "default": "0",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "total",
+        "type": "undefined | number",
+        "optional": true,
+        "scalar": true,
+        "description": "How many questions the call asked in all.",
+        "default": "0",
+        "displayType": "undefined | number"
+      },
+      {
+        "name": "reopenLabel",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "Text of the reopen control.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-reopen",
+        "detail": "Record<string, never>",
+        "description": "The reopen control was pressed. The host brings the panel back and calls its `focus()`.",
+        "displayDetail": "Record<string, never>"
+      }
+    ],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "QuestionsWaiting",
+        "group": "Components"
+      }
+    ],
+    "tokens": []
+  },
+  {
     "tag": "kai-radio-group",
     "className": "KaiRadioGroupElement",
     "displayName": "RadioGroup",
