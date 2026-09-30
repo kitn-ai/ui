@@ -211,14 +211,15 @@ describe('pattern index, item JSON and rendering', () => {
   });
 
   it('the cdn form rewrites ONLY the kit import line', () => {
-    const files = renderPattern(hello, { cdn: { version: '9.9.9' } });
+    const version = '9.9.9';
+    const files = renderPattern(hello, { cdn: { version } });
     const ts = files.find((f) => f.path === 'hello-pattern.js')!;
     const before = (hello.files.get('hello-pattern.js') as string).split('\n');
     const after = ts.content.split('\n');
     expect(after).toHaveLength(before.length);
     const changed = after.filter((line, i) => line !== before[i]);
     expect(changed).toHaveLength(1);
-    expect(changed[0]).toContain('https://cdn.jsdelivr.net/npm/@kitn.ai/ui@9.9.9/dist/kai.es.js');
+    expect(changed[0]).toContain(`https://cdn.jsdelivr.net/npm/@kitn.ai/ui@${version}/dist/kai.es.js`);
     expect(files.find((f) => f.path === 'hello-pattern.html')?.content).toBe(hello.files.get('hello-pattern.html'));
   });
 
