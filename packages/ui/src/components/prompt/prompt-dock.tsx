@@ -1,4 +1,4 @@
-import { type JSX, Show } from 'solid-js';
+import { type JSX, createEffect, createMemo, createSignal, on, onCleanup, onMount } from 'solid-js';
 import { cn } from '../../utils/cn';
 
 /** How the tray frames the input: the SPATIAL axis (padding/inset only).
@@ -43,6 +43,97 @@ export interface PromptDockProps {
 /** Shared base styling for a lip region; per-region classes append/override it. */
 const LIP_BASE = 'px-3 py-2 text-sm leading-snug text-muted-foreground';
 
+/** Slide duration for a band opening, closing or resizing. */
+const BAND_MS = 180;
+
+/**
+ * One animated band. The wrapper clips and owns the height; the measured child holds the
+ * content plus the tray gap on its inner edge, so a closed band takes no space at all
+ * (the tray has no flex gap of its own). Height comes from the content's `scrollHeight`,
+ * re-read by a ResizeObserver while open, so content that grows (a panel switching tabs)
+ * animates to its new height instead of clipping. Reduced motion zeroes the duration.
+ * The last content stays mounted for the length of the closing slide.
+ */
+function Band(props: {
+  name: 'top' | 'bottom';
+  content: JSX.Element;
+  class?: string;
+}) {
+  // One evaluation of the content prop: it may build DOM, so it is read exactly once.
+  const content = createMemo(() => props.content);
+  const open = () => !!content();
+  // Keep the last content mounted while the band slides shut, so it fades out rather
+  // than collapsing blank. Dropped once the slide has finished.
+  const [held, setHeld] = createSignal<JSX.Element>(undefined);
+  let release: ReturnType<typeof setTimeout> | undefined;
+  createEffect(() => {
+    const c = content();
+    clearTimeout(release);
+    if (c) setHeld(() => c);
+    else release = setTimeout(() => setHeld(undefined), BAND_MS + 60);
+  });
+  onCleanup(() => clearTimeout(release));
+  const [height, setHeight] = createSignal(0);
+  const [ready, setReady] = createSignal(false);
+  const [reduced, setReduced] = createSignal(false);
+  let wrapper!: HTMLDivElement;
+  let measured!: HTMLDivElement;
+
+  const measure = () => setHeight(measured.scrollHeight);
+
+  onMount(() => {
+    const mq = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : undefined;
+    if (mq) {
+      setReduced(mq.matches);
+      const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+      mq.addEventListener?.('change', onChange);
+      onCleanup(() => mq.removeEventListener?.('change', onChange));
+    }
+    // A band that is already open on first paint must not animate in from nothing.
+    measure();
+    const raf = requestAnimationFrame(() => setReady(true));
+    onCleanup(() => cancelAnimationFrame(raf));
+    if (typeof ResizeObserver === 'function') {
+      const ro = new ResizeObserver(() => {
+        if (open()) measure();
+      });
+      ro.observe(measured);
+      onCleanup(() => ro.disconnect());
+    }
+  });
+  // The content mounts in the same flush as the state change, so this reads the new height.
+  createEffect(on(open, (o) => { if (o) measure(); }, { defer: true }));
+  createEffect(() => {
+    // Closed bands keep focusable content out of the tab order.
+    if (open()) wrapper.removeAttribute('inert');
+    else wrapper.setAttribute('inert', '');
+  });
+
+  return (
+    <div
+      ref={wrapper}
+      data-dock-band={props.name}
+      data-state={open() ? 'open' : 'closed'}
+      aria-hidden={open() ? undefined : 'true'}
+      style={{
+        overflow: 'hidden',
+        height: open() ? (height() > 0 ? `${height()}px` : 'auto') : '0px',
+        opacity: open() ? '1' : '0',
+        'transition-property': ready() ? 'height, opacity' : 'none',
+        'transition-duration': reduced() ? '0s' : `${BAND_MS}ms`,
+        'transition-timing-function': 'ease-out',
+      }}
+    >
+      <div
+        ref={measured}
+        style={{ [props.name === 'top' ? 'padding-bottom' : 'padding-top']: '0.375rem' }}
+      >
+        <div part={props.name} class={cn(LIP_BASE, props.class)}>{content() ?? held()}</div>
+      </div>
+    </div>
+  );
+}
+
 /**
  * PromptDock - a recessed tray that frames a prompt input and can extend with optional
  * "lip" regions above and/or below it.
@@ -75,8 +166,8 @@ export function PromptDock(props: PromptDockProps) {
       part="tray"
       // Surface / border / radius / inset live in the tokenized inline style so the
       // var fallbacks resolve and external overrides win; only the structural
-      // flex + gap stay in classes.
-      class={cn('flex flex-col gap-1.5', props.class)}
+      // flex stays in a class (the band gap lives inside each band, so a closed band is free).
+      class={cn('flex flex-col', props.class)}
       style={{
         background: filled()
           ? 'var(--kai-prompt-dock-surface, var(--color-surface-sunken))'
@@ -94,13 +185,9 @@ export function PromptDock(props: PromptDockProps) {
               : 'var(--kai-prompt-dock-inset, 0.375rem)',
       }}
     >
-      <Show when={props.top}>
-        <div part="top" class={cn(LIP_BASE, props.topClass)}>{props.top}</div>
-      </Show>
+      <Band name="top" content={props.top} class={props.topClass} />
       {props.children}
-      <Show when={props.bottom}>
-        <div part="bottom" class={cn(LIP_BASE, props.bottomClass)}>{props.bottom}</div>
-      </Show>
+      <Band name="bottom" content={props.bottom} class={props.bottomClass} />
     </div>
   );
 }
