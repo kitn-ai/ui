@@ -22,7 +22,7 @@ export interface BuilderLayoutProps {
   // collapsing to full-bleed on `mobile`, matching `components/dock/dock.tsx`'s <=480px
   // takeover) drives that from the same signal it hands `viewport`: see
   // `builder-in-app-assistant.stories.tsx` and `builder.stories.tsx`.
-  /** The preview content, typically a device frame wrapping `<ChatThread>`. */
+  /** The preview content, typically a device frame wrapping `<ChatApp>`. */
   preview: JSX.Element;
   // Same controlled/uncontrolled convention as `Switch`'s `checked`/`defaultChecked` and
   // `ToggleChip`'s `pressed`/`defaultPressed`.

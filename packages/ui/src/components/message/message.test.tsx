@@ -435,7 +435,7 @@ describe('MessageBody reasoningMode (Task 10b)', () => {
 // A `<Message>` on its own knows nothing of a thread, so an unset `density` has to land
 // on the shipped spacing rather than on whichever value happens to be the tighter one.
 // The threads passing their own RESOLVED value down are pinned in `thread.test.tsx` and
-// `chat-thread.test.tsx`; this pins the row itself, both halves.
+// `chat-app.test.tsx`; this pins the row itself, both halves.
 describe('Message row gap', () => {
   const row = (c: HTMLElement) => c.querySelector('[part="row"]') as HTMLElement;
 

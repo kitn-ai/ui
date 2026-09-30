@@ -5,7 +5,7 @@
  * WHY THIS FILE EXISTS, which is the part worth keeping: `Message` gained
  * `role="article"` + a speaker `aria-label` in c80080e, and that fix was verified
  * on `Message` in ISOLATION — rendered directly, role asserted, axe clean.
- * Neither `Thread` nor `ChatThread` passed `role` when rendering the list, so the
+ * Neither `Thread` nor `ChatApp` passed `role` when rendering the list, so the
  * a11y fix reached nobody through the primary path and the isolated tests stayed
  * green the whole time. Verifying a mechanism is not verifying the thing that
  * uses it. Every assertion below therefore goes through a real custom element
@@ -37,7 +37,7 @@ import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
 /** Both speakers AND both `<Message>` call sites. The avatar entry is not
- *  padding: `Thread`/`ChatThread` each render `<Message>` from two branches, and
+ *  padding: `Thread`/`ChatApp` each render `<Message>` from two branches, and
  *  a fix applied to only the no-avatar fallback passes a thread without one. */
 const MESSAGES: ChatMessage[] = [
   { id: 'm1', role: 'user', parts: [{ type: 'text', text: 'What is the capital of France?' }] },

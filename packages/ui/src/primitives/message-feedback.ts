@@ -2,7 +2,7 @@
 // per-message `<For>` so a streaming re-render (a fresh `messages` array ref per
 // chunk) never wipes the user's optimistic vote or the transient "copied" check.
 //
-// Both facades (`ChatThread` and the `<kai-message>` element) create one of
+// Both facades (`ChatApp` and the `<kai-message>` element) create one of
 // these and route their action-bar clicks through `handleAction`. Keeping the
 // logic here (not inside the un-unit-testable `defineWebComponent` body) makes
 // the toggle/toast/clipboard behavior directly testable.

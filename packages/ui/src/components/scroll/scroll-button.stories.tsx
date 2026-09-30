@@ -190,7 +190,7 @@ export const LightAndDark: Story = {
   ...src(`<ScrollButton showLabel />`),
 };
 
-// The last panel is what thread.tsx and chat-thread.tsx ship: `relative` on the
+// The last panel is what thread.tsx and chat-app.tsx ship: `relative` on the
 // non-scrolling box, then `absolute bottom-4 left-1/2 w-full max-w-3xl -translate-x-1/2` on
 // the wrapper, which centres the button on the message band instead of the full container.
 //

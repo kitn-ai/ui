@@ -11,7 +11,7 @@ import type { ThreadDensity } from '../../components/chat/thread-density';
 interface Props extends Record<string, unknown> {
   // Each entry carries its role, ordered `parts`, and optional
   // actions/avatar/feedback; mutating an entry in place does not re-render. Re-declared
-  // from `ChatThreadProps` so the element's own prop table carries its own description,
+  // from `ChatAppProps` so the element's own prop table carries its own description,
   // matching `<kai-chat>`.
   /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: ChatMessage[];

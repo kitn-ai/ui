@@ -157,7 +157,7 @@ export function bubbles(page: Page): Locator {
 //
 // So the assistant's bubble is now selected by SPEAKER. The kit does not put the
 // speaker in the rendered DOM — `<Message role>` emits `data-role` /
-// `role="article"` / `aria-label`, but neither `Thread` nor `ChatThread` passes
+// `role="article"` / `aria-label`, but neither `Thread` nor `ChatApp` passes
 // it, so every row in a real `<kai-thread>` is an unlabelled generic div (see
 // HARNESS.md, "The thread renders no role"). Until it does, the speaker has to
 // be read off the two independent things the kit DOES render differently:

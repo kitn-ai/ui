@@ -153,7 +153,7 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
         child: 'kai-conversations',
         parent: 'kai-chat',
         slot: 'sidebar',
-        // Every clause here is checked against chat-thread.tsx, not inferred
+        // Every clause here is checked against chat-app.tsx, not inferred
         // from the slot's name. The shell's whole sidebar implementation is one
         // `<aside part="sidebar" class="flex w-64 shrink-0 …">` around a
         // `<slot name="sidebar" />`: fixed width, no responsive class in the
@@ -163,7 +163,7 @@ export const surfaceRecipes: TSurfaceRecipe[] = [
         // many words: "the host owns the surrounding region". A note that
         // credited the shell with collapse and a breakpoint would send a builder
         // into a 16rem empty column holding a floating reopen button.
-        note: 'the rail is a light-DOM child of <kai-chat> carrying slot="sidebar", not a sibling: the shell renders it into its own ::part(sidebar) aside, a FIXED-WIDTH column (w-64 in chat-thread.tsx, exposed as a part so you can restyle it) — and that is the whole of what the shell does. Collapse is the RAIL\'s own (collapsed / collapse() / kai-collapse-toggle) and <kai-chat> does not react to it, so a collapsed rail leaves the column at its fixed width; there is no responsive behaviour here either. Give the rail height (display:block;height:100%) and drive it through its own JS properties — being slotted changes where it renders, never how it is wired. If the COLUMN itself has to collapse, resize or respond to width, that is the <kai-workspace> layout shell (its start aside: startCollapsed / collapseBelow / drawer-below, widths via the --kai-workspace-start-* custom properties) or a layout you own',
+        note: 'the rail is a light-DOM child of <kai-chat> carrying slot="sidebar", not a sibling: the shell renders it into its own ::part(sidebar) aside, a FIXED-WIDTH column (w-64 in chat-app.tsx, exposed as a part so you can restyle it) — and that is the whole of what the shell does. Collapse is the RAIL\'s own (collapsed / collapse() / kai-collapse-toggle) and <kai-chat> does not react to it, so a collapsed rail leaves the column at its fixed width; there is no responsive behaviour here either. Give the rail height (display:block;height:100%) and drive it through its own JS properties — being slotted changes where it renders, never how it is wired. If the COLUMN itself has to collapse, resize or respond to width, that is the <kai-workspace> layout shell (its start aside: startCollapsed / collapseBelow / drawer-below, widths via the --kai-workspace-start-* custom properties) or a layout you own',
       },
     ],
     wiring: [

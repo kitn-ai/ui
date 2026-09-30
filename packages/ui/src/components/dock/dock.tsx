@@ -337,7 +337,7 @@ const DOCK_CSS = `
      SCOPED to :not([data-hide-close]) because the band read as a dead strip when nothing
      but the X occupied it; removing it unconditionally reintroduces the very collision
      this band prevents, for every consumer who never opted into hideClose. hideClose is only true for a caller that supplies
-     its OWN close control in its own header row (ChatThread's headerEndContent is
+     its OWN close control in its own header row (ChatApp's headerEndContent is
      the one that does today) — the built-in X and this band both come off
      together for that case, since there is nothing left for the band to protect.
      Every other consumer -- including a hand-authored kai-dock with real
@@ -439,7 +439,7 @@ function isWithin(root: Node, node: Node | null): boolean {
  *   CSS-gated by the SAME media query and `[data-expanded]`, so it needs no viewport
  *   JS. Desktop is unaffected: the launcher keeps toggling and no X ever renders.
  *   This is the FALLBACK route, for panel content with no header of its own to hold
- *   a close control: content that does (a `ChatThread` using `headerEndContent`,
+ *   a close control: content that does (a `ChatApp` using `headerEndContent`,
  *   say) passes `hideClose` to drop this X instead of stacking a second one over
  *   its own header row.
  *

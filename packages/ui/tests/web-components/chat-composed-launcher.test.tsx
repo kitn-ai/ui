@@ -10,7 +10,7 @@
  *       property in, the `kai-unread-change` event out; and
  *   (b) close the conversations list programmatically on widget close
  *       (`el.closeConversationsList()`), the interaction-API seam that was
- *       reachable only through `ChatThreadController` inside the facade.
+ *       reachable only through `ChatAppController` inside the facade.
  *
  * `../../src/web-components/chat` is the source of the public `@kitn.ai/ui/web-components`
  * entry; `../../src/index` is the package root — the same modules a consumer's
@@ -143,7 +143,7 @@ test('composed launcher, B-10: startNewConversation() is an element method — c
     loads.push((e as CustomEvent<{ id: string | undefined; messages: unknown[] }>).detail));
 
   // The consumer's own "New conversation" control — previously reachable only
-  // through ChatThreadController inside the facade.
+  // through ChatAppController inside the facade.
   expect(typeof el.startNewConversation).toBe('function');
   el.startNewConversation!();
   await settle();

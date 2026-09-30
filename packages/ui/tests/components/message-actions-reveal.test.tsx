@@ -21,11 +21,11 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
 import { MessageBody, resolveActionsReveal } from '../../src/components/message/message';
-import { ChatThread } from '../../src/components/chat/chat-thread';
+import { ChatApp } from '../../src/components/chat/chat-app';
 import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 beforeAll(() => {
-  // `ChatThread`'s stick-to-bottom scroller calls `scrollTo` from a rAF, and jsdom has no
+  // `ChatApp`'s stick-to-bottom scroller calls `scrollTo` from a rAF, and jsdom has no
   // scrolling at all; an unhandled throw inside the rAF callback fails the whole run.
   if (!Element.prototype.scrollTo) Element.prototype.scrollTo = () => {};
 });
@@ -117,14 +117,14 @@ describe('MessageBody — the reveal default follows the message role', () => {
   });
 });
 
-describe('ChatThread — one thread, two reveal modes', () => {
+describe('ChatApp — one thread, two reveal modes', () => {
   const messages = [message('u1', 'user', 'What is SolidJS?'), message('a1', 'assistant', 'A reactive UI library.')];
   const rowFor = (container: HTMLElement, role: 'user' | 'assistant') =>
     container.querySelector<HTMLElement>(`[data-role="${role}"]`)!;
 
   it('reveals the user row and pins the assistant row when the prop is omitted', () => {
     const { container } = render(() => (
-      <ChatThread messages={messages} userActions={['copy']} assistantActions={['copy']} />
+      <ChatApp messages={messages} userActions={['copy']} assistantActions={['copy']} />
     ));
 
     expect(rowFor(container, 'user').className, 'the user ROW carries the group the bar fades on').toContain('group');
@@ -138,13 +138,13 @@ describe('ChatThread — one thread, two reveal modes', () => {
 
   it('applies an explicit reveal to every row, whichever way it points', () => {
     const always = render(() => (
-      <ChatThread messages={messages} userActions={['copy']} assistantActions={['copy']} actionsReveal="always" />
+      <ChatApp messages={messages} userActions={['copy']} assistantActions={['copy']} actionsReveal="always" />
     ));
     expect(rowFor(always.container, 'user').className).not.toContain('group');
     always.unmount();
 
     const hover = render(() => (
-      <ChatThread messages={messages} userActions={['copy']} assistantActions={['copy']} actionsReveal="hover" />
+      <ChatApp messages={messages} userActions={['copy']} assistantActions={['copy']} actionsReveal="hover" />
     ));
     expect(rowFor(hover.container, 'assistant').className, 'the assistant row now fades too').toContain('group');
     expect(bar(hover.container).className).toContain(HIDDEN);
@@ -152,7 +152,7 @@ describe('ChatThread — one thread, two reveal modes', () => {
 
   it('still fires an action from a row whose bar is revealed on hover', () => {
     const { container } = render(() => (
-      <ChatThread messages={messages} userActions={['copy']} assistantActions={['copy']} />
+      <ChatApp messages={messages} userActions={['copy']} assistantActions={['copy']} />
     ));
     fireEvent.click(actionButton(container));
     // The bar's own click path must survive being opacity-hidden: the copy button swaps to

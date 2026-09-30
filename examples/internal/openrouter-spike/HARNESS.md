@@ -191,7 +191,7 @@ refuse it.
 
 None of this should need styling. `<Message role>` already emits `data-role`,
 `role="article"` and an `aria-label` naming the speaker — but neither `Thread`
-nor `ChatThread` passes `role` when it renders the message list, so every row in
+nor `ChatApp` passes `role` when it renders the message list, so every row in
 a real `<kai-thread>` is an **unlabelled generic div**. That is a kit gap in its
 own right (a screen reader gets no speaker either), and it is why the speaker has
 to be inferred here at all.

@@ -35,7 +35,7 @@ export interface HomePanelProps {
 /**
  * The widget home screen: greeting, the most-recent conversation, a "start a new
  * conversation" CTA, and a list of host-defined links. Pure props in, events out:
- * no fetching, no routing. `ChatThread` wires it behind its Home/Messages tab bar.
+ * no fetching, no routing. `ChatApp` wires it behind its Home/Messages tab bar.
  *
  * The rows render THROUGH the public `Row` part, so the facade's home tab and a
  * composed block's settings screen share one row anatomy. The unsafe-href rule

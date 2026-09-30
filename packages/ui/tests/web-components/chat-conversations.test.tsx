@@ -15,7 +15,7 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 
 const flush = () => new Promise((r) => setTimeout(r, 0));
 
-test('conversations=true forwards; store is a property-only prop that reaches the internal ChatThread', async () => {
+test('conversations=true forwards; store is a property-only prop that reaches the internal ChatApp', async () => {
   localStorage.clear();
   const store = localStorageStore('acme-support');
   await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }] satisfies ChatMessage[]);
@@ -27,7 +27,7 @@ test('conversations=true forwards; store is a property-only prop that reaches th
   document.body.appendChild(el);
   await flush();
 
-  // Property reached the internal ChatThread: the toggle renders.
+  // Property reached the internal ChatApp: the toggle renders.
   expect(el.shadowRoot!.querySelector('[data-kai-conversations-toggle]')).toBeTruthy();
 
   // `store` must never be reflected as an attribute — it is a live object of
@@ -49,13 +49,13 @@ test('conversations=true forwards; store is a property-only prop that reaches th
 
 // CRITICAL-1 (2026-08-26 final review): the facade used to forward
 // `conversations`/`store` but never wire `onConversationLoad` onto the
-// internal `<ChatThread>`, so a row tap / "new conversation" / mount
-// auto-restore all updated ChatThread's own internal state while a WC
+// internal `<ChatApp>`, so a row tap / "new conversation" / mount
+// auto-restore all updated ChatApp's own internal state while a WC
 // consumer had no way at all to receive the loaded messages back — row-tap,
 // new, and restore were all inert. Fixed by dispatching a non-bubbling
 // `kai-conversation-load` CustomEvent (detail: { id, messages }) off the
 // element; the facade's own internal wiring (always present) also satisfies
-// the ChatThread-level "no onConversationLoad" guard, so the toggle keeps
+// the ChatApp-level "no onConversationLoad" guard, so the toggle keeps
 // rendering even for a consumer who never listens for the event.
 test('a row tap fires kai-conversation-load with the messages, and a consumer setting el.messages from it renders the thread', async () => {
   localStorage.clear();
@@ -98,9 +98,9 @@ test('a row tap fires kai-conversation-load with the messages, and a consumer se
 });
 
 // The other half of CRITICAL-1: `conversations` on with a `store` but no
-// `onConversationLoad` handler ANYWHERE (i.e. exercised at the ChatThread
+// `onConversationLoad` handler ANYWHERE (i.e. exercised at the ChatApp
 // level directly — the facade always supplies its own internal handler, so
-// this guard cannot trip through `<kai-chat>` itself; see chat-thread.test.tsx
+// this guard cannot trip through `<kai-chat>` itself; see chat-app.test.tsx
 // for that direct case). Documented here so the two guard halves — missing
 // `store` and missing `onConversationLoad` — are easy to find side by side.
 test('missing store (element level): decides loudly, toggle stays absent', async () => {

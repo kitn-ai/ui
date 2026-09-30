@@ -34,7 +34,7 @@ describe('composedFrom', () => {
     //
     // The helper MOVED on 2026-09-19: `default-input.tsx` registers nothing and is a
     // plain Solid component, yet it lived in the web-components layer while a Solid
-    // component (components/chat/chat-thread.tsx) imported it -- an upward VALUE edge.
+    // component (components/chat/chat-app.tsx) imported it -- an upward VALUE edge.
     // It now lives in components/prompt/, so this facade composes it DIRECTLY and the
     // reported name is that helper rather than the three primitives inside it. The
     // in-layer recursion branch this test once exercised is exercised by nothing today

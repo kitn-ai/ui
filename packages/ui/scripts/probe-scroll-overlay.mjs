@@ -46,7 +46,7 @@
  *
  * WATCH IT FAIL, both ways, before trusting it:
  *   - delete `pointer-events-none` from the wrapper in `components/thread/thread.tsx`
- *     (and its twin in `components/chat/chat-thread.tsx`) and checks 1, 2, 3 and 4 report
+ *     (and its twin in `components/chat/chat-app.tsx`) and checks 1, 2, 3 and 4 report
  *     the wrapper at the band's point, a caret on the wrapper, no selection, and a frozen
  *     `scrollTop`;
  *   - delete `pointer-events-auto` from the button in `components/scroll/scroll-button.tsx`

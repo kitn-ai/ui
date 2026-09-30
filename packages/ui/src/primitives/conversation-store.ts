@@ -23,17 +23,17 @@ import type { ChatMessage } from '../web-components/chat/chat-types';
 export interface ConversationStore {
   // `list()`/`load()` implementations MUST return a fresh array (and, for any
   // item whose content actually differs, a fresh object) on every call —
-  // `ChatThread`'s conversation list and the message array it hands back
+  // `ChatApp`'s conversation list and the message array it hands back
   // through `onConversationLoad` are both reference-keyed `<For>`s, and a
   // reused array/object reads as "nothing changed" (kai- contract).
   list(): Promise<ConversationSummary[]>;
   load(id: string): Promise<ChatMessage[]>;
   save(id: string, messages: ChatMessage[]): Promise<void>;
-  // Persist `ConversationSummary.lastReadAt` for `id`, called by `ChatThread` whenever that
+  // Persist `ConversationSummary.lastReadAt` for `id`, called by `ChatApp` whenever that
   // conversation counts as seen: it is the active conversation, the chat view (not the
   // list) is showing, and the host is open: on the select/restore transition into that
-  // state AND on every new message arriving while it holds (see `ChatThread`'s `hostOpen`
-  // prop doc for the third leg, which `ChatThread` cannot know on its own).
+  // state AND on every new message arriving while it holds (see `ChatApp`'s `hostOpen`
+  // prop doc for the third leg, which `ChatApp` cannot know on its own).
   //
   // OPT-IN, not a nice-to-have: omit it and no summary gets a `lastReadAt`, so every
   // unread computation reads "not unread" (that field's absent-means-not-unread default)
@@ -92,7 +92,7 @@ export const LEGACY_THREAD_MIGRATED_TITLE = 'Conversation 1';
 
 /** Newest-first ordering over `updatedAt`; rows with a missing or unparsable
  *  timestamp sort last (stable, so ties keep declaration order). The ONE
- *  recency rule: the list panel, ChatThread's restore pick, and the home
+ *  recency rule: the list panel, ChatApp's restore pick, and the home
  *  screen's recent card all sort with this. */
 export function byRecency(
   a: Pick<ConversationSummary, 'updatedAt'>,
@@ -160,7 +160,7 @@ export function mostRecentSummary(
 /**
  * Whether a conversation should show an unread indicator. `lastReadAt`'s own doc
  * (`types.ts`) has the full contract; this is the one place that reads it, so every
- * surface (the list row, the widget panel, the home screen's recent card, ChatThread's
+ * surface (the list row, the widget panel, the home screen's recent card, ChatApp's
  * own badge report, any consumer-composed launcher) derives it identically rather than
  * each restating the comparison. Headless data logic, so it lives here beside the
  * `ConversationStore` contract and is re-exported from the package root.
@@ -449,7 +449,7 @@ export function localStorageStore(name: string, userId?: string): ConversationSt
  *  x-kai-user-id carries userId on every request, matching the header
  *  codegen.ts already emits for the endpoint provider and the endpoint
  *  history persistence mode. Decide loudly: no request here catches its own
- *  rejection, a caller (ChatThread's lifecycle, Task 2) decides how to
+ *  rejection, a caller (ChatApp's lifecycle, Task 2) decides how to
  *  degrade, exactly as the spec's degradation section requires.
  *
  *  No `markRead`, and none of `rename`/`setPinned`/`setArchived`/`setGroup`/`remove`, and no

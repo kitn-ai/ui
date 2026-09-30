@@ -4,14 +4,14 @@
  * WHY THIS FILE EXISTS AT ALL. `MessageBody` already has a `<Index>` over its
  * part groups, added to stop a streaming delta tearing down an open tool /
  * reasoning panel. That fix was landed on the evidence of a test that drove
- * `MessageBody` directly, and it was DEAD: `ChatThread` / `Thread` render their
+ * `MessageBody` directly, and it was DEAD: `ChatApp` / `Thread` render their
  * messages through a reference-keyed `<For>`, and `createAssistantStream` hands
  * the streaming message a NEW OBJECT IDENTITY on every delta
  * (`{ ...prev[i], parts: next }`). So the parent saw an entirely new list each
  * chunk and destroyed the whole message row before the position-keying inside it
  * could matter. A test that cannot see the parent cannot see this bug.
  *
- * So these tests drive the real thing: render `ChatThread` / `Thread`, then push
+ * So these tests drive the real thing: render `ChatApp` / `Thread`, then push
  * deltas through the REAL `@kitn.ai/ui/state` folds so the object churn is the
  * genuine article, not a hand-written stand-in.
  *
@@ -36,7 +36,7 @@
 import { describe, it, expect, beforeAll, afterEach } from 'vitest';
 import { render, fireEvent, cleanup } from '@solidjs/testing-library';
 import { createSignal, type Accessor } from 'solid-js';
-import { ChatThread } from '../../src/components/chat/chat-thread';
+import { ChatApp } from '../../src/components/chat/chat-app';
 import { Thread } from '../../src/components/thread/thread';
 import { createAssistantStream, type AssistantStream } from '../../src/state/index';
 import type { ChatMessage } from '../../src/web-components/chat/chat-types';
@@ -149,17 +149,17 @@ function assertSurvivesDeltas(container: HTMLElement, stream: AssistantStream) {
   expect(container.textContent).toContain('Light rain');
 }
 
-describe('ChatThread — message list keying under a live stream', () => {
+describe('ChatApp — message list keying under a live stream', () => {
   it('keeps a tool panel opened mid-stream open across every subsequent delta', () => {
     const { messages, stream } = streamingThread();
-    const { container } = render(() => <ChatThread messages={messages()} />);
+    const { container } = render(() => <ChatApp messages={messages()} />);
     openTurn(stream);
     assertSurvivesDeltas(container, stream);
   });
 
   it('does not remount the message row when a delta replaces the message object', () => {
     const { messages, stream } = streamingThread();
-    const { container } = render(() => <ChatThread messages={messages()} />);
+    const { container } = render(() => <ChatApp messages={messages()} />);
     stream.appendReasoning('Paris in autumn', { label: 'Thinking' });
 
     const row = container.querySelector<HTMLElement>('[part="row"]');
@@ -179,7 +179,7 @@ describe('ChatThread — message list keying under a live stream', () => {
     const [messages, setMessages] = createSignal<ChatMessage[]>([
       { id: 'assistant-1', role: 'assistant', parts: [{ type: 'tool', tool: { type: 'get_weather', toolCallId: 'call_1', state: 'output-available', output: { forecast: 'Light rain' } } }] },
     ]);
-    const { container } = render(() => <ChatThread messages={messages()} />);
+    const { container } = render(() => <ChatApp messages={messages()} />);
 
     const trigger = toolTrigger(container, 'get_weather');
     const contentId = trigger.getAttribute('aria-controls')!;

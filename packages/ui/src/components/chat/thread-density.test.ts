@@ -4,9 +4,9 @@
  * The class strings are pinned HERE as literals so the "`default` changes nothing"
  * claim is checked rather than asserted. `default`'s entries are exactly the
  * classes the thread carried before the axis existed
- * (`components/chat/chat-thread.tsx`: `h-full px-4 py-3` / `space-y-4` /
+ * (`components/chat/chat-app.tsx`: `h-full px-4 py-3` / `space-y-4` /
  * `shrink-0 px-4 pb-4` / `shrink-0 px-4`), and the two component tests
- * (`chat-thread.test.tsx`, `thread.test.tsx`) pin the RENDERED class attributes, so a
+ * (`chat-app.test.tsx`, `thread.test.tsx`) pin the RENDERED class attributes, so a
  * change to either the strings or the call sites fails somewhere. `messageGap` joined
  * the table when the owner asked for a row's own gap to follow the thread's density;
  * its `default` is the `gap-3` the row already painted.
@@ -92,7 +92,7 @@ describe('resolveThreadDensity', () => {
     resolveThreadDensity('roomy', 'Thread');
     expect(error).toHaveBeenCalledTimes(1);
     // A DIFFERENT caller is a different mistake, so it gets its own report.
-    resolveThreadDensity('roomy', 'ChatThread');
+    resolveThreadDensity('roomy', 'ChatApp');
     expect(error).toHaveBeenCalledTimes(2);
   });
 });

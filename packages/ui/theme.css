@@ -123,7 +123,7 @@
      error, so a consumer re-theming "danger" red must not also move every
      unread dot. Used identically by all three places an unread conversation
      surfaces: the list-row trailing dot (ConversationPanel), the header
-     toggle's badge (ChatThread), and Dock's own closed-launcher badge.
+     toggle's badge (ChatApp), and Dock's own closed-launcher badge.
      A vivid "messenger red" (Tailwind red-500 territory, the Intercom/iOS
      badge convention) rather than the darker --color-destructive hue: the
      first pass at this token picked a color that read as legible-on-paper

@@ -52,7 +52,7 @@ export interface ConversationControllerHooks {
    *  list order (archived out, pinned first) - the render feed. */
   onSummariesChange?: (summaries: ConversationSummary[]) => void;
   /** Fires whenever the derived unread flag CHANGES (edge, not level) - the
-   *  launcher-badge feed, mirroring ChatThread's `onUnreadChange`. */
+   *  launcher-badge feed, mirroring ChatApp's `onUnreadChange`. */
   onUnreadChange?: (anyUnread: boolean) => void;
   /** Failure tap, replacing the default console reporting. The controller has already
    *  degraded safely by the time this fires. */
@@ -63,7 +63,7 @@ export interface ConversationControllerHooks {
    *  chat-view leg of the seen rule. */
   initialView?: string;
   /** Whether the host starts open (default `true` - a full-page app has no
-   *  closed state, matching ChatThread's `hostOpen !== false` default). */
+   *  closed state, matching ChatApp's `hostOpen !== false` default). */
   initialOpen?: boolean;
 }
 

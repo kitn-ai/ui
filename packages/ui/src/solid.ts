@@ -143,7 +143,7 @@ export type { ConversationPanelProps } from './components/conversation/conversat
 // ---------------------------------------------------------------------------
 export { Thread } from './components/thread/thread';
 export type { ThreadProps, ThreadController } from './components/thread/thread';
-// ChatThread — the component behind `<kai-chat>`. VERIFIED standalone: rendered in
+// ChatApp — the component behind `<kai-chat>`. VERIFIED standalone: rendered in
 // a plain Vite+Solid app (no custom element, no shadow root) it draws its header,
 // the full message list and its BUILT-IN composer; typing into that composer and
 // pressing Send fires `onSubmit` with the typed text and the thread updates, with
@@ -157,12 +157,12 @@ export type { ThreadProps, ThreadController } from './components/thread/thread';
 // the FACADE sets when a host slots content — left at their default they emit no
 // slot at all and the built-in UI renders. So a Solid consumer can ignore all of
 // it; they just cannot project content into those five points without the element.
-export { ChatThread } from './components/chat/chat-thread';
-export type { ChatThreadProps, ChatThreadController, ChatThreadContextUsage } from './components/chat/chat-thread';
+export { ChatApp } from './components/chat/chat-app';
+export type { ChatAppProps, ChatAppController, ChatAppContextUsage } from './components/chat/chat-app';
 export { Screen } from './components/screen/screen';
 export type { ScreenProps, ScreenController } from './components/screen/screen';
 // HomePanel / WidgetTabBar — the widget home screen (Intercom-pattern).
-// Wired into ChatThread itself behind the `home` prop (and from there into
+// Wired into ChatApp itself behind the `home` prop (and from there into
 // `<kai-chat>`'s own `home`/`onHomeLink`); exported here too for a Solid
 // consumer composing either piece directly.
 export { HomePanel } from './components/home/home-panel';

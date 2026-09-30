@@ -460,7 +460,7 @@ export type { ComposerDoc, Segment, EntityRef } from './primitives/composer-mode
 // list from the facades with the TS checker and fails on a new unexported one.
 // ---------------------------------------------------------------------------
 export type { TriggerDef, TriggerItem } from './components/composer/composer';
-export type { ChatThreadContextUsage } from './components/chat/chat-thread';
+export type { ChatAppContextUsage } from './components/chat/chat-app';
 export type { Skill } from './components/message/message-skills';
 export type { AgentStatus } from './components/agent-card/agent-card';
 export type { KaiNavItem } from './components/nav/nav';

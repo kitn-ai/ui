@@ -5,7 +5,7 @@ import { BuilderPanel, type BuilderConstruct } from '../../components/builder/bu
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
 import { AudioVisualizer, type VisualizerVariant } from '../../components/audio-visualizer/index';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { WorkspaceShell } from '../../components/workspace/workspace-shell';
 import { Captions, type CaptionSegment, type CaptionsVariant } from '../../components/captions/captions';
 import { Switch } from '../../components/switch/switch';
@@ -23,7 +23,7 @@ import type { ChatMessage } from '../../web-components/chat/chat-types';
 // `WorkspaceShell` (the SAME real collapse mechanism the Workspace
 // template's Expand control found — controlled `startCollapsed`/
 // `endCollapsed`, confirmed by reading `WorkspaceShell` again rather than
-// re-deriving it) for the split, and the kit's real `ChatThread` for the
+// re-deriving it) for the split, and the kit's real `ChatApp` for the
 // transcript panel's content, per the owner's own instruction.
 //
 // 1. LAYOUT: a TRANSCRIPT PANEL, dockable `start` or `end` (a panel radio,
@@ -54,11 +54,11 @@ import type { ChatMessage } from '../../web-components/chat/chat-types';
 //    story only proves the mechanism.
 //
 //    TEXT INPUT ("typing to the agent alongside voice, optional toggle"):
-//    a REAL mechanism, not a new one. `ChatThread`'s `composer` prop is a
+//    a REAL mechanism, not a new one. `ChatApp`'s `composer` prop is a
 //    REPLACE flag — `<Show when={props.composer} fallback={
 //    <DefaultPromptInput .../>}><slot name="composer" /></Show>`
-//    (`chat-thread.tsx`, read again before using it this way). A bare
-//    Solid `<ChatThread>` usage (this story, like every other template)
+//    (`chat-app.tsx`, read again before using it this way). A bare
+//    Solid `<ChatApp>` usage (this story, like every other template)
 //    projects no `slot="composer"` content, so setting `composer={true}`
 //    with nothing to replace it WITH renders an empty slot — the built-in
 //    prompt input disappears with nothing replacing it. That is exactly
@@ -213,14 +213,14 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
 };
 
 /** The transcript panel's own content: a small header (title + a collapse
- *  button on the dock side's own edge) over a real `ChatThread` — message
+ *  button on the dock side's own edge) over a real `ChatApp` — message
  *  history always on, the composer gated by `textInput` per the module
  *  doc comment's real-mechanism note. */
 // Panel surface tone (owner amendment): matched to `stories/showcase/t3code.stories.tsx`'s
 // own rail/panel background — that story's `slot="start"` carries no bg
 // class of its own, so it renders `WorkspaceShell`'s (there, `kai-workspace`'s)
 // own default aside token, `bg-surface` (`components/workspace/workspace-shell.tsx`'s
-// `asideColumn`, read to confirm before reusing it here). `ChatThread`'s own
+// `asideColumn`, read to confirm before reusing it here). `ChatApp`'s own
 // root hardcodes `bg-background` on itself, which would otherwise paint over
 // that surface tone, so it's overridden explicitly on the `class` prop below
 // rather than left to rely on the wrapper underneath it.
@@ -255,9 +255,9 @@ function TranscriptPanel(props: { dockSide: DockSide; textInput: boolean; showDo
           edge satisfies the same non-text-contrast note theme.css makes
           about control edges (not just relying on a shadow). Scoped via a
           descendant selector on `[data-prompt-input]` (real light-DOM CSS —
-          `ChatThread` here is the bare Solid component, no shadow root) so
+          `ChatApp` here is the bare Solid component, no shadow root) so
           only the input frame changes tier, not the message list. */}
-      <ChatThread
+      <ChatApp
         class="h-full min-h-0 flex-1 !bg-surface [&_[data-prompt-input]]:bg-background [&_[data-prompt-input]]:border [&_[data-prompt-input]]:border-border"
         messages={TRANSCRIPT_MESSAGES}
         composer={props.textInput ? undefined : true}
@@ -536,7 +536,7 @@ function LayoutSection(props: {
         <span class="text-xs font-medium text-foreground">Text input</span>
         <Switch checked={props.textInput} label="Text input" onChange={props.onTextInputChange} />
       </div>
-      <p class="text-xs text-muted-foreground">Typing to the agent alongside voice. Off replaces the transcript's composer with nothing (a real ChatThread `composer` REPLACE-slot mechanism, not a new one).</p>
+      <p class="text-xs text-muted-foreground">Typing to the agent alongside voice. Off replaces the transcript's composer with nothing (a real ChatApp `composer` REPLACE-slot mechanism, not a new one).</p>
 
       <div class="flex items-center justify-between gap-3">
         <span class="text-xs font-medium text-foreground">Download button</span>
@@ -632,8 +632,8 @@ type Story = StoryObj;
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; AudioVisualizer, Captions
-// and ChatThread ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
-const IMPORT = `import { AudioVisualizer, Captions, ChatThread } from '@kitn.ai/ui/solid';`;
+// and ChatApp ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
+const IMPORT = `import { AudioVisualizer, Captions, ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -656,8 +656,8 @@ export const Voice: Story = {
     <div class="flex h-full flex-col items-center justify-center gap-6">
       <AudioVisualizer variant={variant} state={state} size="xl" label={construct.header?.title + ' voice level'} />
       <Captions segments={captionSegments} variant={captionVariant} />
-      {/* transcript: a real ChatThread, dockable start or end, collapsible */}
-      <ChatThread class="w-96" messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
+      {/* transcript: a real ChatApp, dockable start or end, collapsible */}
+      <ChatApp class="w-96" messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
     </div>
   }
   viewport={viewport}

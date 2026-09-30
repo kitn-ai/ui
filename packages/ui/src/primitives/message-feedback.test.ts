@@ -1,6 +1,6 @@
 /**
  * Unit tests for `createMessageFeedback` — the action-row state controller both
- * `ChatThread` and the `<kai-message>` element delegate to.
+ * `ChatApp` and the `<kai-message>` element delegate to.
  *
  * Strategy: the `<kai-message>` facade is a `defineWebComponent` Shadow-DOM
  * element, which needs a full browser environment and isn't unit-testable in

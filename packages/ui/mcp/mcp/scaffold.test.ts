@@ -3567,7 +3567,7 @@ describe('scaffold — solid', () => {
    * plus the inner `<For each={m.parts}>` that used to be emitted here tore the
    * whole message row down on EVERY streaming delta, so expanding a tool or
    * reasoning panel mid-stream silently did nothing. The kit had the identical
-   * defect in `ChatThread`/`Thread` (fixed in cb41f5c); this is the same fix,
+   * defect in `ChatApp`/`Thread` (fixed in cb41f5c); this is the same fix,
    * applied to the code we tell people to copy.
    *
    * So this is a SHAPE assertion, not a behaviour one, and it is written to fail

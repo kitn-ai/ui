@@ -322,7 +322,7 @@ const propName = (node) => {
  *  export config, which the house convention (`satisfies Meta<typeof X>`)
  *  gives a SHARED `render:` wrapper applied to every args-driven story
  *  (`render: (args) => <div>...<X {...args} /></div>`, see e.g.
- *  `chat-thread.stories.tsx`). That is not the pattern this rule polices --
+ *  `chat-app.stories.tsx`). That is not the pattern this rule polices --
  *  a story reachable through `args` is already fully described by the
  *  Controls panel. Matched structurally, by the enclosing variable's name,
  *  because not every meta object uses `satisfies Meta<...>` (some use a type
@@ -2529,7 +2529,7 @@ const SELF_TEST_CASES = [
     expectSnippetless: ['Playground'],
   },
   {
-    name: '(a) a SHARED render: on `const meta = {...}` is the args-driven wrapper; `Default` still needs its own snippet (the chat-thread.stories.tsx shape)',
+    name: '(a) a SHARED render: on `const meta = {...}` is the args-driven wrapper; `Default` still needs its own snippet (the chat-app.stories.tsx shape)',
     code: `const meta = {
       title: 'X',
       render: (args) => <X {...args} />,
