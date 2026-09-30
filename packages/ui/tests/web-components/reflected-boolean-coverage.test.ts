@@ -292,6 +292,9 @@ test('the migrated facades really do call reflectFlag', () => {
     'chat.tsx': ['loading'],
     'resizable.tsx': ['collapsed', 'locked'],
     'disclosure.ts': ['open'],
+    'button.tsx': ['disabled', 'full'],
+    'dropdown.tsx': ['full', 'disabled'],
+    'menu.tsx': ['full', 'disabled'],
   };
   const index = byBasename();
   for (const [file, props] of Object.entries(expected)) {

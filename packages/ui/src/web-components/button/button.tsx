@@ -56,7 +56,13 @@ defineWebComponent<Props, Events>('kai-button', {
   full: false,
   align: 'center',
   type: 'button',
-}, (props, { dispatch, flag, element, expose }) => {
+}, (props, { dispatch, flag, element, expose, reflectFlag }) => {
+  // The attribute follows the property both ways. Without this `<kai-button disabled>` then
+  // `el.disabled = false` left the attribute behind, and `el.full = true` never wrote the
+  // `[full]` that `:host([full])` below keys on.
+  reflectFlag('disabled');
+  reflectFlag('full');
+
   // `icon` / `icon-sm` are square, icon-ONLY sizes: suppress the text label and
   // trailing icon so a stray label doesn't get cramped into the square (the
   // `label` prop still names it for assistive tech).

@@ -95,6 +95,11 @@ defineWebComponent<Props, Events>('kai-menu', {
   // show/hide/toggle, disabled-gating. See ./disclosure.
   wireDisclosure(ctx, () => api, () => props.open);
 
+  // `:host([full])` is the rule that makes the host a block, and `disabled` is what a host
+  // selector or a serializer reads: both must follow the property, not just the parsed attribute.
+  ctx.reflectFlag('full');
+  ctx.reflectFlag('disabled');
+
   return (
     <>
       {/* The host shrinks to the trigger by default (UA inline); `full` makes it
