@@ -39,25 +39,25 @@ describe('code theme default', () => {
   it('is a light theme in light mode', async () => {
     const { container } = render(() => <CodeBlockCode code="x" language="ts" />);
     await flush();
-    expect(themeOf(container)).toBe('github-light');
+    expect(themeOf(container)).toBe('github-light-default');
   });
 
   it('is the dark theme in dark mode', async () => {
     knob = 'dark';
     const { container } = render(() => <CodeBlockCode code="x" language="ts" />);
     await flush();
-    expect(themeOf(container)).toBe('github-dark-dimmed');
+    expect(themeOf(container)).toBe('github-dark-default');
   });
 
   it('switches live when html.dark toggles, without re-highlighting in a loop', async () => {
     const { container } = render(() => <CodeBlockCode code="x" language="ts" />);
     await flush();
-    expect(themeOf(container)).toBe('github-light');
+    expect(themeOf(container)).toBe('github-light-default');
     knob = 'dark';
     document.documentElement.className = 'dark';
     await flush();
-    expect(themeOf(container)).toBe('github-dark-dimmed');
-    expect(seen).toEqual(['github-light', 'github-dark-dimmed']);
+    expect(themeOf(container)).toBe('github-dark-default');
+    expect(seen).toEqual(['github-light-default', 'github-dark-default']);
   });
 
   it('an explicit codeTheme wins and a toggle does not switch it', async () => {

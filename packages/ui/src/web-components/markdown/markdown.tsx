@@ -7,7 +7,7 @@ interface Props extends Record<string, unknown> {
   content: string;
   /** Text and markdown sizing. */
   proseSize?: ProseSize;
-  // Default: `'github-light'` in light mode, `'github-dark-dimmed'` in dark, live with `html.dark`.
+  // Default: `'github-light-default'` in light mode, `'github-dark-default'` in dark, live with `html.dark`.
   /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Set false to render plain `pre` blocks, with no highlighter load. */

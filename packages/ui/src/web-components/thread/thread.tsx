@@ -21,7 +21,7 @@ interface Props extends Record<string, unknown> {
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
    *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
-  // Default: `'github-light'` in light mode, `'github-dark-dimmed'` in dark, live with `html.dark`.
+  // Default: `'github-light-default'` in light mode, `'github-dark-default'` in dark, live with `html.dark`.
   /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain

@@ -2,12 +2,13 @@
 // `--kai-color-scheme` cascade (an `html.dark` toggle switches a default block live, an explicit
 // `code-theme` does not move), and a bare `<kai-action action="copy">` ends up with an accessible
 // name. Screenshots land in VITE_KAI_SHOT_DIR when set.
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { page } from 'vitest/browser';
 import '../../src/web-components/markdown/markdown';
 import '../../src/web-components/message/message';
 import '../../src/web-components/activity/activity';
 
+const settle = (fn: () => void) => vi.waitFor(fn, { timeout: 10_000, interval: 100 });
 const tick = (ms = 400) => new Promise((r) => setTimeout(r, ms));
 afterEach(() => { document.body.innerHTML = ''; document.documentElement.classList.remove('dark'); });
 
@@ -43,11 +44,11 @@ const lum = (rgb: string) => { const n = rgb.match(/\d+/g)!.map(Number); return 
 describe('code theme follows the scheme (real Chromium)', () => {
   it('light page: a light block; html.dark toggle: a dark block, live', async () => {
     const md = await block();
-    expect(lum(bg(md))).toBeGreaterThan(200);
+    await settle(() => expect(lum(bg(md))).toBeGreaterThan(200));
     await shot('markdown-light');
     document.documentElement.classList.add('dark');
     await tick(900);
-    expect(lum(bg(md))).toBeLessThan(80);
+    await settle(() => expect(lum(bg(md))).toBeLessThan(80));
     await shot('markdown-dark');
   });
 
@@ -55,7 +56,7 @@ describe('code theme follows the scheme (real Chromium)', () => {
     const md = await block('code-theme="github-light"');
     document.documentElement.classList.add('dark');
     await tick(900);
-    expect(lum(bg(md))).toBeGreaterThan(200);
+    await settle(() => expect(lum(bg(md))).toBeGreaterThan(200));
     await shot('markdown-explicit-light-in-dark');
   });
 });
@@ -92,11 +93,11 @@ describe('activity Arguments / Result code blocks', () => {
     }
     await tick(1000);
     const b = () => getComputedStyle(deepPre(el.shadowRoot!)!).backgroundColor;
-    expect(lum(b())).toBeGreaterThan(200);
+    await settle(() => expect(lum(b())).toBeGreaterThan(200));
     await shot('activity-light');
     document.documentElement.classList.add('dark');
     await tick(900);
-    expect(lum(b())).toBeLessThan(80);
+    await settle(() => expect(lum(b())).toBeLessThan(80));
     await shot('activity-dark');
   });
 });

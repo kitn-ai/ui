@@ -17,7 +17,9 @@ export interface ChatConfigValue {
 /** The code theme a block uses when nobody set one: it follows the resolved colour scheme, so a
  *  light page gets a light block and a `.dark` toggle switches it live. An explicit `codeTheme`
  *  (config, prop or per-block `theme`) always wins over this. */
-export const DEFAULT_CODE_THEME = { light: 'github-light', dark: 'github-dark-dimmed' } as const;
+// Chosen on measured token contrast against the block background (lowest token): github-light-default
+// 4.55:1 and github-dark-default 6.15:1, where github-light is 3.49:1 and github-dark-dimmed 3.88:1.
+export const DEFAULT_CODE_THEME = { light: 'github-light-default', dark: 'github-dark-default' } as const;
 
 const defaultConfig: ChatConfigValue = {
   proseSize: () => 'sm' as ProseSize,

@@ -53,6 +53,8 @@ const DEFAULT_LANGUAGES: Record<string, Loader> = {
 const DEFAULT_THEMES: Record<string, Loader> = {
   'github-dark-dimmed': () => import('@shikijs/themes/github-dark-dimmed'),
   'github-light': () => import('@shikijs/themes/github-light'),
+  'github-light-default': () => import('@shikijs/themes/github-light-default'),
+  'github-dark-default': () => import('@shikijs/themes/github-dark-default'),
 };
 
 const DEFAULT_ALIASES: Record<string, string> = {
