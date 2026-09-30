@@ -185,6 +185,22 @@ export function declaredKitTokens(css: string): ReadonlySet<string> {
   return names;
 }
 
+/** Split a top-level `light-dark(<light>, <dark>)` fallback into its two halves, paren-balanced
+ *  because either half can be a `color-mix(...)` with its own commas. `null` when the value is not one. */
+function splitLightDark(value: string): { light: string; dark: string } | null {
+  const m = /^light-dark\(([\s\S]*)\)$/.exec(value);
+  if (!m) return null;
+  const body = m[1];
+  let depth = 0;
+  for (let i = 0; i < body.length; i++) {
+    const c = body[i];
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (c === ',' && depth === 0) return { light: body.slice(0, i).trim(), dark: body.slice(i + 1).trim() };
+  }
+  return null;
+}
+
 /** Parse `var(--kai-x, <default>)` out of theme.css, per mode. The `.dark { }`
  *  block is the dark scope; everything else is light. Defaults are read with a
  *  paren-balanced scan because a color-mix default nests its own parentheses
@@ -211,6 +227,13 @@ export function parseKitDefaults(css: string): ReadonlyMap<string, KitDefault> {
       if (depth > 0) i++;
     }
     const value = css.slice(re.lastIndex, i).trim();
+    const pair = splitLightDark(value);
+    if (pair) {
+      // `light-dark(<light>, <dark>)`: one declaration carries both scopes.
+      if (!light.has(m[1])) light.set(m[1], pair.light);
+      if (!dark.has(m[1])) dark.set(m[1], pair.dark);
+      continue;
+    }
     const inDark = darkStart !== -1 && m.index > darkStart && m.index < darkEnd;
     const bucket = inDark ? dark : light;
     if (!bucket.has(m[1])) bucket.set(m[1], value);

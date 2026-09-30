@@ -43,18 +43,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-background: var(--kai-color-background, hsl(0 0% 100%));
-  --color-foreground: var(--kai-color-foreground, hsl(240 10% 3.9%));
-  --color-card: var(--kai-color-card, hsl(0 0% 100%));
-  --color-card-foreground: var(--kai-color-card-foreground, hsl(240 10% 3.9%));
-  --color-popover: var(--kai-color-popover, hsl(0 0% 100%));
-  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(240 10% 3.9%));
-  --color-primary: var(--kai-color-primary, hsl(240 5.9% 10%));
-  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(0 0% 98%));
-  --color-secondary: var(--kai-color-secondary, hsl(240 4.8% 95.9%));
-  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(240 5.9% 10%));
-  --color-muted: var(--kai-color-muted, hsl(240 4.8% 95.9%));
-  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(240 3.8% 43%));
+  --color-background: var(--kai-color-background, light-dark(hsl(0 0% 100%), hsl(50 2% 9%)));
+  --color-foreground: var(--kai-color-foreground, light-dark(hsl(240 10% 3.9%), hsl(0 0% 98%)));
+  --color-card: var(--kai-color-card, light-dark(hsl(0 0% 100%), hsl(45 4% 12%)));
+  --color-card-foreground: var(--kai-color-card-foreground, light-dark(hsl(240 10% 3.9%), hsl(0 0% 98%)));
+  --color-popover: var(--kai-color-popover, light-dark(hsl(0 0% 100%), hsl(45 4% 12%)));
+  --color-popover-foreground: var(--kai-color-popover-foreground, light-dark(hsl(240 10% 3.9%), hsl(0 0% 98%)));
+  --color-primary: var(--kai-color-primary, light-dark(hsl(240 5.9% 10%), hsl(0 0% 98%)));
+  --color-primary-foreground: var(--kai-color-primary-foreground, light-dark(hsl(0 0% 98%), hsl(45 4% 11%)));
+  --color-secondary: var(--kai-color-secondary, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%)));
+  --color-secondary-foreground: var(--kai-color-secondary-foreground, light-dark(hsl(240 5.9% 10%), hsl(0 0% 98%)));
+  --color-muted: var(--kai-color-muted, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%)));
+  --color-muted-foreground: var(--kai-color-muted-foreground, light-dark(hsl(240 3.8% 43%), hsl(45 4% 56%)));
   /* Subtle SURFACE — an opaque "muted panel" for things that sit OVER content
      (the prompt input, message bubbles, artifact/card headers, chips). CALCULATED
      from existing tokens — `--color-muted` blended 40% onto `--color-background`
@@ -68,10 +68,10 @@
      can't share a number — see the .dark block. */
   --color-surface: var(--kai-color-surface, color-mix(in srgb, var(--color-muted) 40%, var(--color-background)));
   --color-surface-strong: var(--kai-color-surface-strong, color-mix(in srgb, var(--color-muted) 60%, var(--color-background)));
-  --color-surface-sunken: var(--kai-color-surface-sunken, color-mix(in srgb, var(--color-muted) 85%, var(--color-background)));
-  --color-accent: var(--kai-color-accent, hsl(240 4.8% 95.9%));
-  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(240 5.9% 10%));
-  --color-destructive: var(--kai-color-destructive, hsl(0 72% 45%));
+  --color-surface-sunken: var(--kai-color-surface-sunken, light-dark(color-mix(in srgb, var(--color-muted) 85%, var(--color-background)), color-mix(in srgb, var(--color-muted) 18%, var(--color-background))));
+  --color-accent: var(--kai-color-accent, light-dark(hsl(240 4.8% 95.9%), hsl(45 4% 17%)));
+  --color-accent-foreground: var(--kai-color-accent-foreground, light-dark(hsl(240 5.9% 10%), hsl(0 0% 98%)));
+  --color-destructive: var(--kai-color-destructive, light-dark(hsl(0 72% 45%), hsl(0 62.8% 30.6%)));
   --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
   /* Error TEXT. Its own token rather than a reuse of --color-destructive, because
      a FILL and TEXT need different values in dark: the dark fill is deliberately
@@ -84,7 +84,7 @@
      flips to (6.36:1 on the dark background, 5.84:1 on a dark card, 5.52:1 on the
      `destructive/20` tint). Use text-destructive-text for error copy — never
      text-destructive, which is the fill. Override via --kai-color-destructive-text. */
-  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 72% 45%));
+  --color-destructive-text: var(--kai-color-destructive-text, light-dark(hsl(0 72% 45%), hsl(0 84% 70%)));
   /* Semantic status colors - solid fills with a legible foreground, matched to
      the kit's tool-green / -amber / -blue hues so they read on-brand. Use
      bg-success / bg-warning / bg-info with the matching -foreground for badges,
@@ -94,12 +94,12 @@
      legible as text on a pale tint; dark (see .dark) flips to brighter hues over
      a near-black foreground. Override via --kai-color-success / -warning / -info
      (+ -foreground). */
-  --color-success: var(--kai-color-success, hsl(142 71% 30%));
-  --color-success-foreground: var(--kai-color-success-foreground, hsl(0 0% 98%));
-  --color-warning: var(--kai-color-warning, hsl(38 92% 30%));
-  --color-warning-foreground: var(--kai-color-warning-foreground, hsl(0 0% 98%));
-  --color-info: var(--kai-color-info, hsl(217 91% 42%));
-  --color-info-foreground: var(--kai-color-info-foreground, hsl(0 0% 98%));
+  --color-success: var(--kai-color-success, light-dark(hsl(142 71% 30%), hsl(142 71% 45%)));
+  --color-success-foreground: var(--kai-color-success-foreground, light-dark(hsl(0 0% 98%), hsl(45 4% 11%)));
+  --color-warning: var(--kai-color-warning, light-dark(hsl(38 92% 30%), hsl(38 92% 50%)));
+  --color-warning-foreground: var(--kai-color-warning-foreground, light-dark(hsl(0 0% 98%), hsl(45 4% 11%)));
+  --color-info: var(--kai-color-info, light-dark(hsl(217 91% 42%), hsl(217 91% 70%)));
+  --color-info-foreground: var(--kai-color-info-foreground, light-dark(hsl(0 0% 98%), hsl(45 4% 11%)));
   /* Soft tinted status surfaces - OPAQUE, theme-tracking fills derived as ~14% of
      the status hue blended onto the background. Use these for subtle callouts /
      banners instead of an eyeballed bg-success/10; pair with text-success /
@@ -153,7 +153,7 @@
      OPAQUE, so it composites predictably over whichever field it lands on.
      Override via --kai-color-highlight. Light: near-black text over it is 15.6:1;
      dark: near-white text over it is 6.7:1 — both well clear of WCAG AA. */
-  --color-highlight: var(--kai-color-highlight, hsl(45 96% 78%));
+  --color-highlight: var(--kai-color-highlight, light-dark(hsl(45 96% 78%), hsl(40 75% 26%)));
   /* SELECTED text — the kit's own ::selection fill, applied inside every kai-*
      shadow root (see src/web-components/styles.css for the scoping rationale). The kit
      owns this because leaving it to the UA meant the browser's blue outranked the
@@ -168,9 +168,9 @@
      under WCAG AA on this fill. Forcing the foreground token makes the guarantee
      hold for every glyph regardless of what colour it had. Light 13.99:1,
      dark 8.87:1. Override via --kai-color-selection(-foreground). */
-  --color-selection: var(--kai-color-selection, hsl(213 94% 87%));
-  --color-selection-foreground: var(--kai-color-selection-foreground, hsl(240 10% 3.9%));
-  --color-border: var(--kai-color-border, hsl(240 5.9% 90%));
+  --color-selection: var(--kai-color-selection, light-dark(hsl(213 94% 87%), hsl(217 60% 32%)));
+  --color-selection-foreground: var(--kai-color-selection-foreground, light-dark(hsl(240 10% 3.9%), hsl(0 0% 98%)));
+  --color-border: var(--kai-color-border, light-dark(hsl(240 5.9% 90%), hsl(45 4% 17%)));
   /* CONTROL boundary — the visible edge of an interactive form control (text
      input, textarea, select, the radio/checkbox ring). WCAG 2.1 SC 1.4.11
      Non-text Contrast requires >=3:1 against the adjacent surface for exactly
@@ -179,32 +179,32 @@
      and may sit below 3:1, a control's edge may not. Do NOT use border-input
      for list wrappers or panel outlines — use border-border there.
      Contrast is the requirement; a thicker border does not satisfy 1.4.11. */
-  --color-input: var(--kai-color-input, hsl(240 5% 53%));
+  --color-input: var(--kai-color-input, light-dark(hsl(240 5% 53%), hsl(45 4% 48%)));
   /* Focus ring — a deliberate blue (not a neutral) so keyboard focus is always
      obvious and on-brand in both modes. Light uses a strong blue; dark uses a
      brighter one for contrast on dark surfaces. Both clear WCAG 2.1 non-text
      contrast (≥3:1) against the kit's backgrounds. Override via --kai-color-ring. */
-  --color-ring: var(--kai-color-ring, hsl(217 91% 53%));
+  --color-ring: var(--kai-color-ring, light-dark(hsl(217 91% 53%), hsl(217 91% 68%)));
   /* Custom scrollbars — thin, rounded, subtle; thumb strengthens on hover. A
      consistent cross-platform look (the kit styles its OWN scroll regions inside
      the shadow root; the track stays transparent so nothing is forced where no
      scrollbar is needed). Override via --kai-color-scrollbar-thumb(-hover). */
-  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(240 5% 80%));
-  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(240 4% 64%));
-  --color-sidebar: var(--kai-color-sidebar, hsl(0 0% 100%));
+  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, light-dark(hsl(240 5% 80%), hsl(45 3% 30%)));
+  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, light-dark(hsl(240 4% 64%), hsl(45 3% 42%)));
+  --color-sidebar: var(--kai-color-sidebar, light-dark(hsl(0 0% 100%), hsl(50 2% 7%)));
 
   /* Inline `code` accent. Blue text on a translucent blue chip. */
-  --color-code-foreground: var(--kai-color-code-foreground, hsl(224.3 76.3% 48%));
+  --color-code-foreground: var(--kai-color-code-foreground, light-dark(hsl(224.3 76.3% 48%), hsl(213 94% 78%)));
 
   /* Tool/status chip hues. Each chip is hue text over a 15% translucent fill of
      the SAME hue (set in tool.tsx). The bare hue is too light to reach WCAG AA
      (4.5:1) on the faint fill in LIGHT mode, so the light values are darkened;
      dark mode keeps brighter hues for AA on the dark fill. Override via
      --kai-color-tool-* to retheme. */
-  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 38%));
-  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 28%));
-  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 26%));
-  --color-tool-red: var(--kai-color-tool-red, hsl(0 72% 42%));
+  --color-tool-blue: var(--kai-color-tool-blue, light-dark(hsl(217 91% 38%), hsl(217 91% 70%)));
+  --color-tool-amber: var(--kai-color-tool-amber, light-dark(hsl(38 92% 28%), hsl(38 92% 50%)));
+  --color-tool-green: var(--kai-color-tool-green, light-dark(hsl(142 71% 26%), hsl(142 71% 45%)));
+  --color-tool-red: var(--kai-color-tool-red, light-dark(hsl(0 72% 42%), hsl(0 84% 70%)));
 
   /* Every rung derives from --radius. A rung left at Tailwind's stock value is a
      component that silently ignores the knob (`rounded-2xl` did, before these).
@@ -318,18 +318,16 @@
   @keyframes kai-spinner-fade { 0% { opacity: 0 } 100% { opacity: 1 } }
 }
 
+/* THE SCHEME CONTRACT. Every colour token above is `light-dark(<light>, <dark>)`, resolved against the
+   used `color-scheme` of the element that consumes it, and `--kai-color-scheme` (light | dark) is the ONE
+   inherited knob that sets it: the facade wrapper reads `color-scheme` taken from the knob with a
+   `light dark` fallback, so an unset knob follows the OS. `.dark` / `.light` on ANY ancestor (the page root or a scoping div) set
+   the knob; the element `theme` prop sets it inline on its own wrapper and so overrides the ancestors.
+   The rules also set `color-scheme` directly so a light-DOM Solid consumer (no facade wrapper) resolves
+   `light-dark()` under them too. The prose below explains the DARK values now living inside `light-dark()`. */
 .dark {
-  --color-background: var(--kai-color-background, hsl(50 2% 9%));
-  --color-foreground: var(--kai-color-foreground, hsl(0 0% 98%));
-  --color-card: var(--kai-color-card, hsl(45 4% 12%));
-  --color-card-foreground: var(--kai-color-card-foreground, hsl(0 0% 98%));
-  --color-popover: var(--kai-color-popover, hsl(45 4% 12%));
-  --color-popover-foreground: var(--kai-color-popover-foreground, hsl(0 0% 98%));
-  --color-primary: var(--kai-color-primary, hsl(0 0% 98%));
-  --color-primary-foreground: var(--kai-color-primary-foreground, hsl(45 4% 11%));
-  --color-secondary: var(--kai-color-secondary, hsl(45 4% 17%));
-  --color-secondary-foreground: var(--kai-color-secondary-foreground, hsl(0 0% 98%));
-  --color-muted: var(--kai-color-muted, hsl(45 4% 17%));
+  --kai-color-scheme: dark;
+  color-scheme: dark;
   /* Muted TEXT - dark. Moved DOWN from 64% to 56% lightness (2026-09-27). The owner
      asked for the sidebar's section labels ("Project", "Recent", "No conversations
      yet") to read a little more muted in dark only: "light mode looks fine".
@@ -347,68 +345,37 @@
      so it keeps AA everywhere, including the strongest muted surface. Before the
      move dark read 7.27 / 6.68 / 6.32 on the same three - brighter than light's
      best, which is what the owner saw. Hue and saturation are untouched. */
-  --color-muted-foreground: var(--kai-color-muted-foreground, hsl(45 4% 56%));
   /* Re-declared in the dark scope so the color-mix recomputes with the DARK
      muted/background (a derived token is computed where it's declared, not where
      it's used — see the light --color-surface for the full note). */
-  --color-surface: var(--kai-color-surface, color-mix(in srgb, var(--color-muted) 40%, var(--color-background)));
-  --color-surface-strong: var(--kai-color-surface-strong, color-mix(in srgb, var(--color-muted) 60%, var(--color-background)));
   /* Sunken: in dark a LOWER muted% is darker (blends toward the dark background). */
-  --color-surface-sunken: var(--kai-color-surface-sunken, color-mix(in srgb, var(--color-muted) 18%, var(--color-background)));
-  --color-accent: var(--kai-color-accent, hsl(45 4% 17%));
-  --color-accent-foreground: var(--kai-color-accent-foreground, hsl(0 0% 98%));
-  --color-destructive: var(--kai-color-destructive, hsl(0 62.8% 30.6%));
-  --color-destructive-foreground: var(--kai-color-destructive-foreground, hsl(0 0% 98%));
   /* Error TEXT — dark. The brighter red for the reason in the light block: the
      dark --color-destructive fill is a fill, and 1.79:1 as text. */
-  --color-destructive-text: var(--kai-color-destructive-text, hsl(0 84% 70%));
   /* Semantic status colors - dark mode flips to the brighter tool-* dark hues
      (matching the chip values) carried over a near-black foreground, so the color
      both reads as text on a dark soft tint AND backs a legible foreground. See
      the light @theme note. */
-  --color-success: var(--kai-color-success, hsl(142 71% 45%));
-  --color-success-foreground: var(--kai-color-success-foreground, hsl(45 4% 11%));
-  --color-warning: var(--kai-color-warning, hsl(38 92% 50%));
-  --color-warning-foreground: var(--kai-color-warning-foreground, hsl(45 4% 11%));
-  --color-info: var(--kai-color-info, hsl(217 91% 70%));
-  --color-info-foreground: var(--kai-color-info-foreground, hsl(45 4% 11%));
   /* Soft status surfaces + interaction states - re-declared so each color-mix
      recomputes with the DARK hues/background (a derived token resolves where it's
      declared; see the light block for the full note). */
-  --color-success-soft: var(--kai-color-success-soft, color-mix(in oklab, var(--color-success) 14%, var(--color-background)));
-  --color-warning-soft: var(--kai-color-warning-soft, color-mix(in oklab, var(--color-warning) 14%, var(--color-background)));
-  --color-info-soft: var(--kai-color-info-soft, color-mix(in oklab, var(--color-info) 14%, var(--color-background)));
-  --color-destructive-soft: var(--kai-color-destructive-soft, color-mix(in oklab, var(--color-destructive) 14%, var(--color-background)));
-  --color-hover: var(--kai-color-hover, color-mix(in oklab, var(--color-muted) 60%, var(--color-background)));
-  --color-selected: var(--kai-color-selected, color-mix(in oklab, var(--color-primary) 8%, var(--color-background)));
   /* Unread indicator — dark. Same value as light (see the light block for the
      full contrast note): one vivid red independently clears 3:1 against both
      modes' real surfaces, so there is nothing to flip here. Still redeclared
      for override symmetry with every other semantic color in this file. */
-  --color-unread: var(--kai-color-unread, hsl(0 84% 60%));
   /* Marked text — dark. A deep warm amber rather than the light yellow: a pale
      highlighter on a near-black field would blow out and force the text to flip
      colour. See the light block for the full note. */
-  --color-highlight: var(--kai-color-highlight, hsl(40 75% 26%));
   /* Selected text — dark. A deep blue rather than the light one, for the same
      reason the mark darkens. See the light block for the full note. */
-  --color-selection: var(--kai-color-selection, hsl(217 60% 32%));
-  --color-selection-foreground: var(--kai-color-selection-foreground, hsl(0 0% 98%));
-  --color-border: var(--kai-color-border, hsl(45 4% 17%));
   /* Control boundary — see the light block. Lifted to clear 3:1 (SC 1.4.11)
      against the dark background and card surfaces. */
-  --color-input: var(--kai-color-input, hsl(45 4% 48%));
-  --color-ring: var(--kai-color-ring, hsl(217 91% 68%));
-  --color-scrollbar-thumb: var(--kai-color-scrollbar-thumb, hsl(45 3% 30%));
-  --color-scrollbar-thumb-hover: var(--kai-color-scrollbar-thumb-hover, hsl(45 3% 42%));
-  --color-sidebar: var(--kai-color-sidebar, hsl(50 2% 7%));
-  --color-code-foreground: var(--kai-color-code-foreground, hsl(213 94% 78%));
 
   /* Tool/status chip hues — dark mode. Brighter hues reach AA on the dark fill. */
-  --color-tool-blue: var(--kai-color-tool-blue, hsl(217 91% 70%));
-  --color-tool-amber: var(--kai-color-tool-amber, hsl(38 92% 50%));
-  --color-tool-green: var(--kai-color-tool-green, hsl(142 71% 45%));
-  --color-tool-red: var(--kai-color-tool-red, hsl(0 84% 70%));
+}
+
+.light {
+  --kai-color-scheme: light;
+  color-scheme: light;
 }
 
 /* Self-contained markdown styling — replaces the typography plugin's `prose`.

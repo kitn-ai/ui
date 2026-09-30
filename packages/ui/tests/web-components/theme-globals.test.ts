@@ -57,8 +57,8 @@ describe('theme.css globals are kai-prefixed', () => {
     expect(unprefixed).toEqual([]);
   });
 
-  it('every global class is kai- prefixed, except the public .chat-markdown and the .dark scope', () => {
-    const allowed = new Set(['chat-markdown', 'dark']);
+  it('every global class is kai- prefixed, except the public .chat-markdown and the .dark / .light scheme scopes', () => {
+    const allowed = new Set(['chat-markdown', 'dark', 'light']);
     const unprefixed = globalClasses.filter((c) => !c.startsWith('kai-') && !allowed.has(c));
     expect(unprefixed).toEqual([]);
   });

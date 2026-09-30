@@ -21,19 +21,25 @@ const themeCss = readFileSync(
   'utf8',
 );
 
-/** The `.dark { … }` block, and everything before it (the light `@theme`). */
-const darkStart = themeCss.indexOf('\n.dark {');
-expect(darkStart).toBeGreaterThan(0);
-const BLOCKS = {
-  light: themeCss.slice(0, darkStart),
-  dark: themeCss.slice(darkStart),
-} as const;
+/** Each colour token is one `light-dark(<light>, <dark>)` declaration; a mode picks its half. */
+const BLOCKS = { light: 'light', dark: 'dark' } as const;
 
-/** Read a token's DEFAULT — the fallback inside `var(--kai-…, <default>)`. */
-function tokenDefault(block: string, name: string): string {
-  const m = new RegExp(`--${name}:\\s*var\\(--kai-${name},\\s*([^)]*\\)?[^;]*)\\);`).exec(block);
+/** Read a token's DEFAULT for one mode -- the fallback inside `var(--kai-…, <default>)`, and for a
+ *  `light-dark(L, D)` fallback the half that mode resolves to. */
+function tokenDefault(mode: 'light' | 'dark', name: string): string {
+  const m = new RegExp(`--${name}:\\s*var\\(--kai-${name},\\s*([^)]*\\)?[^;]*)\\);`).exec(themeCss);
   if (!m) throw new Error(`--${name} not found (or not in var(--kai-…, default) form)`);
-  return m[1].trim();
+  const value = m[1].trim();
+  const ld = /^light-dark\(([\s\S]*)\)$/.exec(value);
+  if (!ld) return value; // single-valued: identical in both schemes
+  let depth = 0;
+  for (let i = 0; i < ld[1].length; i++) {
+    const c = ld[1][i];
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (c === ',' && depth === 0) return (mode === 'light' ? ld[1].slice(0, i) : ld[1].slice(i + 1)).trim();
+  }
+  throw new Error(`--${name}: malformed light-dark(${ld[1]})`);
 }
 
 function toRgb(css: string): [number, number, number] {
