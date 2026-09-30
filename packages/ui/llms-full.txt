@@ -3,7 +3,7 @@
 
 # @kitn.ai/ui
 
-> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 101 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
+> Framework-agnostic, Shadow-DOM web components for building AI chat interfaces — works in React, Vue, Angular, Svelte, or plain HTML. 105 custom elements, every one prefixed `kai-` (e.g. `<kai-chat>`, `<kai-artifact>`): streaming responses, markdown + code rendering, reasoning/tool panels, attachments, conversation sidebar, voice input. Zero framework dependency for consumers; the SolidJS runtime it is authored in is bundled in, so the host needs nothing.
 
 ## Install
 
@@ -37,7 +37,7 @@ Drop an element into any framework (React, Vue, plain HTML). Data in via JS prop
 - `<kai-prompt-input>` — standalone composer with send button.
 
 **Layer 2 — composable custom elements** (`import { … } from '@kitn.ai/ui'`):
-All 101 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
+All 105 web components are also exported individually. Use them for custom layouts or features `<kai-chat>` does not expose (ChainOfThought, FeedbackBar, ThinkingBar, VoiceInput, …). Your bundler tree-shakes the rest.
 
 ## Key rules for the web components
 
@@ -151,7 +151,7 @@ For Tailwind builds: `@import "@kitn.ai/ui/theme.css"` in your CSS.
 
 ## Docs
 
-- Web component reference (all 101 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
+- Web component reference (all 105 web components, every prop/event/method/slot/part): the "Web component reference" section of ./llms-full.txt — https://kitn.dev/llms-full.txt
 - Programmatic layer (`@kitn.ai/ui/state` + `@kitn.ai/ui/wire`: streaming folds, the mock responder, the SSE readers/encoders): the "Programmatic layer" section of llms-full.txt
 - How to build a chat app in 5 steps (install → pick a layer → handle submit + stream → wire features → theme, with working code): the "How to build a chat app in 5 steps" section of llms-full.txt
 - Streaming recipe (the two rules that bite: reassign new references per chunk, fold deltas onto the trailing text part): the "Streaming recipe" section of llms-full.txt
@@ -978,7 +978,7 @@ Every name `kai-icon` (and every `icon` prop/attribute across the elements) reso
 
 ---
 
-## Web component reference (101 web components, generated from custom-elements.json)
+## Web component reference (105 web components, generated from custom-elements.json)
 
 Every element also accepts the `theme` attribute. Array/object properties are marked with a `—` attribute: they must be set as JS properties.
 
@@ -3236,6 +3236,121 @@ The prompt row: a rich text editor with its send button and toolbar.
 | `::part(attachment-below)` | The content region inside the card, below the input row: whatever you slot into `below`. — `kai-prompt-input::part(attachment-below) { font-size: 0.8125rem }` |
 | `::part(divider-above)` | The hairline between `above` content and the input row. Recolor or restyle it; hide it to let the content run straight into the input. — `kai-prompt-input::part(divider-above) { border-color: var(--color-primary) } /* or display: none */` |
 | `::part(divider-below)` | The hairline between the input row and `below` content. — `kai-prompt-input::part(divider-below) { border-style: dashed }` |
+
+---
+
+### `kai-question` / `Question`
+
+One question of a `<kai-question-panel>`, declared as a child.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `questionId` | `question-id` | `undefined \| string` | The question's identity, echoed in its answer. Defaults to `q<index>` from its position. |
+| `header` | `header` | `undefined \| string` | The short tab label (keep it under about twelve characters). |
+| `question` | `question` | `undefined \| string` | The question itself, shown above the options. |
+| `kind` | `kind` | `undefined \| "choice" \| "confirm" \| "tasks" \| "text" \| "form"` | What kind of answer it takes. Default `choice`. |
+| `multiSelect` | `multi-select` | `undefined \| false \| true` | Let the user pick several options (checkboxes). A `tasks` question is always multiple. |
+| `placeholder` | `placeholder` | `undefined \| string` | Hint text of the free-text field (the `text` kind, or the Other row). |
+| `required` | `required` | `undefined \| false \| true` | Whether the question must be answered before Submit. Default true; `required="false"` turns it off. |
+| `allowOther` | `allow-other` | `undefined \| false \| true` | Offer the Other row (the user's own words). Default true for choice, confirm and tasks; `allow-other="false"` turns it off. |
+| `fields` | — | `undefined \| Record<string, unknown>` | The `form` kind's fields: a JSON Schema object with `properties`, and `required` for the fields that must be filled. JS property. |
+
+_No events._
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | The question's `<kai-question-option>` rows, in order. "Other" is added after them by the panel. |
+
+---
+
+### `kai-question-option` / `QuestionOption`
+
+One option of a `<kai-question>`.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `label` | `label` | `undefined \| string` | The option's label, and the value that comes back in `selected`. The element's own text is the fallback. |
+| `description` | `description` | `undefined \| string` | One line under the label. |
+| `preview` | `preview` | `undefined \| string` | Code or config text shown beside the list while this option is focused. Rendered as plain text, never markup. |
+
+_No events._
+
+---
+
+### `kai-question-panel` / `QuestionPanel`
+
+The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit. Escape inside it dismisses.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `questions` | — | `undefined \| { id: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; multiSelect?: undefined \| false \| true; options?: undefined \| { label: string; description?: undefined \| string; preview?: undefined \| string }[]; placeholder?: undefined \| string; fields?: undefined \| Record<string, unknown>; required: false \| true }[]` | The questions to ask, in order. JS property; `questionsFromToolCall` output fits. Ignored while `<kai-question>` children exist. |
+| `toolCallId` | `tool-call-id` | `undefined \| string` | The provider's tool call id. Echoed in `kai-questions-submit` and `kai-questions-dismiss` so the host settles the right call, and a new one resets the answers. |
+| `value` | — | `undefined \| { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[]` | Controlled answers, one per answered question. JS property. Omit to let the panel keep its own. |
+| `defaultValue` | — | `undefined \| { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[]` | The answers to start from when uncontrolled (a Reopen with the answers kept). JS property. |
+| `activeIndex` | `active-index` | `undefined \| number` | Controlled step: the question index, or the question count for the Review step. Omit to let the panel keep its own. |
+| `defaultActiveIndex` | `default-active-index` | `undefined \| number` | The step to start on when uncontrolled. |
+| `dismissLabel` | `dismiss-label` | `undefined \| string` | Text of the dismiss button. Replace the whole control with the `dismiss` slot. |
+| `submitLabel` | `submit-label` | `undefined \| string` | Text of the final action. |
+| `label` | `label` | `undefined \| string` | Accessible name of the panel and its tab list. |
+| `focusOnOpen` | `focus-on-open` | `undefined \| false \| true` | Move focus into the panel when it appears. Default true; turn it off for a panel that is on the page from the start. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-active-change` | `CustomEvent<{ index: number; questionId?: undefined \| string }>` | The step changed (a tab, Back, Next, or a method). `questionId` is absent on the Review step. |
+| `kai-answer-change` | `CustomEvent<{ answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] }>` | An answer changed. `answers` is the whole current set, one entry per answered question. |
+| `kai-questions-dismiss` | `CustomEvent<{ toolCallId?: undefined \| string; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] }>` | The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. |
+| `kai-questions-submit` | `CustomEvent<{ toolCallId?: undefined \| string; result: { status: "answered"; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] } \| { status: "dismissed"; answers: { questionId: string; header: string; question: string; kind: "choice" \| "confirm" \| "tasks" \| "text" \| "form"; selected?: undefined \| string[]; text?: undefined \| string; values?: undefined \| Record<string, unknown> }[] } }>` | The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. |
+
+**Methods** (call on the element instance: `document.querySelector('kai-question-panel').next()`):
+
+| Method | Signature | Description |
+|---|---|---|
+| `next` | `(): void` | Go to the next step. |
+| `back` | `(): void` | Go to the previous step. |
+| `select` | `(index: number): void` | Go to a step by index; the question count is the Review step. |
+| `submit` | `(): void` | Submit, when every required question is answered. Fires `kai-questions-submit`. |
+| `focus` | `(): void` | Focus the active step's first control. Call it when a dismissed panel is reopened. |
+
+**Slots** (project your own markup via `slot="name"` on a light-DOM child):
+
+| Slot | Mode | Description |
+|---|---|---|
+| _(default)_ | inject | Your own `<kai-question>` children (item mode: the app owns the questions). `questions` is ignored while any are present. The panel keeps the tabs, Back and Next, the review step and Submit. |
+| `dismiss` | replace | Replaces the "Let's chat" button. A click anywhere in it dismisses the panel, so a slotted `<button>` or `<kai-button>` needs no handler of its own. |
+
+---
+
+### `kai-questions-waiting` / `QuestionsWaiting`
+
+The quiet "N of M questions waiting" line with a Reopen control.
+
+**Properties** (every element also accepts `theme="light|dark|auto"`; only scalar props work as HTML attributes):
+
+| Property | Attribute | Type | Description |
+|---|---|---|---|
+| `theme` | `theme` | `"light" \| "dark" \| "auto"` | Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. |
+| `count` | `count` | `undefined \| number` | How many questions still have no answer. |
+| `total` | `total` | `undefined \| number` | How many questions the call asked in all. |
+| `reopenLabel` | `reopen-label` | `undefined \| string` | Text of the reopen control. |
+
+**Events** (non-bubbling `CustomEvent`s — listen directly on the element):
+
+| Event | `detail` type | Description |
+|---|---|---|
+| `kai-reopen` | `CustomEvent<Record<string, never>>` | The reopen control was pressed. The host brings the panel back and calls its `focus()`. |
 
 ---
 
