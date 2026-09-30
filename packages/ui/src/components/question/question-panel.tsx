@@ -8,7 +8,7 @@ import type { Answer, AskResult } from '../../primitives/questions';
 import { QuestionBody, type QuestionBodyApi } from './question';
 import {
   type AnswerDraft, type Drafts, type PanelQuestion, answerLine, answersFromDrafts, draftsFromAnswers, emptyDraft,
-  isAnswered, isOneClick, missingQuestions,
+  isAnswered, isOneClick, missingQuestions, TEXT_LIMITS, showText, clampText,
 } from './question-state';
 
 /** The imperative surface the element forwards onto its host. */
@@ -63,7 +63,8 @@ const fingerprint = (answers: Answer[] | undefined): string => JSON.stringify(an
  *
  * Keyboard: number keys pick while focus is inside the panel (never inside a text field), arrows move
  * between tabs and between options, Enter in the Other textarea advances, Shift+Enter is a newline.
- * There is no Escape binding: the way out is the dismiss control, which does not settle the call.
+ * Escape inside the panel is the dismiss control ("Let's chat"): it fires the same dismiss event with
+ * the partial answers and does not settle the call.
  */
 export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
   const uid = createUniqueId();
@@ -109,6 +110,44 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
   });
   const focusTab = (i: number) => requestAnimationFrame(() => root.querySelector<HTMLElement>(`[data-tab="${i}"]`)?.focus());
 
+  // Where focus was, as a selector that names the EQUIVALENT element after a rebuild. Content changes
+  // keep the rows' identity (see QuestionBody), so this only matters when an id or the shape changed.
+  let lastFocus: string | undefined;
+  const describeFocus = (t: EventTarget | null): string | undefined => {
+    const el = t as HTMLElement | null;
+    if (!el?.closest) return undefined;
+    const tab = el.closest<HTMLElement>('[data-tab]');
+    if (tab) return `[data-tab="${tab.dataset.tab}"]`;
+    if (el.matches('textarea[data-other]')) return 'textarea[data-other]';
+    const row = el.closest<HTMLElement>('[data-option-row]');
+    if (row && el.matches('[data-option-input]')) return `[data-option-row="${row.dataset.optionRow}"] [data-option-input]`;
+    const edit = el.closest<HTMLElement>('[data-review-edit]');
+    if (edit) return `[data-review-edit="${edit.dataset.reviewEdit}"]`;
+    if (el.matches('[data-question-body] textarea')) return '[data-question-body] textarea';
+    return undefined;
+  };
+  const onFocusIn = (e: FocusEvent) => { lastFocus = describeFocus(e.target); };
+  const onFocusOut = (e: FocusEvent) => {
+    const t = e.target as Node;
+    // A real blur clears it; an element that was REMOVED while focused is still disconnected a tick later.
+    // The microtask can run AFTER the next focusin (a programmatic focus() inside a handler), so it also
+    // checks that focus is really outside the panel now.
+    queueMicrotask(() => {
+      const active = (root.getRootNode() as Document | ShadowRoot).activeElement;
+      if (t.isConnected && !(active && root.contains(active))) lastFocus = undefined;
+    });
+  };
+  createEffect(on(() => props.questions, () => {
+    const sel = lastFocus;
+    if (!sel || !root) return;
+    const scope = root.getRootNode() as Document | ShadowRoot;
+    if (scope.activeElement && root.contains(scope.activeElement)) return;
+    if (scope.activeElement && scope.activeElement !== document.body) return; // focus went somewhere else on purpose
+    const target = root.querySelector<HTMLElement>(sel);
+    if (target) target.focus();
+    else body?.focus();
+  }, { defer: true }));
+
   const go = (to: number, opts: { focus?: 'body' | 'tab' } = {}) => {
     const next = Math.max(0, Math.min(steps() - 1, to));
     if (next !== idx()) {
@@ -145,6 +184,11 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
   });
 
   const onPanelKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && !e.isComposing && !e.defaultPrevented && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      dismiss();
+      return;
+    }
     if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || !/^[1-9]$/.test(e.key)) return;
     // Never steal a digit from a field the user is typing into.
     if ((e.target as HTMLElement).closest?.('textarea,[contenteditable],input:not([type="radio"]):not([type="checkbox"]),select')) return;
@@ -154,10 +198,14 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
   // --- tabs ---
   const tabId = (i: number) => `${uid}-tab-${i}`;
   const panelId = `${uid}-panel`;
-  const tabs = createMemo(() => [
-    ...qs().map((q, i) => ({ i, label: q.header, title: q.header, answered: isAnswered(q, drafts()[q.id]) })),
-    ...(hasReview() ? [{ i: n(), label: 'Review', title: 'Review', answered: false }] : []),
-  ]);
+  // Tabs are keyed by INDEX and read their label and check reactively, so editing a header or ticking an
+  // answer updates the tab in place instead of rebuilding it (and dropping focus from it).
+  const tabIndexes = createMemo(() => Array.from({ length: steps() }, (_, i) => i), [], {
+    equals: (a, b) => a.length === b.length,
+  });
+  const tabLabel = (i: number) => (i < n() ? showText(qs()[i]?.header ?? '', TEXT_LIMITS.header) : 'Review');
+  const tabTip = (i: number) => (i < n() ? showText(qs()[i]?.header ?? '', TEXT_LIMITS.tip) : 'Review');
+  const tabAnswered = (i: number) => i < n() && isAnswered(qs()[i], drafts()[qs()[i]?.id]);
   const onTabKey = (e: KeyboardEvent) => {
     const last = steps() - 1;
     const to = e.key === 'ArrowRight' ? (idx() + 1) % (last + 1)
@@ -193,14 +241,14 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
           const text = () => answerLine(q, drafts()[q.id]);
           return (
             <li class="grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 px-3 py-2 @md:grid-cols-[6rem_minmax(0,1fr)_auto]">
-              <span class="truncate text-meta text-muted-foreground" title={q.question}>{q.header}</span>
-              <span class={cn('line-clamp-3 min-w-0 whitespace-pre-line break-words text-body', text() ? 'text-foreground' : 'text-warning')}>
-                {text() ?? 'Not answered'}
+              <span dir="auto" class="truncate text-meta text-muted-foreground [unicode-bidi:isolate]" title={showText(q.question, TEXT_LIMITS.tip)}>{showText(q.header, TEXT_LIMITS.header)}</span>
+              <span dir="auto" class={cn('line-clamp-3 min-w-0 whitespace-pre-line break-words text-body [unicode-bidi:isolate]', text() ? 'text-foreground' : 'text-warning')}>
+                {text() !== undefined ? showText(text()!, TEXT_LIMITS.answer) : 'Not answered'}
               </span>
               <button
                 type="button"
                 data-review-edit={i()}
-                aria-label={`${text() ? 'Edit' : 'Answer'}: ${q.header}`}
+                aria-label={`${text() ? 'Edit' : 'Answer'}: ${clampText(q.header, 80)}`}
                 onClick={() => go(i(), { focus: 'body' })}
                 class="rounded-md px-1 text-meta text-muted-foreground underline underline-offset-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >{text() ? 'Edit' : 'Answer'}</button>
@@ -214,7 +262,13 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
   return (
     <div class={cn('@container w-full', props.class)}>
       <div
-        ref={root}
+        ref={(el) => {
+          root = el;
+          // Native listeners, not Solid's delegated onFocusIn: focus moves made from script inside a key
+          // handler are not reliably seen through delegation, and this record must not miss one.
+          el.addEventListener('focusin', onFocusIn);
+          el.addEventListener('focusout', onFocusOut);
+        }}
         role="group"
         aria-label={props.label ?? 'Questions'}
         data-question-panel=""
@@ -229,27 +283,27 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
               onKeyDown={onTabKey}
               class="inline-flex items-center gap-0.5 rounded-lg bg-surface-sunken p-0.5"
             >
-              <For each={tabs()}>{(t) => (
+              <For each={tabIndexes()}>{(i) => (
                 <button
                   type="button"
                   role="tab"
-                  id={tabId(t.i)}
-                  data-tab={t.i}
-                  aria-selected={idx() === t.i}
+                  id={tabId(i)}
+                  data-tab={i}
+                  aria-selected={idx() === i}
                   aria-controls={panelId}
-                  tabindex={idx() === t.i ? 0 : -1}
-                  title={t.title}
-                  onClick={() => go(t.i)}
+                  tabindex={idx() === i ? 0 : -1}
+                  title={tabTip(i)}
+                  onClick={() => go(i)}
                   class={cn(
                     'inline-flex h-7 max-w-40 items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    idx() === t.i ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                    idx() === i ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  <Show when={t.answered}>
+                  <Show when={tabAnswered(i)}>
                     <Check class="size-3 shrink-0 text-success" aria-hidden="true" />
                   </Show>
-                  <span class="truncate">{t.label}</span>
-                  <Show when={t.answered}><span class="sr-only">(answered)</span></Show>
+                  <span dir="auto" class="truncate [unicode-bidi:isolate]">{tabLabel(i)}</span>
+                  <Show when={tabAnswered(i)}><span class="sr-only">(answered)</span></Show>
                 </button>
               )}</For>
             </div>
@@ -273,7 +327,11 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
           role="tabpanel"
           id={panelId}
           aria-labelledby={bodyKey() === 'review' || active() ? tabId(idx()) : undefined}
-          class="col-span-3 row-start-2 min-w-0"
+          // Bounded, so a huge question can never push the tabs and the footer out of reach. It is a scroll
+          // region, so it is focusable (keyboard scrolling), and the small negative margin keeps the option
+          // rows' focus ring inside the clip.
+          tabindex="0"
+          class="col-span-3 row-start-2 -mx-1 min-w-0 max-h-[min(26rem,55vh)] overflow-y-auto overscroll-contain px-1 py-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Show when={bodyKey()} keyed fallback={<p class="px-1 text-body text-muted-foreground">There are no questions to answer.</p>}>
             {(key) => key === 'review'
@@ -299,8 +357,8 @@ export function QuestionPanel(props: QuestionPanelProps): JSX.Element {
         >{statusText()}</span>
 
         <div class="col-start-3 row-start-3 flex items-center gap-2 self-center justify-self-end">
-          <Show when={steps() > 1}>
-            <Button type="button" size="sm" variant="outline" class={OUTLINE} disabled={idx() === 0} onClick={() => go(idx() - 1)}>Back</Button>
+          <Show when={idx() > 0}>
+            <Button type="button" size="sm" variant="outline" class={OUTLINE} onClick={() => go(idx() - 1)}>Back</Button>
           </Show>
           <Show when={!lastStep()}>
             <Button type="button" size="sm" variant="default" onClick={() => go(idx() + 1)}>Next</Button>

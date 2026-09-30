@@ -9,6 +9,8 @@ import type { PanelQuestion } from './question-state';
  * One tab per question (Review appears from two), Back and Next, numbered options with "Other" as
  * the last row, and one Submit. A lone approve/deny question submits on the click.
  *
+ * Escape inside the panel is "Let's chat": it dismisses with the partial answers, like the button.
+ *
  * These are the Solid component; `Components/Question Panel Composed` builds the same panel from
  * `<kai-question>` elements. Question text, labels, descriptions and previews are model output and
  * are always drawn as text.
@@ -74,8 +76,11 @@ const CONFIG: PanelQuestion = {
 };
 const APPROVE: PanelQuestion = {
   id: 'run', header: 'Run', kind: 'confirm', required: true,
-  question: 'Run `pnpm --filter @kitn.ai/ui run build:css && nx build ui` in this checkout?',
-  options: [{ label: 'Approve', description: 'Run it once' }, { label: 'Deny', description: 'Skip it and say why below' }],
+  question: 'Run this command in the project?',
+  options: [
+    { label: 'Approve', description: 'Run it once', preview: 'pnpm --filter @kitn.ai/ui run build:css && nx build ui' },
+    { label: 'Deny', description: 'Skip it and say why below' },
+  ],
 };
 const STEPS: PanelQuestion = {
   id: 'steps', header: 'Steps', kind: 'tasks', required: true,
@@ -97,7 +102,7 @@ const CONTACT: PanelQuestion = {
 
 const answer = (q: PanelQuestion, extra: object) => ({ questionId: q.id, header: q.header, question: q.question, kind: q.kind, ...extra });
 
-/** One choice question. Number keys 1 to 4 pick; 4 is Other and focuses its textarea. */
+/** One choice question. Number keys 1 to 4 pick; 4 is Other and focuses its textarea. Escape dismisses. */
 export const SingleSelect: Story = {
   name: 'Single Select',
   render: () => <Frame><QuestionPanel questions={[TONE]} focusOnOpen={false} /></Frame>,
@@ -171,7 +176,7 @@ export const Tasks: Story = {
 <QuestionPanel questions={[{ id: 'steps', header: 'Steps', kind: 'tasks', required: true, question: 'Which cleanup steps should I run?', options: [{ label: 'Remove unused exports' } /* ... */] }]} />`),
 };
 
-/** A panel whose only question is a confirm submits on the click of Approve or Deny: there is no Submit. */
+/** A panel whose only question is a confirm submits on the click of Approve or Deny: there is no Submit. A preview on the options is the thing being approved, drawn as text in a monospace strip. */
 export const OneClickConfirm: Story = {
   name: 'One-click Confirm',
   render: () => <Frame><QuestionPanel questions={[APPROVE]} focusOnOpen={false} /></Frame>,

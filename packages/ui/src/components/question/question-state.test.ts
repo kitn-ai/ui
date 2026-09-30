@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Answer } from '../../primitives/questions';
 import {
   optionsOf, allowsOther, isMulti, rowCount, isAnswered, answerFromDraft, draftFromAnswer, emptyDraft,
-  missingQuestions, unansweredCount, answerLine, clampPreview, PREVIEW_MAX, isOneClick,
+  missingQuestions, unansweredCount, answerLine, clampPreview, PREVIEW_MAX, isOneClick, clampText, showText, confirmDetail,
   type PanelQuestion,
 } from './question-state';
 
@@ -98,5 +98,23 @@ describe('question-state', () => {
     expect(clamped.startsWith('x'.repeat(PREVIEW_MAX))).toBe(true);
     expect(clamped.length).toBeLessThan(PREVIEW_MAX + 200);
     expect(clamped).toMatch(/100000 characters/);
+  });
+
+  it('clampText keeps short text and marks a cut with the number of characters lost', () => {
+    expect(clampText('short', 10)).toBe('short');
+    expect(clampText('x'.repeat(1_000_000), 300)).toMatch(/^x{300}\u2026 \[\+999700 more characters\]$/);
+  });
+
+  it('showText draws a bidi override as a visible code point and leaves the rest alone', () => {
+    const out = showText('\u202Eevil.exe \u2066x\u2069');
+    expect(out).toBe('[U+202E]evil.exe [U+2066]x[U+2069]');
+    expect(showText('plain <b>text</b>')).toBe('plain <b>text</b>');
+    expect(showText('y'.repeat(50), 10)).toMatch(/more characters/);
+  });
+
+  it('confirmDetail is the first option preview of a confirm, and nothing for other kinds', () => {
+    expect(confirmDetail({ kind: 'confirm', options: [{ label: 'Approve', preview: 'rm -rf x' }, { label: 'Deny' }] })).toBe('rm -rf x');
+    expect(confirmDetail({ kind: 'confirm' })).toBeUndefined();
+    expect(confirmDetail({ kind: 'choice', options: [{ label: 'a', preview: 'p' }] })).toBeUndefined();
   });
 });

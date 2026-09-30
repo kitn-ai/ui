@@ -2,6 +2,7 @@ import type { JSX } from 'solid-js';
 import { Textarea } from '../textarea/textarea';
 import { FIELD_BASE } from '../input/input';
 import { cn } from '../../utils/cn';
+import { clampText } from './question-state';
 
 export interface OtherAnswerProps {
   /** The question this belongs to, for the accessible name. Model output, rendered as an attribute value only. */
@@ -24,7 +25,7 @@ export function OtherAnswer(props: OtherAnswerProps): JSX.Element {
   return (
     <Textarea
       data-other={props.dataOther}
-      aria-label={`Your own answer to: ${props.question}`}
+      aria-label={`Your own answer to: ${clampText(props.question, 200)}`}
       placeholder={props.placeholder ?? 'Type your own answer'}
       maxHeight={160}
       value={props.value}

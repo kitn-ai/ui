@@ -36,7 +36,7 @@ interface Events extends Record<string, unknown> {
   'kai-active-change': { index: number; questionId?: string };
   /** The user submitted. `result` is the AskResult to hand to `answerQuestions` as the call's tool result. */
   'kai-questions-submit': { toolCallId?: string; result: AskResult };
-  /** The user chose to chat instead. `answers` are the partial answers so far. This does not settle the call. */
+  /** The user chose to chat instead (the button, or Escape inside the panel). `answers` are the partial answers so far. Settles nothing. */
   'kai-questions-dismiss': { toolCallId?: string; answers: Answer[] };
 }
 // The panel stands in the composer's place while a model's questions are open: it takes the composer
@@ -45,7 +45,7 @@ interface Events extends Record<string, unknown> {
 // and `questions` is the preset over the same parts. Both feed ONE renderer, so they cannot differ.
 // It never settles the call itself: the host calls `answerQuestions` / `settlePendingQuestions`.
 /**
- * The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit.
+ * The question panel: tabs, Back and Next, numbered options with an Other row, a review step and Submit. Escape inside it dismisses.
  */
 defineWebComponent<Props, Events>('kai-question-panel', {
   questions: undefined,

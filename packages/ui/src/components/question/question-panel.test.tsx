@@ -92,15 +92,15 @@ describe('QuestionPanel: tabs', () => {
 });
 
 describe('QuestionPanel: Back and Next', () => {
-  it('Back is disabled on the first step and Next becomes the submit label on the last', async () => {
+  it('Back is hidden on the first step and Next becomes the submit label on the last', async () => {
     const p = mount([scope, tone], { submitLabel: 'Send it' });
-    expect(p.btn('Back')).toBeDisabled();
+    expect(p.btn('Back')).toBeUndefined();
     expect(p.btn('Next')).toBeTruthy();
     await fireEvent.click(p.btn('Next')!);
     await fireEvent.click(p.btn('Next')!);
     expect(p.btn('Next')).toBeUndefined();
     expect(p.btn('Send it')).toBeTruthy();
-    expect(p.btn('Back')).not.toBeDisabled();
+    expect(p.btn('Back')).toBeTruthy();
   });
 });
 
@@ -272,6 +272,17 @@ describe('QuestionPanel: confirm and one-click', () => {
     expect(p.submits).toHaveLength(0);
   });
 
+  it('a confirm preview is the thing being approved: a monospace strip of text, not the side-by-side preview', () => {
+    const cmd = '<b>rm -rf</b> node_modules';
+    const p = mount([{ ...ok, options: [{ label: 'Approve', preview: cmd }, { label: 'Deny' }] }]);
+    const strip = p.$('[data-confirm-detail]');
+    expect(strip.textContent).toBe(cmd);
+    expect(strip.querySelector('b')).toBeNull();
+    expect(strip.className).toContain('font-mono');
+    expect(p.$('[data-preview]')).toBeNull();
+    expect(mount([ok]).$('[data-confirm-detail]')).toBeNull();
+  });
+
   it("the model's pair overrides Approve and Deny", () => {
     const p = mount([{ ...ok, options: [{ label: 'Ship' }, { label: 'Hold' }] }]);
     expect(p.rows()[0].textContent).toContain('Ship');
@@ -363,9 +374,20 @@ describe("QuestionPanel: Let's chat", () => {
     expect(p.dismisses).toHaveLength(1);
   });
 
-  it('Escape is not bound: the only way out is the control', async () => {
+  it('Escape inside the panel dismisses exactly like the button, with the partial answers', async () => {
+    const p = mount([scope, tone]);
+    await fireEvent.click(p.input(2));
+    p.key(p.input(2), 'Escape');
+    expect(p.dismisses).toHaveLength(1);
+    expect(p.dismisses[0]).toMatchObject({ toolCallId: 'call_1', answers: [{ questionId: 'scope', selected: ['Docs'] }] });
+    expect(p.submits).toHaveLength(0);
+  });
+
+  it('Escape that something else already handled does not also dismiss', () => {
     const p = mount([scope]);
-    p.key(p.input(0), 'Escape');
+    const e = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    p.input(0).addEventListener('keydown', (ev) => ev.preventDefault());
+    p.input(0).dispatchEvent(e);
     expect(p.dismisses).toHaveLength(0);
   });
 });

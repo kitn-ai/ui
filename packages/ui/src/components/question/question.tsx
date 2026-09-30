@@ -1,4 +1,5 @@
-import { type JSX, For, Show, createSignal, createUniqueId } from 'solid-js';
+import { type JSX, For, Show, createMemo, createSignal, createUniqueId } from 'solid-js';
+import { Terminal } from 'lucide-solid';
 import { Textarea } from '../textarea/textarea';
 import { FIELD_BASE } from '../input/input';
 import { cn } from '../../utils/cn';
@@ -6,7 +7,7 @@ import { OtherAnswer } from './other-answer';
 import { QuestionOptionRow } from './question-option';
 import { QuestionFormFields } from './question-form-fields';
 import {
-  type AnswerDraft, type PanelQuestion, allowsOther, clampPreview, isMulti, optionsOf, rowCount,
+  type AnswerDraft, type PanelQuestion, TEXT_LIMITS, allowsOther, clampPreview, confirmDetail, isMulti, optionsOf, rowCount, showText,
 } from './question-state';
 
 /** What the panel may ask of the question on screen. */
@@ -38,10 +39,13 @@ export function QuestionBody(props: QuestionBodyProps): JSX.Element {
   const qid = `${uid}-q`;
   let root!: HTMLDivElement;
 
-  const options = () => optionsOf(q());
-  const other = () => allowsOther(q());
-  const multi = () => isMulti(q());
-  const count = () => rowCount(q());
+  // Memos, not plain functions: a change to the question's TEXT must not re-run what only depends on its
+  // SHAPE, or the rows (and the focused input in one) are rebuilt and the user loses their place.
+  const options = createMemo(() => optionsOf(q()));
+  const other = createMemo(() => allowsOther(q()));
+  const multi = createMemo(() => isMulti(q()));
+  const count = createMemo(() => rowCount(q()));
+  const detail = createMemo(() => confirmDetail(q()));
   const isOtherRow = (i: number) => other() && i === options().length;
 
   const [pointed, setPointed] = createSignal<number | undefined>(undefined);
@@ -51,7 +55,7 @@ export function QuestionBody(props: QuestionBodyProps): JSX.Element {
     return i >= 0 ? i : d.otherOn && other() ? options().length : -1;
   };
   const cursor = () => Math.min(pointed() ?? Math.max(selectedRow(), 0), Math.max(count() - 1, 0));
-  const hasPreview = () => options().some((o) => o.preview !== undefined && o.preview !== '');
+  const hasPreview = () => q().kind !== 'confirm' && options().some((o) => o.preview !== undefined && o.preview !== '');
   const previewRow = () => pointed() ?? Math.max(selectedRow(), 0);
 
   const rowInput = (i: number) => root.querySelector<HTMLElement>(`[data-option-row="${i}"] [data-option-input]`);
@@ -100,11 +104,28 @@ export function QuestionBody(props: QuestionBodyProps): JSX.Element {
   props.apiRef?.({ pick: (row) => pick(row), focus });
 
   const rows = () => Array.from({ length: count() }, (_, i) => i);
-  const previewLabel = () => (isOtherRow(previewRow()) ? 'Other' : options()[previewRow()]?.label ?? '');
+  const previewLabel = () => (isOtherRow(previewRow()) ? 'Other' : showText(options()[previewRow()]?.label ?? '', TEXT_LIMITS.tip));
 
   return (
     <div ref={root} class="flex flex-col gap-2" data-question-body={q().id}>
-      <p id={qid} class="px-1 text-body font-medium leading-snug text-foreground break-words">{q().question}</p>
+      <p id={qid} dir="auto" class="px-1 text-body font-medium leading-snug text-foreground break-words [unicode-bidi:isolate]">{showText(q().question, TEXT_LIMITS.question)}</p>
+
+      <Show when={detail()}>
+        <div
+          data-confirm-detail=""
+          dir="auto"
+          tabIndex={0}
+          role="region"
+          aria-label="What you are approving"
+          class={cn(
+            'mx-1 flex max-h-40 items-start gap-2 overflow-auto rounded-lg border border-border px-3 py-2 font-mono text-meta text-foreground [unicode-bidi:isolate] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            props.wellClass ?? 'bg-background',
+          )}
+        >
+          <Terminal class="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <span class="min-w-0 whitespace-pre-wrap break-all">{showText(detail()!)}</span>
+        </div>
+      </Show>
 
       <Show when={q().kind === 'choice' || q().kind === 'confirm' || q().kind === 'tasks'}>
         <div class={cn('grid gap-3', hasPreview() && '@xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]')}>
@@ -117,8 +138,8 @@ export function QuestionBody(props: QuestionBodyProps): JSX.Element {
             <For each={rows()}>{(i) => (
               <QuestionOptionRow
                 index={i}
-                label={isOtherRow(i) ? 'Other' : options()[i]?.label ?? ''}
-                description={isOtherRow(i) ? undefined : options()[i]?.description}
+                label={isOtherRow(i) ? 'Other' : showText(options()[i]?.label ?? '', TEXT_LIMITS.label)}
+                description={isOtherRow(i) ? undefined : showText(options()[i]?.description ?? '', TEXT_LIMITS.description) || undefined}
                 multi={multi()}
                 task={q().kind === 'tasks'}
                 name={`${uid}-group`}
@@ -145,17 +166,18 @@ export function QuestionBody(props: QuestionBodyProps): JSX.Element {
           </div>
           <Show when={hasPreview()}>
             <div class="flex min-w-0 flex-col gap-1">
-              <span class="px-1 text-meta text-muted-foreground">Preview of {previewLabel()}</span>
+              <span dir="auto" title={previewLabel()} class="block truncate px-1 text-meta text-muted-foreground [unicode-bidi:isolate]">Preview of {previewLabel()}</span>
               <pre
                 tabIndex={0}
                 role="region"
                 aria-label={`Preview of ${previewLabel()}`}
+                dir="auto"
                 data-preview=""
                 class={cn(
-                  'max-h-56 flex-1 overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border px-3 py-2.5 font-mono text-meta leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'max-h-56 flex-1 overflow-auto whitespace-pre-wrap break-words [unicode-bidi:isolate] rounded-lg border border-border px-3 py-2.5 font-mono text-meta leading-relaxed text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   props.wellClass ?? 'bg-background',
                 )}
-              >{isOtherRow(previewRow()) ? 'Your own answer has no preview.' : clampPreview(options()[previewRow()]?.preview ?? '')}</pre>
+              >{isOtherRow(previewRow()) ? 'Your own answer has no preview.' : showText(clampPreview(options()[previewRow()]?.preview ?? ''))}</pre>
             </div>
           </Show>
         </div>

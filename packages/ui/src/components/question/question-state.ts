@@ -135,3 +135,30 @@ export function clampPreview(text: string): string {
   if (text.length <= PREVIEW_MAX) return text;
   return `${text.slice(0, PREVIEW_MAX)}\n\n[preview truncated: showing ${PREVIEW_MAX} of ${text.length} characters]`;
 }
+
+/** Longest text drawn for each kind of model string. Past it the text is cut and the cut is stated. */
+export const TEXT_LIMITS = { header: 200, question: 8000, label: 300, description: 600, answer: 2000, tip: 500 } as const;
+
+/** Text clamped to `max` characters, with the cut made visible ("... +N more characters"). */
+export function clampText(text: string, max: number): string {
+  if (typeof text !== 'string' || text.length <= max) return text;
+  return `${text.slice(0, max)}\u2026 [+${text.length - max} more characters]`;
+}
+
+// Bidi format characters reorder the text AROUND them, and an isolate on the element cannot stop one
+// inside it: "\u202Eevil.exe" reads "exe.live". They are drawn as a visible code point instead.
+const BIDI_CONTROLS = /[\u202A-\u202E\u2066-\u2069\u200E\u200F\u061C]/g;
+const bidiLabel = (c: string): string => `[U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}]`;
+
+/** Model text as it is DRAWN: bidi controls made visible, then clamped. Answers keep the original. */
+export function showText(text: string, max: number = Infinity): string {
+  if (typeof text !== 'string') return '';
+  return clampText(text.replace(BIDI_CONTROLS, bidiLabel), max);
+}
+
+/** The thing a `confirm` asks to approve (a command, a path): the first option preview, drawn in a strip. */
+export function confirmDetail(q: Pick<Question, 'kind' | 'options'>): string | undefined {
+  if (q.kind !== 'confirm') return undefined;
+  const p = q.options?.find((o) => typeof o.preview === 'string' && o.preview !== '')?.preview;
+  return p === undefined ? undefined : clampPreview(p);
+}

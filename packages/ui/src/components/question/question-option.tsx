@@ -1,4 +1,4 @@
-import { type JSX, Show } from 'solid-js';
+import { type JSX, Show, createMemo } from 'solid-js';
 import { Radio } from '../radio/radio';
 import { Checkbox } from '../checkbox/checkbox';
 import { Kbd } from '../kbd/kbd';
@@ -35,8 +35,11 @@ export interface QuestionOptionRowProps {
  * pattern, WITHOUT advancing: only a click, Enter or a number key advances).
  */
 export function QuestionOptionRow(props: QuestionOptionRowProps): JSX.Element {
+  // Memoised so a change to the question's TEXT does not re-run `control()` and swap the focused input for a new one.
+  const multi = createMemo(() => props.multi);
+  const task = createMemo(() => !!props.task);
   const control = () =>
-    props.multi ? (
+    multi() ? (
       <Checkbox
         checked={props.checked}
         tabindex={props.tabbable ? 0 : -1}
@@ -66,7 +69,7 @@ export function QuestionOptionRow(props: QuestionOptionRowProps): JSX.Element {
     if (delta !== undefined || ends !== undefined) {
       e.preventDefault();
       props.onMove((ends ?? delta) as number | 'first' | 'last');
-    } else if (e.key === 'Enter' && !props.multi) {
+    } else if (e.key === 'Enter' && !multi()) {
       e.preventDefault();
       props.onPick();
     }
@@ -84,14 +87,14 @@ export function QuestionOptionRow(props: QuestionOptionRowProps): JSX.Element {
       )}
     >
       <label class="flex cursor-pointer items-start gap-3">
-        <Show when={props.task} fallback={num()}>{control()}</Show>
+        <Show when={task()} fallback={num()}>{control()}</Show>
         <span class="min-w-0 flex-1">
-          <span class="block break-words text-body font-medium leading-snug text-foreground">{props.label}</span>
+          <span dir="auto" class="block break-words text-body font-medium leading-snug text-foreground [unicode-bidi:isolate]">{props.label}</span>
           <Show when={props.description}>
-            <span class="block break-words text-meta text-muted-foreground">{props.description}</span>
+            <span dir="auto" class="block break-words text-meta text-muted-foreground [unicode-bidi:isolate]">{props.description}</span>
           </Show>
         </span>
-        <Show when={props.task} fallback={control()}>{num()}</Show>
+        <Show when={task()} fallback={control()}>{num()}</Show>
       </label>
       {props.children}
     </div>

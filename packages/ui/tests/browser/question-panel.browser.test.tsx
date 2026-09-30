@@ -110,9 +110,21 @@ describe('question panel in Chromium: keyboard', () => {
     expect(p.body()).toBe('scope');
   });
 
-  it('Escape does not dismiss: the control is the only way out', async () => {
-    const p = await mount([SCOPE], { focusOnOpen: true });
+  it("Escape inside the panel is Let's chat: it fires kai-questions-dismiss with the partial answers", async () => {
+    const p = await mount([SCOPE, TONE], { focusOnOpen: true });
     await wait(100);
+    await userEvent.keyboard('1');
+    await wait(120);
+    await userEvent.keyboard('{Escape}');
+    const d = p.events.filter(([n]) => n === 'kai-questions-dismiss');
+    expect(d).toHaveLength(1);
+    expect(d[0][1]).toMatchObject({ toolCallId: 'call_1', answers: [{ questionId: 'scope', selected: ['This package'] }] });
+    expect(p.events.filter(([n]) => n === 'kai-questions-submit')).toHaveLength(0);
+  });
+
+  it('Escape pressed outside the panel does nothing to it', async () => {
+    const p = await mount([SCOPE], { before: '<input id="outside" aria-label="outside">' });
+    (p.box.querySelector('#outside') as HTMLInputElement).focus();
     await userEvent.keyboard('{Escape}');
     expect(p.events.filter(([n]) => n === 'kai-questions-dismiss')).toHaveLength(0);
   });
@@ -291,5 +303,191 @@ describe('question panel in Chromium: item mode draws the same panel', () => {
     expect(el.shadowRoot!.querySelectorAll('[data-option-row]')).toHaveLength(3);
     expect(el.querySelector('kai-question')!.getBoundingClientRect().height).toBe(0);
     void page;
+  });
+});
+
+
+describe('question panel in Chromium: content changes keep the user\'s place', () => {
+  const inside = (p: Awaited<ReturnType<typeof mount>>) => p.active();
+
+  it('editing the question text while an option is focused keeps focus and the number keys', async () => {
+    const p = await mount([SCOPE, TONE], { focusOnOpen: true });
+    await wait(100);
+    const before = inside(p);
+    expect(before).toBe(p.rows()[0].querySelector('input'));
+    p.el.questions = [{ ...SCOPE, question: 'Which part, exactly?' }, TONE];
+    await wait(120);
+    expect(p.root.textContent).toContain('Which part, exactly?');
+    expect(inside(p)).toBe(p.rows()[0].querySelector('input'));
+    await userEvent.keyboard('2');
+    await wait(120);
+    expect(p.body()).toBe('tone');
+  });
+
+  it('editing a <kai-question> attribute and appending a <kai-question-option> keep focus', async () => {
+    const box = document.createElement('div');
+    box.style.cssText = 'width:720px';
+    box.innerHTML = `<kai-question-panel><kai-question question-id="scope" header="Scope" question="Which?" kind="choice">
+      <kai-question-option label="One"></kai-question-option><kai-question-option label="Two"></kai-question-option></kai-question></kai-question-panel>`; // test-authored markup
+    document.body.append(box);
+    const el = box.firstElementChild as Panel;
+    await wait(200);
+    el.focus();
+    await wait(100);
+    const root = el.shadowRoot!;
+    const first = () => root.querySelector('[data-option-row="0"] input');
+    expect(root.activeElement).toBe(first());
+    el.querySelector('kai-question')!.setAttribute('question', 'Which one, really?');
+    await wait(150);
+    expect(root.textContent).toContain('Which one, really?');
+    expect(root.activeElement).toBe(first());
+    const opt = document.createElement('kai-question-option');
+    opt.setAttribute('label', 'Three');
+    el.querySelector('kai-question')!.append(opt);
+    await wait(150);
+    expect(root.querySelectorAll('[data-option-row]')).toHaveLength(4);
+    expect(root.activeElement).toBe(first());
+    await userEvent.keyboard('3');
+    await wait(100);
+    expect((root.querySelector('[data-option-row="2"] input') as HTMLInputElement).checked).toBe(true);
+  });
+
+  it('a focused tab survives a header edit', async () => {
+    const p = await mount([SCOPE, TONE]);
+    p.$$('[role="tab"]')[0].focus();
+    await userEvent.keyboard('{ArrowRight}');
+    await wait(60);
+    const tab = () => p.$$('[role="tab"]')[1];
+    expect(p.active()).toBe(tab());
+    p.el.questions = [SCOPE, { ...TONE, header: 'Area' }];
+    await wait(120);
+    expect(tab().textContent).toContain('Area');
+    expect(p.active()).toBe(tab());
+  });
+
+  it('when the focused element really is replaced (its question id changed), focus goes to the equivalent one', async () => {
+    const p = await mount([SCOPE, TONE], { focusOnOpen: true });
+    await wait(100);
+    await userEvent.keyboard('{ArrowDown}');
+    await wait(60);
+    p.el.questions = [{ ...SCOPE, id: 'scope2' }, TONE];
+    await wait(150);
+    expect(p.active()).toBe(p.rows()[1].querySelector('input'));
+  });
+
+  it('a focused Other textarea keeps its text and focus while the question text changes', async () => {
+    const p = await mount([SCOPE], { focusOnOpen: true });
+    await wait(100);
+    await userEvent.keyboard('4');
+    await wait(120);
+    await userEvent.keyboard('hello');
+    p.el.questions = [{ ...SCOPE, question: 'Changed?' }];
+    await wait(120);
+    const ta = p.$('textarea[data-other]') as HTMLTextAreaElement;
+    expect(p.active()).toBe(ta);
+    expect(ta.value).toBe('hello');
+  });
+});
+
+describe('question panel in Chromium: huge and hostile text stays bounded', () => {
+  const BIG = 'A'.repeat(1_000_000);
+  const inView = (p: Awaited<ReturnType<typeof mount>>, el: HTMLElement) => {
+    const r = el.getBoundingClientRect();
+    return r.bottom < 1400 && r.top >= 0;
+  };
+
+  it('a 1MB question keeps Back/Next/Submit and the tabs reachable', async () => {
+    const p = await mount([{ ...SCOPE, question: BIG }, TONE]);
+    const panel = p.$('[data-question-panel]')!.getBoundingClientRect();
+    expect(panel.height).toBeLessThan(800);
+    expect(inView(p, p.btn('Next')!)).toBe(true);
+    expect(inView(p, p.$('[role="tablist"]')!)).toBe(true);
+    expect(p.$('[role="tabpanel"]')!.scrollHeight).toBeGreaterThanOrEqual(p.$('[role="tabpanel"]')!.clientHeight);
+  });
+
+  it('a 1MB option label and description are clamped with a visible marker, and the footer stays in reach', async () => {
+    const q = { ...SCOPE, options: [{ label: BIG, description: BIG }, { label: 'b' }] };
+    const p = await mount([q, TONE]);
+    const row = p.rows()[0];
+    expect(row.textContent!.length).toBeLessThan(5000);
+    expect(row.textContent).toMatch(/more characters/);
+    expect(p.$('[data-question-panel]')!.getBoundingClientRect().height).toBeLessThan(800);
+    expect(inView(p, p.btn('Next')!)).toBe(true);
+    // the answer still carries the model's real label, untouched
+    await userEvent.click(row.querySelector('input')!);
+    await wait(100);
+    await userEvent.click(p.$$('[role="tab"]')[2]);
+    await wait(60);
+    expect(p.root.textContent!.length).toBeLessThan(20_000);
+  });
+
+  it('a 1MB header, preview label and review answer do not stretch the panel', async () => {
+    const q = { id: 'cfg', header: BIG, question: 'Which?', kind: 'choice', required: true, options: [{ label: BIG, preview: 'x' }, { label: 'b' }] };
+    const p = await mount([q, TONE]);
+    const panel = p.$('[data-question-panel]')!;
+    expect(panel.getBoundingClientRect().height).toBeLessThan(800);
+    expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
+  });
+
+  it('the Preview caption with a long unbroken label does not overflow horizontally', async () => {
+    const label = 'L'.repeat(5000);
+    const p = await mount([{ id: 'cfg', header: 'Cfg', question: 'Which?', kind: 'choice', required: true, options: [{ label, preview: 'x' }, { label: 'b', preview: 'y' }] }], { width: '700px' });
+    const caption = [...p.root.querySelectorAll<HTMLElement>('span')].find((s) => s.textContent?.startsWith('Preview of'))!;
+    // A truncated caption still has a large scrollWidth (the clipped text); what matters is its BOX.
+    const panel = p.$('[data-question-panel]')!;
+    expect(getComputedStyle(caption).textOverflow).toBe('ellipsis');
+    expect(caption.getBoundingClientRect().width).toBeLessThanOrEqual(panel.getBoundingClientRect().width);
+    expect(panel.scrollWidth).toBeLessThanOrEqual(panel.clientWidth + 1);
+  });
+
+  it('a 1MB Other answer clamps in the review row', async () => {
+    const p = await mount([SCOPE, TONE]);
+    p.rows()[3].querySelector('input')!.click();
+    await wait(80);
+    const ta = p.$('textarea[data-other]') as HTMLTextAreaElement;
+    ta.value = BIG;
+    ta.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+    await wait(120);
+    p.el.select(2);
+    await wait(120);
+    expect(p.$('[role="tabpanel"]')!.textContent!.length).toBeLessThan(20_000);
+  });
+});
+
+describe('question panel in Chromium: bidi controls cannot reorder the text', () => {
+  it('draws a right-to-left override visibly and isolates every model-text span', async () => {
+    const evil = '\u202Eevil.exe';
+    const p = await mount([{ id: 'q', header: evil, question: evil, kind: 'choice', required: true, options: [{ label: evil, description: evil, preview: evil }, { label: 'b' }] }, TONE]);
+    const text = p.root.textContent!;
+    expect(text).not.toContain('\u202E');
+    expect(text).toContain('U+202E');
+    for (const sel of ['[data-question-body] > p', '[data-option-row] label span span', '[role="tab"] span.truncate', 'pre[data-preview]']) {
+      const n = p.$(sel)!;
+      expect(n, sel).toBeTruthy();
+      const cs = getComputedStyle(n);
+      expect(['isolate', 'isolate-override'].includes(cs.unicodeBidi) || n.getAttribute('dir') === 'auto', sel).toBe(true);
+      expect(n.getAttribute('dir'), sel).toBe('auto');
+    }
+  });
+});
+
+describe('question panel in Chromium: Back and the confirm strip', () => {
+  it('Back is hidden on the first step and shown after it', async () => {
+    const p = await mount([SCOPE, TONE]);
+    expect(p.btn('Back')).toBeUndefined();
+    await userEvent.click(p.btn('Next')!);
+    await wait(60);
+    expect(p.btn('Back')).toBeTruthy();
+  });
+
+  it('a confirm carrying a preview shows it in a monospace strip above Approve and Deny, as text', async () => {
+    const cmd = '<b>rm -rf</b> node_modules && pnpm install';
+    const p = await mount([{ ...APPROVE, options: [{ label: 'Approve', preview: cmd }, { label: 'Deny' }] }]);
+    const strip = p.$('[data-confirm-detail]')!;
+    expect(strip.textContent).toBe(cmd);
+    expect(strip.querySelector('b')).toBeNull();
+    expect(getComputedStyle(strip).fontFamily).toMatch(/mono|Menlo|Consolas|monospace/i);
+    expect(strip.getBoundingClientRect().bottom).toBeLessThanOrEqual(p.rows()[0].getBoundingClientRect().top + 2);
+    expect(p.$('pre[data-preview]')).toBeNull(); // not the side-by-side preview
   });
 });
