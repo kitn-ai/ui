@@ -18,8 +18,8 @@ const meta = {
   argTypes: {
     status: {
       control: 'select',
-      options: ['new', 'online', 'busy', 'away', 'offline'],
-      description: 'Presence hue.',
+      options: ['new', 'online', 'busy', 'away', 'offline', 'working', 'idle', 'done', 'error', 'blocked'],
+      description: 'Presence hue, or an agent run tone (working, idle, done, error, blocked).',
       table: { defaultValue: { summary: 'new' } },
     },
     size: {
@@ -76,6 +76,26 @@ export const Hues: Story = {
   <Status status="busy" label="Busy" />
   <Status status="away" label="Away" />
   <Status status="offline" label="Offline" />
+</div>`),
+};
+
+/** The agent run tones. Each announces its own word when no label is given. */
+export const AgentTones: Story = {
+  render: () => (
+    <div class="flex items-center gap-5">
+      <Status status="working" pulse />
+      <Status status="idle" />
+      <Status status="done" />
+      <Status status="error" />
+      <Status status="blocked" />
+    </div>
+  ),
+  ...src(`<div class="flex items-center gap-5">
+  <Status status="working" pulse />
+  <Status status="idle" />
+  <Status status="done" />
+  <Status status="error" />
+  <Status status="blocked" />
 </div>`),
 };
 

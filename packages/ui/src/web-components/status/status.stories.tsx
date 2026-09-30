@@ -18,6 +18,24 @@ export default meta;
 
 const src = (code: string) => ({ docs: { source: { language: 'html', code } } });
 
+export const AgentTones: StoryObj = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '1.5rem', 'align-items': 'center', padding: '1rem' }}>
+      <kai-status status="working" pulse></kai-status>
+      <kai-status status="idle"></kai-status>
+      <kai-status status="done"></kai-status>
+      <kai-status status="error"></kai-status>
+      <kai-status status="blocked"></kai-status>
+    </div>
+  ),
+  parameters: src(`<!-- Agent tones announce their own word without a label. -->
+<kai-status status="working" pulse></kai-status>
+<kai-status status="idle"></kai-status>
+<kai-status status="done"></kai-status>
+<kai-status status="error"></kai-status>
+<kai-status status="blocked"></kai-status>`),
+};
+
 export const States: StoryObj = {
   render: () => (
     <div style={{ display: 'flex', gap: '1.5rem', 'align-items': 'center', padding: '1rem' }}>

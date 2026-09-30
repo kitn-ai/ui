@@ -2,11 +2,11 @@ import { defineWebComponent } from '../define/define';
 import { Status, type StatusKind } from '../../components/status/status';
 
 interface Props extends Record<string, unknown> {
-  /** Presence state, which sets the colour. Default `new`. */
+  /** Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. */
   status?: StatusKind;
   /** Animated ping ring; off by default and never under prefers-reduced-motion. */
   pulse?: boolean;
-  /** Accessible name; without it the dot is decorative. */
+  /** Accessible name; without it the dot is decorative, except agent tones, which default to their word. */
   label?: string;
   // `md` is the larger dot.
   /** Size token. Defaults to `'sm'`. */
