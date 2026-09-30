@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative } from 'node:path';
+import { hasHoverBackground, SCAN_FILE, SCAN_ROOTS, SCAN_SKIP } from '../hover/hover-scan';
 
 /**
- * Every component file that paints a `hover:bg-*` background must be measured by the hover-contrast
+ * Every component file that paints a hover background must be measured by the hover-contrast
  * probe (tests/hover/hover-contrast.browser.test.tsx) or carry an explicit, reasoned waiver.
  *
  * The site list is DERIVED from src/components, never typed, so a new hover state cannot ship without
@@ -16,14 +17,13 @@ const walk = (dir: string, out: string[] = []): string[] => {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name);
     if (statSync(p).isDirectory()) walk(p, out);
-    else if (/\.tsx$/.test(name) && !/\.(stories|test)\.tsx$/.test(name)) out.push(p);
+    else if (SCAN_FILE.test(name) && !SCAN_SKIP.test(name)) out.push(p);
   }
   return out;
 };
-const HOVER_BG = /(^|[\s'"`:])hover:bg-[a-z0-9[\]/.-]+/;
 
-const sites = walk(join(ROOT, 'src/components'))
-  .filter((f) => HOVER_BG.test(readFileSync(f, 'utf8')))
+const sites = SCAN_ROOTS.flatMap((r) => walk(join(ROOT, r)))
+  .filter((f) => hasHoverBackground(readFileSync(f, 'utf8')))
   .map((f) => relative(ROOT, f))
   .sort();
 
@@ -43,8 +43,43 @@ describe('hover-contrast coverage is derived from the source', () => {
   it('every waiver states a reason', () => {
     expect([...waivers].filter(([, why]) => why.trim().length < 15)).toEqual([]);
   });
-  it('no fixture or waiver names a file that is gone or has no hover:bg- class', () => {
+  it('no fixture or waiver names a file that is gone or has no hover background', () => {
     const stale = [...covered, ...waivers.keys()].filter((f) => !existsSync(join(ROOT, f)) || !sites.includes(f));
     expect(stale).toEqual([]);
   });
+});
+
+describe('the scan recognises every spelling of a hover background', () => {
+  const positives: Record<string, string> = {
+    plain: 'class="hover:bg-muted"',
+    'group-hover': 'class="group-hover:bg-muted"',
+    'named group-hover': 'class="group-hover/tab:bg-muted"',
+    'peer-hover': 'class="peer-hover:bg-muted"',
+    'arbitrary &:hover': 'class="[&:hover]:bg-muted"',
+    'arbitrary descendant': 'class="[&_button:hover]:bg-muted"',
+    'v4 paren form': 'class="hover:bg-(--x)"',
+    'important prefix': 'class="!hover:bg-muted"',
+    'important on utility': 'class="hover:!bg-muted"',
+    'important suffix': 'class="hover:bg-muted!"',
+    'chained variant': 'class="hover:not-disabled:bg-muted"',
+    'data variant': 'class="hover:data-[open]:bg-muted"',
+    'opacity modifier': 'class="hover:bg-muted/50"',
+    'arbitrary value': 'class="hover:bg-[color:var(--x)]"',
+    'after an open paren': "cn(cond && 'a', (hover:bg-muted))",
+    'after a template hole': 'class={`${base}hover:bg-muted`}',
+    'after a quote': "cn('hover:bg-muted')",
+  };
+  for (const [name, src] of Object.entries(positives)) {
+    it(`finds: ${name}`, () => expect(hasHoverBackground(src)).toBe(true));
+  }
+
+  const negatives: Record<string, string> = {
+    'hover text only': 'class="hover:text-foreground"',
+    'hover border only': 'class="hover:border-ring hover:opacity-100"',
+    'bg without hover': 'class="bg-muted focus:bg-accent"',
+    'hover and bg in separate tokens': 'class="hover:text-foreground bg-muted"',
+  };
+  for (const [name, src] of Object.entries(negatives)) {
+    it(`ignores: ${name}`, () => expect(hasHoverBackground(src)).toBe(false));
+  }
 });
