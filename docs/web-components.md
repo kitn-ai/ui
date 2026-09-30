@@ -247,7 +247,7 @@ Restyle from outside the Shadow DOM via `kai-chat::part(name)`.
 
 #### Composed from
 
-`Components/ChatThread`
+`Components/ChatApp`
 
 #### Theming
 

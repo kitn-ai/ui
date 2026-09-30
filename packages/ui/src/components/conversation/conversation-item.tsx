@@ -114,7 +114,7 @@ export function relativeTimeShort(iso?: string, now: number = Date.now()): strin
 // reads) so a consumer composing their own launcher can import it from the
 // package root — it is headless data logic, not rendering. Re-exported here
 // so this file's existing importers (ConversationPanel, HomePanel,
-// ChatThread, tests) keep their paths.
+// ChatApp, tests) keep their paths.
 export { isConversationUnread } from '../../primitives/conversation-store';
 
 /**

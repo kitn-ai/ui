@@ -25,7 +25,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { render, cleanup } from '@solidjs/testing-library';
-import { ChatThread } from '../../src/components/chat/chat-thread';
+import { ChatApp } from '../../src/components/chat/chat-app';
 import type { ChatMessage } from '../../src/web-components/chat/chat-types';
 
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
@@ -69,14 +69,14 @@ function rowOf(container: HTMLElement, role: 'user' | 'assistant'): HTMLElement 
 
 describe('assistant rows stretch their cards to the column (K-D11)', () => {
   it('lays the assistant row out items-stretch, not items-start', () => {
-    const { container } = render(() => <ChatThread messages={[CARD_MESSAGE]} />);
+    const { container } = render(() => <ChatApp messages={[CARD_MESSAGE]} />);
     const row = rowOf(container, 'assistant');
     expect(row.className).toContain('items-stretch');
     expect(row.className.split(/\s+/)).not.toContain('items-start');
   });
 
   it('puts the card part directly in that stretched row', () => {
-    const { container } = render(() => <ChatThread messages={[CARD_MESSAGE]} />);
+    const { container } = render(() => <ChatApp messages={[CARD_MESSAGE]} />);
     const row = rowOf(container, 'assistant');
     // The card renders through CardRenderer; find it by its heading and walk up
     // to the child of the row that carries it. That child is the flex item
@@ -93,7 +93,7 @@ describe('assistant rows stretch their cards to the column (K-D11)', () => {
   });
 
   it('leaves the user row right-aligned so its bubble keeps its natural width', () => {
-    const { container } = render(() => <ChatThread messages={[USER_MESSAGE]} />);
+    const { container } = render(() => <ChatApp messages={[USER_MESSAGE]} />);
     const row = rowOf(container, 'user');
     expect(row.className).toContain('items-end');
     expect(row.className).not.toContain('items-stretch');

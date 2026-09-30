@@ -11,7 +11,7 @@ import type { ChatMessageAction } from '../../web-components/chat/chat-types';
  *
  * Model: `ChatMessage.actions` (`web-components/chat/chat-types.ts`) is `(ChatMessage
  * Action | CustomAction)[]`, an ORDERED array, not a set, and role-scoped
- * only by caller curation (checked against `message.tsx`/`chat-thread.tsx`:
+ * only by caller curation (checked against `message.tsx`/`chat-app.tsx`:
  * neither hard-couples any built-in id to a role). This picker enforces
  * role-appropriateness via two independent catalogs, one per role, each
  * independently ordered and toggled.

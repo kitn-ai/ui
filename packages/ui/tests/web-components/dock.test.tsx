@@ -1086,7 +1086,7 @@ describe('mobile close X (<=480px full-bleed)', () => {
   // -------------------------------------------------------------------------
   // Fix round 1 (post-review): the X is an ABSOLUTE overlay, and the dock is
   // content-agnostic — it never reads what is slotted into the panel. Verified by
-  // rendering a real ChatThread `header-end` slot (a couple of trailing icon
+  // rendering a real ChatApp `header-end` slot (a couple of trailing icon
   // buttons, the documented "share, settings, ..." case) at a 375px viewport in
   // Playwright: BEFORE this fix the X painted directly over both icons (`anyOverlap:
   // true`, the settings icon fully hidden under the X). The fix has two parts, both
@@ -1116,7 +1116,7 @@ describe('mobile close X (<=480px full-bleed)', () => {
   // construct whose header carries only a title, the reserved padding band read
   // as a dead empty strip with a lone X floating in it — "why is the X button on
   // its own row instead of shared with the title... that doesn't look
-  // intentional." The composing fix: `ChatThread` gained its own
+  // intentional." The composing fix: `ChatApp` gained its own
   // `headerEndContent` escape hatch so a caller puts the close control INSIDE
   // the header row, and `hideClose` here suppresses this built-in X for that
   // case, band included (nothing left for it to protect).

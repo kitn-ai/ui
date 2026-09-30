@@ -73,7 +73,7 @@ export interface MessageProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, '
    *  `aria-label`, and the ARIA `role` attribute is shadowed. */
   role?: MessageRole;
   // The row's gap is the thread density axis one scale down, not a second axis: a
-  // thread passes its RESOLVED value down (`thread.tsx` / `chat-thread.tsx`) so a
+  // thread passes its RESOLVED value down (`thread.tsx` / `chat-app.tsx`) so a
   // compact thread is compact at the avatar gap too. `thread-density.ts` owns the class
   // table, which is why this prop takes that axis' type rather than a boolean or its
   // own `'tight' | 'loose'`. Rendered outside a thread, omitted means `default`, which
@@ -255,7 +255,7 @@ function MessageActionBar(props: MessageActionBarProps) {
         //    arrives to reveal it.
         //  - `group-focus-within:opacity-100` is not decoration: without it a
         //    keyboard user tabs onto a control they cannot see (WCAG 2.4.7, Focus
-        //    Visible). The row carrying the `group` is `chat-thread`'s rowGroup,
+        //    Visible). The row carrying the `group` is `chat-app`'s rowGroup,
         //    and the action bar is inside it, so focusing an action reveals it.
         // `group-hover:` is already hover-scoped by Tailwind, so only the base
         // state needs the query.
@@ -386,7 +386,7 @@ export interface MessageBodyProps {
   // Forwarded to each reasoning part's `<Reasoning>` so the disclosure auto-opens while
   // the model is thinking and settles back once the stream ends; without it the reader
   // watches a static collapsed "Reasoning" label for the whole thinking window. The
-  // caller owns the definition of "streaming": for `ChatThread` that is `loading` plus
+  // caller owns the definition of "streaming": for `ChatApp` that is `loading` plus
   // being the last assistant message.
   /** Whether this message is the one currently streaming. */
   isStreaming?: boolean;
@@ -575,7 +575,7 @@ function AttachmentTile(props: { data: AttachmentData }) {
  *  keyed to the turn, because the row already knows its own speaker. A user message is read
  *  back, so its actions wait for a hover or a focus; an assistant message's actions are the
  *  ones a reader reaches for while reading forward, so they stay put. One spelling of the
- *  rule, read by `MessageBody` and by every list that renders a row (`ChatThread`, `Thread`,
+ *  rule, read by `MessageBody` and by every list that renders a row (`ChatApp`, `Thread`,
  *  and the `<kai-message>` facade) so the row's `group` class and the bar's own reveal can
  *  never disagree. */
 export function resolveActionsReveal(
@@ -590,7 +590,7 @@ export function resolveActionsReveal(
  * pass (text, reasoning, tool calls, generative-UI cards, citations and file
  * attachments interleaved exactly as they appear), followed by the action bar.
  * Runs of `source` and `file` parts each collapse into one row. This is the
- * single source of truth for how a message renders, consumed by `ChatThread`
+ * single source of truth for how a message renders, consumed by `ChatApp`
  * (the `<For>` over `messages`), the standalone `<kai-message>` facade, and (in
  * future) `kai-compare` for each candidate. Pure/prop-driven: all interaction
  * state (copied, feedback vote) is owned above and passed in.

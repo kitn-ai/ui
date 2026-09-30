@@ -4,7 +4,7 @@ import { Plus, ChevronUp, ChevronDown, X } from 'lucide-solid';
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { WorkspaceShell } from '../../components/workspace/workspace-shell';
 import { WorkSurface } from '../../components/work-surface/work-surface';
 import { AppHeader, type AppHeaderAction } from '../../components/app-header/app-header';
@@ -100,7 +100,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 // `components/app-header/app-header.tsx` (`AppHeader`) — the same treatment the work
 // pane's chrome got above, and for the same reason: the emitted app had
 // drifted off this design (a text "Theme" button, no search at all, a bare
-// avatar with no menu, and the whole cluster stuffed into ChatThread's own
+// avatar with no menu, and the whole cluster stuffed into ChatApp's own
 // header row inside the chat rail instead of a strip across the frame). This
 // story now RENDERS that component and the emitted app COMPOSES it, so there
 // is one arrangement, not two. Everything below is the recorded reasoning for
@@ -136,8 +136,8 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //
 // COMPOSER (owner amendment, two parts):
 //  - Quick-fill label/value chips: rows the dev defines (label shown on the
-//    chip, value filled into the composer) — DISTINCT from `ChatThread`'s
-//    own `suggestions` (label IS the value there). Wired to `ChatThread`'s
+//    chip, value filled into the composer) — DISTINCT from `ChatApp`'s
+//    own `suggestions` (label IS the value there). Wired to `ChatApp`'s
 //    REAL controlled `value`/`onValueChange` props (confirmed they exist
 //    before use) — clicking a chip actually fills the composer's real
 //    input, not a stub.
@@ -146,27 +146,27 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //    real `kai-menu` into `kai-prompt-input`'s `toolbar-start` LIGHT-DOM
 //    slot, a mechanism only the `kai-chat`/`kai-prompt-input` WEB COMPONENT
 //    facade can receive (light-DOM child projection). This story renders
-//    the bare Solid `<ChatThread>` directly (same choice every other
+//    the bare Solid `<ChatApp>` directly (same choice every other
 //    template story makes), which has NO JSX prop for its composer
-//    toolbar — `emptyContent` is the one JSX-form escape hatch `ChatThread`
+//    toolbar — `emptyContent` is the one JSX-form escape hatch `ChatApp`
 //    has, and it is REPLACE-only for the empty state, not
 //    additive to the composer. So the composer menu here renders as its
-//    own strip directly above the rail's `ChatThread`, composing the kit's
+//    own strip directly above the rail's `ChatApp`, composing the kit's
 //    REAL `Dropdown`/`DropdownTrigger`/`DropdownContent`/`DropdownItem`
 //    primitives (the same ones `components/model/model-switcher.tsx` composes,
 //    read as a real usage example before building this) — a real, working
-//    menu, just not literally inside `ChatThread`'s own shadow-gated
-//    composer. Kit-tier gap worth naming: `ChatThread` could grow a
+//    menu, just not literally inside `ChatApp`'s own shadow-gated
+//    composer. Kit-tier gap worth naming: `ChatApp` could grow a
 //    `composerStart`/`composerEnd` JSX prop mirroring `emptyContent`'s
 //    pattern, so a bare-Solid consumer gets the same composer-toolbar
 //    injection the web-component facade already has via slots.
 //  - Attachments and Microphone: `capabilities.attachments` was already a
 //    real, existing `BuilderPanel` control (Capabilities section) but this
-//    template never actually WIRED it to `ChatThread`'s own `attach`/
+//    template never actually WIRED it to `ChatApp`'s own `attach`/
 //    `accept` props before this round — fixed here (the toggle now
 //    genuinely applies). Microphone is a new preview-only switch (same
 //    shape as every other template's own Microphone control), wired to
-//    `ChatThread`'s real `voice` prop. (The same `attach`/`accept` wiring
+//    `ChatApp`'s real `voice` prop. (The same `attach`/`accept` wiring
 //    gap exists on `Labs/Builder/Assistant`, `.../Research`, and `.../
 //    In-app assistant` — out of scope for this Workspace-only round, noted
 //    here rather than reached into their files.)
@@ -293,7 +293,7 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
 /** The v0-style composer `+` menu — see the module doc comment's COMPOSER
  *  note for why this composes `Dropdown`/`DropdownTrigger`/`DropdownContent`/
  *  `DropdownItem` directly (the real primitives `model-switcher.tsx` also
- *  composes) rather than reaching for `ChatThread`'s slot-gated toolbar,
+ *  composes) rather than reaching for `ChatApp`'s slot-gated toolbar,
  *  which a bare Solid usage cannot fill. Entries fire a real onSelect —
  *  reported to `onEntrySelect` for display, never a fake integration. */
 function ComposerMenu(props: { entries: ComposerMenuEntry[]; onEntrySelect: (entry: ComposerMenuEntry) => void }): JSX.Element {
@@ -321,10 +321,10 @@ function ComposerMenu(props: { entries: ComposerMenuEntry[]; onEntrySelect: (ent
 }
 
 /** The composer-extras strip: quick-fill chips (label shown, `value` fills
- *  `ChatThread`'s real controlled composer) plus the composer menu, if
- *  either is configured. Renders directly ABOVE the rail's `ChatThread` —
+ *  `ChatApp`'s real controlled composer) plus the composer menu, if
+ *  either is configured. Renders directly ABOVE the rail's `ChatApp` —
  *  see the module doc comment's COMPOSER note for why this is a sibling
- *  strip rather than literally inside `ChatThread`'s own composer. */
+ *  strip rather than literally inside `ChatApp`'s own composer. */
 function ComposerExtras(props: {
   chips: ComposerChip[];
   menuEnabled: boolean;
@@ -477,7 +477,7 @@ function WorkspacePreview(props: {
                 onFill={fill}
                 lastAction={lastAction()}
               />
-              <ChatThread
+              <ChatApp
                 class="h-full min-h-0 flex-1"
                 messages={messages()}
                 chatTitle={props.construct.header?.title}
@@ -781,7 +781,7 @@ function ComposerSection(props: {
 
       <p class="text-xs text-muted-foreground">
         Preview-only: none of the composer knobs above exist in construct.v1 today. Triggers are the one
-        exception: they're wired to ChatThread's real `triggers` prop, a real mechanism already shipped at the component tier. ON by
+        exception: they're wired to ChatApp's real `triggers` prop, a real mechanism already shipped at the component tier. ON by
         default for this template, like the other agentic and dev-shaped templates.
       </p>
     </section>
@@ -972,9 +972,9 @@ type Story = StoryObj;
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
 // names the real composition and wiring rather than a package import; WorkspaceShell, WorkSurface,
-// AppHeader and ChatThread ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
+// AppHeader and ChatApp ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
 const IMPORT = `import { AppHeader, WorkSurface } from '@kitn.ai/ui';
-import { WorkspaceShell, ChatThread } from '@kitn.ai/ui/solid';`;
+import { WorkspaceShell, ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -996,7 +996,7 @@ export const Workspace: Story = {
   preview={
     <div class="flex h-full flex-col">
       <AppHeader title={construct.header?.title} actions={headerActions} onActionSelect={runHeaderAction} />
-      <WorkspaceShell start={<ChatThread messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />}>
+      <WorkspaceShell start={<ChatApp messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />}>
         <WorkSurface preview={previewContent} code={codeContent} tab={activeTab} onTabChange={setActiveTab} />
       </WorkspaceShell>
     </div>

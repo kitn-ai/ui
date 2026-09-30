@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
 import { CHAT_SLOTS, readSlots } from '../slots/slots';
-import { ChatThread, type ChatThreadProps, type ChatThreadContextUsage, type ChatThreadController } from '../../components/chat/chat-thread';
+import { ChatApp, type ChatAppProps, type ChatAppContextUsage, type ChatAppController } from '../../components/chat/chat-app';
 import type { ThreadDensity } from '../../components/chat/thread-density';
 import { cardComponentsFromTags } from '../message/message';
 import { createMessagesGuard } from '../message/validate-messages';
@@ -15,7 +15,7 @@ import type { ProseSize } from '../../primitives/chat-config';
 import type { ModelOption, HomeConfig, HomeLinkEntry } from '../../types';
 import type { ConversationStore } from '../../primitives/conversation-store';
 
-type Props = Omit<ChatThreadProps,
+type Props = Omit<ChatAppProps,
   'class' | 'onValueChange' | 'onSubmit' | 'onAttachmentsChange' | 'onSuggestionClick' | 'onModelChange'
   | 'onMessageAction' | 'onToolSelect' | 'onVoice' | 'controllerRef' | 'cardTypes' | 'cardSchemas' | 'cardHostElement' | 'messages'
   | 'accept' | 'onAttachmentsRejected'
@@ -23,20 +23,20 @@ type Props = Omit<ChatThreadProps,
   // this element's own attribute/property conventions) rather than left to
   // flow through `Omit`'s pass-through — same reason `messages` is excluded
   // above. Left unexcluded, the intersection carries TWO declarations of the
-  // same property (the inherited `ChatThreadProps` one plus the re-declared
+  // same property (the inherited `ChatAppProps` one plus the re-declared
   // one below) and `gen-web-component-api.mjs` concatenates both JSDoc comments into
   // one duplicated, em-dash-laden description.
   | 'conversations' | 'store'
   // `home` is re-declared below for the same reason as `conversations`/`store`
-  // above (own element-facing doc comment rather than the ChatThread-level one
+  // above (own element-facing doc comment rather than the ChatApp-level one
   // flowing through `Omit`'s pass-through). `onHomeLink` is wired internally
-  // (JSX prop on `<ChatThread>` below) as a dispatched `kai-home-link` event,
-  // matching every other ChatThread callback on this element — same reasoning
+  // (JSX prop on `<ChatApp>` below) as a dispatched `kai-home-link` event,
+  // matching every other ChatApp callback on this element — same reasoning
   // as `onConversationLoad` just below.
   | 'home' | 'onHomeLink'
   // `onConversationLoad` is wired internally (below, JSX prop on
-  // `<ChatThread>`) as a dispatched `kai-conversation-load` event — matching
-  // every other ChatThread callback on this element — rather than left as a
+  // `<ChatApp>`) as a dispatched `kai-conversation-load` event — matching
+  // every other ChatApp callback on this element — rather than left as a
   // settable JS property: a `JSX.Element`-shaped callback prop has no HTML-
   // consumer analogue the way `store`/`messages` do, and the kai- contract's
   // idiom for "this thread wants to tell you something" is already an event.
@@ -45,8 +45,8 @@ type Props = Omit<ChatThreadProps,
   | 'onConversationLoad'
   // `hostOpen` is re-declared below (own element-facing doc comment, same
   // reason as `conversations`/`store`); `onUnreadChange` is wired internally
-  // (JSX prop on `<ChatThread>` below) as a dispatched `kai-unread-change`
-  // event, matching every other ChatThread callback on this element. Both
+  // (JSX prop on `<ChatApp>` below) as a dispatched `kai-unread-change`
+  // event, matching every other ChatApp callback on this element. Both
   // were EXCLUDED entirely before the composed-launcher seam: the old
   // reasoning was that `<kai-chat>` has no sibling chrome of its own to
   // report to — true, but a CONSUMER composing this element beside their own
@@ -56,8 +56,8 @@ type Props = Omit<ChatThreadProps,
   // composed-launcher seam below).
   | 'hostOpen' | 'onUnreadChange'
   // `headerEndContent`/`emptyContent` are JSX.Element escape hatches for a caller
-  // composing `ChatThread` directly as a Solid component (see their doc comments in
-  // chat-thread.tsx — the construct-engine's emitted App is the motivating case).
+  // composing `ChatApp` directly as a Solid component (see their doc comments in
+  // chat-app.tsx — the construct-engine's emitted App is the motivating case).
   // `<kai-chat>` is the OPPOSITE shape: a custom element crossing the shadow-DOM
   // boundary, where a `JSX.Element` value cannot exist for a consumer to construct
   // (React/Vue/plain HTML have no such type) and the facade already has its own
@@ -77,9 +77,9 @@ type Props = Omit<ChatThreadProps,
     // picker that accepts nothing.
     /** Which attachment media types the user may stage, in HTML `accept` syntax. Omitted = no filter; media types only, an extension THROWS. */
     accept?: string;
-    // Re-declared here (rather than inherited from `ChatThreadProps`) because the
+    // Re-declared here (rather than inherited from `ChatAppProps`) because the
     // ELEMENT registers a `[]` default and renders the empty state without it, while
-    // the SolidJS `<ChatThread>` component still requires it. The facade hands it a
+    // the SolidJS `<ChatApp>` component still requires it. The facade hands it a
     // validated array either way. Matches `<kai-thread>`.
     // Each entry carries its role, ordered `parts`, and optional
     // actions/avatar/feedback; mutating an entry in place does not re-render.
@@ -105,9 +105,9 @@ type Props = Omit<ChatThreadProps,
     // (`<kai-chat conversations>`). A row select, "new conversation," and the
     // visitor's mount-time auto-restore all deliver their messages the same way: this
     // element does not update `messages` for you. Set with no `store`, the underlying
-    // `ChatThread` decides loudly (one console.error) and stays visually off; this
+    // `ChatApp` decides loudly (one console.error) and stays visually off; this
     // facade always supplies its own internal load handler (the
-    // `kai-conversation-load` dispatch below), so the second ChatThread guard, missing
+    // `kai-conversation-load` dispatch below), so the second ChatApp guard, missing
     // `onConversationLoad`, never trips here, even for a consumer who never listens for
     // the event.
     /** Turns on the prior-conversations list. Requires `store`; default `false`; a load arrives as `kai-conversation-load` -- set `el.messages` yourself. */
@@ -142,7 +142,7 @@ type Props = Omit<ChatThreadProps,
     hostOpen?: boolean;
     // The element-specific half of this prop's story, because the generator CONCATENATES
     // a facade's doc with the underlying component's: a restatement here renders twice in
-    // the published tables. So this adds only what `ChatThreadProps.tools` cannot say —
+    // the published tables. So this adds only what `ChatAppProps.tools` cannot say —
     // that an attribute IS parsed, and what a bad one does. The alternative, a raw string
     // reaching the tree, is spread into the menu character by character while the chip row
     // walks it: a nonsense menu rather than a missing one.
@@ -219,11 +219,11 @@ defineWebComponent<Props, Events>('kai-chat', {
   // Default-true flag convention, as `<kai-conversations show-trailing="false">`: the
   // attribute form is the only way an HTML author says `false`, so the option reaches
   // the host through `flag()` rather than a raw prop read. Inherited from
-  // `ChatThreadProps` (not re-declared above, so the prop table carries one doc comment
+  // `ChatAppProps` (not re-declared above, so the prop table carries one doc comment
   // rather than two concatenated ones), declared HERE so the element reads back `true`
   // rather than `undefined` before any consumer writes it. Same reason as `density`.
   showTrailing: true,
-  // Inherited from `ChatThreadProps` (not re-declared above, so the prop table carries
+  // Inherited from `ChatAppProps` (not re-declared above, so the prop table carries
   // one doc comment rather than two concatenated ones); declared HERE so the element
   // observes the `density` attribute and reads back `'default'` rather than `undefined`.
   density: 'default' as ThreadDensity,
@@ -260,9 +260,9 @@ defineWebComponent<Props, Events>('kai-chat', {
   // WebComponentContext.reflectFlag.
   reflectFlag('loading');
 
-  // Imperative method API — forward the chat-thread controller onto the host
+  // Imperative method API — forward the chat-app controller onto the host
   // (focus the composer, clear it, send programmatically, scroll the thread).
-  let controller: ChatThreadController | undefined;
+  let controller: ChatAppController | undefined;
   expose({
     /** Focus the composer, meaning the contenteditable (or textarea) inside the
      *  shadow root. A native `focus()` on the host lands on the host itself and
@@ -310,7 +310,7 @@ defineWebComponent<Props, Events>('kai-chat', {
   });
 
   return (
-  <ChatThread
+  <ChatApp
     messages={validMessages(props.messages)} value={props.value as string | ComposerDoc | undefined} placeholder={props.placeholder as string}
     loading={flag('loading')} suggestions={props.suggestions as string[] | undefined}
     suggestionsLayout={props.suggestionsLayout as 'pill' | 'block' | undefined}
@@ -318,7 +318,7 @@ defineWebComponent<Props, Events>('kai-chat', {
     proseSize={props.proseSize as ProseSize}
     codeTheme={props.codeTheme as string} codeHighlight={flag('codeHighlight')}
     chatTitle={props.chatTitle as string | undefined} models={props.models as ModelOption[] | undefined}
-    currentModel={props.currentModel as string | undefined} context={props.context as ChatThreadContextUsage | undefined}
+    currentModel={props.currentModel as string | undefined} context={props.context as ChatAppContextUsage | undefined}
     scrollButton={props.scrollButton !== false} attach={flag('attach')} voice={flag('voice')}
     tools={props.tools as ComposerToolItem[] | undefined}
     expanded={resolveExpandedProp(props.expanded, element.hasAttribute('expanded'), element.getAttribute('expanded'))}

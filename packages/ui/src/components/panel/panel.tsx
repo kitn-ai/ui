@@ -5,14 +5,14 @@ import { cn } from '../../utils/cn';
  * `Panel` / `PanelHeader` / `PanelBody` / `PanelFooter`: the widget panel chrome as PUBLIC
  * parts, so a consumer can build the widget frame itself.
  *
- * It owns exactly the chrome `ChatThread` paints privately: the panel surface, the header row
+ * It owns exactly the chrome `ChatApp` paints privately: the panel surface, the header row
  * (`h-14`, bottom border, `px-5`, semibold small title), the view container region and an
  * optional standalone frame. Chrome colour is a kit decision, so every colour here is a kit
  * token: `--kai-color-*` overrides retint the panel together with the components inside it.
  *
  * Two postures, prop-driven:
  * - **Frameless (default)**: the panel fills its container and inherits its border radius,
- *   the shape `ChatThread` has inside `<kai-dock>`'s already-framed floating panel.
+ *   the shape `ChatApp` has inside `<kai-dock>`'s already-framed floating panel.
  * - **`frame`**: the panel carries its own widget-box border, radius and shadow, for
  *   standalone use with no dock around it.
  *
@@ -69,7 +69,7 @@ export interface PanelHeaderProps extends JSX.HTMLAttributes<HTMLElement> {
 
 /**
  * The panel's header row. The box and type are byte-for-byte the chrome
- * `ChatThread`'s built-in header paints (h-14 row, bottom border-border,
+ * `ChatApp`'s built-in header paints (h-14 row, bottom border-border,
  * px-5, gap-2 clusters, `text-sm font-semibold text-foreground` title), so
  * the refactored `kai-chat` (ruling P-9) can render its header THROUGH this
  * component with no visual delta.
@@ -102,7 +102,7 @@ export function PanelHeader(props: PanelHeaderProps) {
 /**
  * The view container region: fills the panel between header and footer,
  * clips its content, and is the positioning context for floating children
- * (scroll buttons, overlays) -- `ChatThread`'s `relative flex-1
+ * (scroll buttons, overlays) -- `ChatApp`'s `relative flex-1
  * overflow-hidden` body, as a public part.
  */
 export type PanelBodyProps = JSX.HTMLAttributes<HTMLDivElement>;

@@ -4,7 +4,7 @@ import { Copy, RefreshCw, Share2, Image as ImageIcon, Sparkles } from 'lucide-so
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { Source, SourceTrigger, SourceContent } from '../../components/source/source';
 import { PromptSuggestion } from '../../components/prompt/prompt-suggestion';
 import { Tabs, type KaiTabItem } from '../../components/tabs/tabs';
@@ -21,7 +21,7 @@ import type { Source as SourceCitation } from '../../web-components/chat/chat-ty
 // radio (T-2).
 //
 // THE ENTRY POINT IS UNCHANGED (owner's own instruction): the preview still
-// opens on `ChatThread`'s own centered empty state (no sidebar, no model
+// opens on `ChatApp`'s own centered empty state (no sidebar, no model
 // switcher) — same as before this round. What changed is everything AFTER
 // a query is submitted.
 //
@@ -40,17 +40,17 @@ import type { Source as SourceCitation } from '../../web-components/chat/chat-ty
 //    Perplexity's story states directly why: "the markdown renderer renders
 //    a string and can't interleave citation chips at citation offsets," so
 //    the cited paragraphs are JSX text runs with real `Source`/
-//    `SourceTrigger`/`SourceContent` chips built in, not `ChatThread`
+//    `SourceTrigger`/`SourceContent` chips built in, not `ChatApp`
 //    message parts. This is a STRUCTURAL correction from the previous
 //    round: `message.tsx`'s own citation grouping (used before this round)
 //    renders citations as a TRAILING group after the text, never
 //    interleaved mid-sentence — a materially different shape from
 //    Perplexity's actual inline chips. Confirmed by reading `message.tsx`'s
 //    `groupAs` logic again before concluding this. Because the answer is no
-//    longer message-shaped, `ChatThread`'s `messages` stays permanently
+//    longer message-shaped, `ChatApp`'s `messages` stays permanently
 //    empty and the whole Perplexity-style view renders through its REAL
 //    `emptyContent` JSX prop instead (Round R's mechanism, reused) — which
-//    also means the SAME `ChatThread` still supplies the composer at the
+//    also means the SAME `ChatApp` still supplies the composer at the
 //    bottom, unchanged in both states, matching Perplexity's own "the top
 //    search box and the follow-up composer are the same location."
 //  - a media/images strip (placeholder tiles, Perplexity's own shape)
@@ -217,8 +217,8 @@ interface AnatomyToggles {
 
 /** The Perplexity-shaped answer, miniaturized honestly into the builder
  *  preview — see the module doc comment for the region-by-region mapping
- *  back to `perplexity.stories.tsx`. Rendered through `ChatThread`'s real
- *  `emptyContent` JSX prop (see the module doc comment), so `ChatThread`
+ *  back to `perplexity.stories.tsx`. Rendered through `ChatApp`'s real
+ *  `emptyContent` JSX prop (see the module doc comment), so `ChatApp`
  *  itself still supplies the composer below, unchanged. */
 function PerplexityAnswerView(props: { query: string; toggles: AnatomyToggles; onRelatedClick: (q: string) => void }): JSX.Element {
   const [tab, setTab] = createSignal<'answer' | 'sources' | 'images'>('answer');
@@ -337,7 +337,7 @@ function ResearchPreview(props: {
       data-builder-viewport={props.viewport}
     >
       <div class="flex min-h-0 flex-1 flex-col">
-        <ChatThread
+        <ChatApp
           class="h-full"
           messages={[]}
           chatTitle={props.answered ? props.construct.header?.title : undefined}
@@ -442,9 +442,9 @@ type Story = StoryObj;
 
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
-// names the real composition and wiring rather than a package import; ChatThread IS public
+// names the real composition and wiring rather than a package import; ChatApp IS public
 // (@kitn.ai/ui) and is shown as this preview actually uses its `emptyContent` prop.
-const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -463,7 +463,7 @@ export const Research: Story = {
     // ...plus this screen's own Answer-layout section (one toggle per region)
   }
   preview={
-    <ChatThread
+    <ChatApp
       messages={messages}
       chatTitle={construct.header?.title}
       suggestions={construct.capabilities?.starters}

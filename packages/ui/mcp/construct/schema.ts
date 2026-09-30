@@ -223,17 +223,17 @@ export const ConstructSchema = z
       .optional(),
     /** Construct-wide header chrome, valid on every layout (not layout-scoped
      *  like `widget`, and not a capability toggle — a header is a construct-
-     *  wide fact, like `theme`). Rendered inside ChatThread's own built-in
+     *  wide fact, like `theme`). Rendered inside ChatApp's own built-in
      *  header bar; a logo/icon projects through the kit's EXISTING
      *  `header-start` named slot (`slots` vocabulary above), not a second
      *  image-prop convention here. */
     header: z
       .object({
-        /** Rendered in ChatThread's built-in header bar (left side). Construct-
+        /** Rendered in ChatApp's built-in header bar (left side). Construct-
          *  authored/untrusted text, like theme.accent/provider.url — JSON.stringify'd
          *  at its one emit site, never a raw JSX attribute string. */
         title: z.string().min(1).optional(),
-        /** Renders a theme-toggle Button in ChatThread's header-end region,
+        /** Renders a theme-toggle Button in ChatApp's header-end region,
          *  flipping the host's `theme` attribute (the attribute
          *  defineWebComponent already owns) via the facade's ctx.element —
          *  codegen work, no new kit surface (B-10). */
@@ -263,9 +263,9 @@ export const ConstructSchema = z
     /** Greeting shown while the thread is empty (no messages yet) — the
      *  proven "welcome screen" pattern (Intercom-class): title + optional
      *  description + optional icon above, with `capabilities.starters`'
-     *  chips and the composer still rendering below (ChatThread's `empty`
+     *  chips and the composer still rendering below (ChatApp's `empty`
      *  REPLACE slot only stands in for the empty MESSAGE LIST — see
-     *  chat-thread.tsx's own doc comment on `empty` — so the chips are
+     *  chat-app.tsx's own doc comment on `empty` — so the chips are
      *  never lost). Construct-wide like `header`, not a capability: it's a
      *  fact about the empty state, not a toggleable affordance.
      *  `title`/`description` are construct-authored/untrusted text, like
@@ -323,7 +323,7 @@ export const ConstructSchema = z
         /** Enables the paperclip attach affordance; accept is a non-empty
          *  list of media types/globs, e.g. ["image/*", "application/pdf"] —
          *  WHETHER stays with the construct author (this field), HOW stays
-         *  with the kit (ChatThread's own attach/accept props, threaded
+         *  with the kit (ChatApp's own attach/accept props, threaded
          *  through by codegen). */
         attachments: z
           .object({
@@ -357,7 +357,7 @@ export const ConstructSchema = z
          *  reasoning streams, with no expandable detail. `'off'` hides
          *  reasoning entirely. This is HOW an existing medium fact (the
          *  model's thinking) displays — the kit's call — so it maps straight
-         *  onto ChatThread's own `reasoning` prop; there is no app-layer
+         *  onto ChatApp's own `reasoning` prop; there is no app-layer
          *  quota or retention decision hiding in it. Left `.optional()`
          *  rather than `.default('full')`, matching every sibling field in
          *  this object: a zod `.default()` here would make `reasoning`
@@ -385,7 +385,7 @@ export const ConstructSchema = z
          *  localStorage vs. a fetch endpoint) is codegen's call, never
          *  vocabulary here (C-3 — no transport-layer vocabulary). */
         conversations: z.literal(true).optional(),
-        /** Role-scoped default action bars, threaded onto ChatThread's
+        /** Role-scoped default action bars, threaded onto ChatApp's
          *  `userActions`/`assistantActions` props (B-3/B-7b). Ordered
          *  arrays; enum ids ONLY, read off the ONE const
          *  (CHAT_MESSAGE_ACTIONS — B-6): a CustomAction is an id the APP
@@ -402,7 +402,7 @@ export const ConstructSchema = z
           .optional(),
         /** The citations STRIP (the `part="citations"` row consecutive
          *  `source` parts already collapse into — message.tsx). `strip:
-         *  false` hides it (emits ChatThread's `hideSources`); `strip:
+         *  false` hides it (emits ChatApp's `hideSources`); `strip:
          *  true` or the key absent emits NOTHING — the row already renders,
          *  the kit default IS the on state, the same anchored-on-the-
          *  default convention as `reasoning: 'full'` (B-4). */
@@ -580,7 +580,7 @@ export const ConstructSchema = z
       .strict()
       .optional(),
     /** Composer chrome — NOT a capability: chrome on the medium, like
-     *  `header` (B-5). `triggers` maps onto ChatThread's real, shipped
+     *  `header` (B-5). `triggers` maps onto ChatApp's real, shipped
      *  `triggers` prop: `slash` → `{ char: '/', kind: 'command', items }`,
      *  `mention` → `{ char: '@', kind: 'mention', items }` at emit. */
     composer: z

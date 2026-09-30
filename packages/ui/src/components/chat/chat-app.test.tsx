@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom/vitest';
 import { createSignal } from 'solid-js';
 import { render, cleanup, fireEvent } from '@solidjs/testing-library';
-import { ChatThread, type ChatThreadController } from './chat-thread';
+import { ChatApp, type ChatAppController } from './chat-app';
 import type { ThreadDensity } from './thread-density';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 import { localStorageStore } from '../../primitives/conversation-store';
@@ -42,25 +42,25 @@ afterEach(cleanup);
 // createPresence unmounts the hidden vote button on a microtask in jsdom.
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
-describe('ChatThread header composition', () => {
+describe('ChatApp header composition', () => {
   it('hides the header with no title, models, context, or header slot', () => {
-    const { container } = render(() => <ChatThread messages={[]} />);
+    const { container } = render(() => <ChatApp messages={[]} />);
     expect(container.querySelector('header')).toBeNull();
   });
 
   it('shows the header when only header-start content is present', () => {
-    const { container } = render(() => <ChatThread messages={[]} headerStart />);
+    const { container } = render(() => <ChatApp messages={[]} headerStart />);
     expect(container.querySelector('header')).toBeTruthy();
   });
 
   it('renders header-start and header-end slots inside the header', () => {
-    const { container } = render(() => <ChatThread messages={[]} headerStart headerEnd />);
+    const { container } = render(() => <ChatApp messages={[]} headerStart headerEnd />);
     expect(container.querySelector('header slot[name="header-start"]')).toBeTruthy();
     expect(container.querySelector('header slot[name="header-end"]')).toBeTruthy();
   });
 
   it('still shows the header for a chat title (back-compat)', () => {
-    const { container, getByText } = render(() => <ChatThread messages={[]} chatTitle="Assistant" />);
+    const { container, getByText } = render(() => <ChatApp messages={[]} chatTitle="Assistant" />);
     expect(container.querySelector('header')).toBeTruthy();
     expect(getByText('Assistant')).toBeInTheDocument();
   });
@@ -70,13 +70,13 @@ describe('ChatThread header composition', () => {
   // components/dock/dock.tsx's hideClose doc). Renders ALONGSIDE the named slot, not instead of
   // it, and counts toward showHeader() on its own.
   it('shows the header for headerEndContent alone, with no title/models/context/slots', () => {
-    const { container } = render(() => <ChatThread messages={[]} headerEndContent={<button>Close</button>} />);
+    const { container } = render(() => <ChatApp messages={[]} headerEndContent={<button>Close</button>} />);
     expect(container.querySelector('header')).toBeTruthy();
   });
 
   it('renders headerEndContent in the header, alongside (not instead of) the header-end slot', () => {
     const { container, getByText } = render(() => (
-      <ChatThread messages={[]} headerEnd headerEndContent={<button>Close</button>} />
+      <ChatApp messages={[]} headerEnd headerEndContent={<button>Close</button>} />
     ));
     const header = container.querySelector('header');
     expect(header).toBeTruthy();
@@ -89,21 +89,21 @@ describe('ChatThread header composition', () => {
 // region, rendered in-tree (fully styled by the adopted stylesheet) rather than
 // through the light-DOM `slot="empty"` boundary `empty` targets. Wins over
 // `empty`/`slot="empty"` when both are set.
-describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
+describe('ChatApp emptyContent (JSX empty-state escape hatch)', () => {
   it('renders emptyContent while the thread is empty', () => {
-    const { getByText } = render(() => <ChatThread messages={[]} emptyContent={<div>Welcome!</div>} />);
+    const { getByText } = render(() => <ChatApp messages={[]} emptyContent={<div>Welcome!</div>} />);
     expect(getByText('Welcome!')).toBeInTheDocument();
   });
 
   it('does not render emptyContent once the thread has messages', () => {
     const messages: ChatMessage[] = [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }];
-    const { queryByText } = render(() => <ChatThread messages={messages} emptyContent={<div>Welcome!</div>} />);
+    const { queryByText } = render(() => <ChatApp messages={messages} emptyContent={<div>Welcome!</div>} />);
     expect(queryByText('Welcome!')).toBeNull();
   });
 
   it('emptyContent wins over the empty/slot="empty" boundary when both are set', () => {
     const { container, getByText, queryByText } = render(() => (
-      <ChatThread messages={[]} empty emptyContent={<div>Welcome!</div>} />
+      <ChatApp messages={[]} empty emptyContent={<div>Welcome!</div>} />
     ));
     expect(getByText('Welcome!')).toBeInTheDocument();
     expect(container.querySelector('slot[name="empty"]')).toBeNull();
@@ -111,12 +111,12 @@ describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
   });
 
   it('empty alone (no emptyContent) still falls back to the slot', () => {
-    const { container } = render(() => <ChatThread messages={[]} empty />);
+    const { container } = render(() => <ChatApp messages={[]} empty />);
     expect(container.querySelector('slot[name="empty"]')).toBeTruthy();
   });
 });
 
-// `attach` passthrough: mirrors the `voice` pattern (ChatThreadProps -> the composer
+// `attach` passthrough: mirrors the `voice` pattern (ChatAppProps -> the composer
 // fallback branch -> DefaultPromptInput), but with the OPPOSITE default direction.
 // `voice` defaults OFF when undeclared (`props.voice === true`); attach must default
 // ON when undeclared, so kit consumers who never heard of this prop keep today's
@@ -129,51 +129,51 @@ describe('ChatThread emptyContent (JSX empty-state escape hatch)', () => {
 // a button that no longer exists finds nothing whether the prop works or not. With no
 // host tools declared, the tree is the file item ALONE, so the trigger's presence is
 // still an exact proxy for `attach`.
-describe('ChatThread attach passthrough', () => {
+describe('ChatApp attach passthrough', () => {
   const toolsTrigger = (container: HTMLElement) => container.querySelector('button[aria-label="More tools"]');
 
   it('shows the tools trigger when attach is undeclared (default)', () => {
-    const { container } = render(() => <ChatThread messages={[]} />);
+    const { container } = render(() => <ChatApp messages={[]} />);
     expect(toolsTrigger(container)).toBeTruthy();
   });
 
   it('shows the tools trigger when attach is explicitly true', () => {
-    const { container } = render(() => <ChatThread messages={[]} attach={true} />);
+    const { container } = render(() => <ChatApp messages={[]} attach={true} />);
     expect(toolsTrigger(container)).toBeTruthy();
   });
 
   it('removes the file item, and with it the trigger, when attach is explicitly false', () => {
-    const { container } = render(() => <ChatThread messages={[]} attach={false} />);
+    const { container } = render(() => <ChatApp messages={[]} attach={false} />);
     expect(toolsTrigger(container)).toBeNull();
   });
 });
 
-describe('ChatThread suggestions gating', () => {
+describe('ChatApp suggestions gating', () => {
   const SUGGESTIONS = ['What can you do?', 'Tell me a joke'];
   const oneMessage = [{ id: '1', role: 'user' as const, parts: [{ type: 'text' as const, text: 'hi' }] }];
 
   it('renders suggestions when the thread is empty', () => {
-    const { getByText } = render(() => <ChatThread messages={[]} suggestions={SUGGESTIONS} />);
+    const { getByText } = render(() => <ChatApp messages={[]} suggestions={SUGGESTIONS} />);
     expect(getByText('What can you do?')).toBeInTheDocument();
     expect(getByText('Tell me a joke')).toBeInTheDocument();
   });
 
   it('hides suggestions once the conversation has messages (default)', () => {
-    const { queryByText } = render(() => <ChatThread messages={oneMessage} suggestions={SUGGESTIONS} />);
+    const { queryByText } = render(() => <ChatApp messages={oneMessage} suggestions={SUGGESTIONS} />);
     expect(queryByText('What can you do?')).toBeNull();
     expect(queryByText('Tell me a joke')).toBeNull();
   });
 
   it('keeps suggestions visible with messages when persistSuggestions is set', () => {
     const { getByText } = render(() => (
-      <ChatThread messages={oneMessage} suggestions={SUGGESTIONS} persistSuggestions />
+      <ChatApp messages={oneMessage} suggestions={SUGGESTIONS} persistSuggestions />
     ));
     expect(getByText('What can you do?')).toBeInTheDocument();
     expect(getByText('Tell me a joke')).toBeInTheDocument();
   });
 });
 
-describe('ChatThread action-row feedback', () => {
+describe('ChatApp action-row feedback', () => {
   beforeEach(() => {
     toastSpy.mockClear();
     writeText.mockClear();
@@ -187,7 +187,7 @@ describe('ChatThread action-row feedback', () => {
     // Drive `messages` from a signal so we can hand the thread a brand-new array
     // reference (as a real streaming update would).
     const [messages, setMessages] = createSignal<ChatMessage[]>([assistant('Hello')]);
-    const { getByLabelText, queryByLabelText } = render(() => <ChatThread messages={messages()} />);
+    const { getByLabelText, queryByLabelText } = render(() => <ChatApp messages={messages()} />);
 
     // Vote up.
     fireEvent.click(getByLabelText('Like'));
@@ -207,7 +207,7 @@ describe('ChatThread action-row feedback', () => {
   it('copies content to the clipboard, shows the check, and reverts after 2s', async () => {
     vi.useFakeTimers();
     try {
-      const { getByLabelText } = render(() => <ChatThread messages={[assistant('Copy me')]} />);
+      const { getByLabelText } = render(() => <ChatApp messages={[assistant('Copy me')]} />);
       fireEvent.click(getByLabelText('Copy'));
       expect(writeText).toHaveBeenCalledWith('Copy me');
       // The copy button now shows the success check (aria-label flips to "Copied").
@@ -223,7 +223,7 @@ describe('ChatThread action-row feedback', () => {
   it('emits state:"on" on set and state:"off" on the un-vote re-tap', async () => {
     const onMessageAction = vi.fn();
     const { getByLabelText } = render(() => (
-      <ChatThread messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
+      <ChatApp messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
     ));
     fireEvent.click(getByLabelText('Like'));
     expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'like', state: 'on' });
@@ -236,7 +236,7 @@ describe('ChatThread action-row feedback', () => {
   it('omits state for copy (no on/off)', () => {
     const onMessageAction = vi.fn();
     const { getByLabelText } = render(() => (
-      <ChatThread messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
+      <ChatApp messages={[assistant('Hi')]} onMessageAction={onMessageAction} />
     ));
     fireEvent.click(getByLabelText('Copy'));
     expect(onMessageAction).toHaveBeenLastCalledWith({ messageId: 'a1', action: 'copy' });
@@ -246,13 +246,13 @@ describe('ChatThread action-row feedback', () => {
     const controlled: ChatMessage = {
       id: 'a1', role: 'assistant', parts: [{ type: 'text', text: 'x' }], actions: ['like', 'dislike'], feedback: 'dislike',
     };
-    const { getByLabelText } = render(() => <ChatThread messages={[controlled]} />);
+    const { getByLabelText } = render(() => <ChatApp messages={[controlled]} />);
     expect(getByLabelText('Dislike')).toHaveAttribute('aria-pressed', 'true');
     expect(getByLabelText('Like').closest('[data-feedback-collapsed]')).not.toBeNull();
   });
 
   it('toasts on copy and on a SET vote, but NOT on the un-vote', async () => {
-    const { getByLabelText } = render(() => <ChatThread messages={[assistant('Hi')]} />);
+    const { getByLabelText } = render(() => <ChatApp messages={[assistant('Hi')]} />);
 
     fireEvent.click(getByLabelText('Copy'));
     expect(toastSpy).toHaveBeenCalledWith('Copied to clipboard', expect.anything());
@@ -269,7 +269,7 @@ describe('ChatThread action-row feedback', () => {
   });
 });
 
-describe('ChatThread composer reset on submit', () => {
+describe('ChatApp composer reset on submit', () => {
   // The input is the contenteditable composer (not a <textarea>): the editable
   // surface is [data-kai-composer-editable], its content is textContent, typing is
   // textContent + an input event, and Enter submits (see composer.test.tsx).
@@ -280,7 +280,7 @@ describe('ChatThread composer reset on submit', () => {
     // so the batteries-included hooks (useKaiChat/createKaiChat) — whose `bind`
     // does not control `value` — get a clean composer each turn.
     const onSubmit = vi.fn();
-    const { container } = render(() => <ChatThread messages={[]} onSubmit={onSubmit} />);
+    const { container } = render(() => <ChatApp messages={[]} onSubmit={onSubmit} />);
     const el = editableEl(container);
 
     el.textContent = 'hello there';
@@ -294,7 +294,7 @@ describe('ChatThread composer reset on submit', () => {
   it('does NOT clear a CONTROLLED value on submit (the host owns it)', () => {
     const onSubmit = vi.fn();
     const { container } = render(() => (
-      <ChatThread messages={[]} value="locked" onSubmit={onSubmit} />
+      <ChatApp messages={[]} value="locked" onSubmit={onSubmit} />
     ));
     const el = editableEl(container);
     expect(el.textContent).toContain('locked');
@@ -309,7 +309,7 @@ describe('ChatThread composer reset on submit', () => {
 // MessageBody as `reasoningDefaultOpen`, which seeds the Reasoning disclosure
 // open AND (via openOnStream) keeps it tracking the stream — reproducing the
 // pre-19f auto-open default losslessly for a consumer who opts back in.
-describe('ChatThread reasoningOpen forwarding (Task 19f)', () => {
+describe('ChatApp reasoningOpen forwarding (Task 19f)', () => {
   const reasoningTrigger = (c: HTMLElement) =>
     Array.from(c.querySelectorAll('button')).find((b) => (b.textContent ?? '').includes('Reasoning')) as HTMLButtonElement;
 
@@ -318,12 +318,12 @@ describe('ChatThread reasoningOpen forwarding (Task 19f)', () => {
   ];
 
   it('default (reasoningOpen absent): a streaming reasoning disclosure starts closed', () => {
-    const { container } = render(() => <ChatThread messages={streamingMessages} loading={true} />);
+    const { container } = render(() => <ChatApp messages={streamingMessages} loading={true} />);
     expect(reasoningTrigger(container)).toHaveAttribute('aria-expanded', 'false');
   });
 
   it('reasoningOpen={true} reaches MessageBody: a streaming reasoning disclosure starts open', () => {
-    const { container } = render(() => <ChatThread messages={streamingMessages} loading={true} reasoningOpen={true} />);
+    const { container } = render(() => <ChatApp messages={streamingMessages} loading={true} reasoningOpen={true} />);
     expect(reasoningTrigger(container)).toHaveAttribute('aria-expanded', 'true');
   });
 });
@@ -333,14 +333,14 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
 
   it('conversations=false renders no list-toggle button (off by default)', () => {
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={false} store={localStorageStore('t')} onSubmit={() => {}} />
+      <ChatApp messages={[]} conversations={false} store={localStorageStore('t')} onSubmit={() => {}} />
     ));
     expect(container.querySelector('[data-kai-conversations-toggle]')).toBeNull();
   });
 
   it('conversations=true with no store: decides loudly, feature stays off', () => {
     const err = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const { container } = render(() => <ChatThread messages={[]} conversations={true} onSubmit={() => {}} />);
+    const { container } = render(() => <ChatApp messages={[]} conversations={true} onSubmit={() => {}} />);
     expect(err).toHaveBeenCalled();
     expect(container.querySelector('[data-kai-conversations-toggle]')).toBeNull();
     err.mockRestore();
@@ -348,7 +348,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
 
   // CRITICAL-1 (2026-08-26 final review): `store` alone is not enough — a
   // consumer who forgets `onConversationLoad` gets an inert row-tap/new/
-  // restore (ChatThread updates its own internal view/list state but the
+  // restore (ChatApp updates its own internal view/list state but the
   // rendered `messages` never changes) AND mount's auto-restore can stamp an
   // active conversation id that the save effect then clobbers with whatever
   // `messages` the caller drives in. Decide loudly instead, mirroring the
@@ -356,7 +356,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
   it('conversations=true with a store but no onConversationLoad handler: decides loudly, feature stays off', () => {
     const err = vi.spyOn(console, 'error').mockImplementation(() => {});
     const store = localStorageStore('t');
-    const { container } = render(() => <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} />);
+    const { container } = render(() => <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} />);
     expect(err).toHaveBeenCalled();
     expect(container.querySelector('[data-kai-conversations-toggle]')).toBeNull();
     err.mockRestore();
@@ -367,7 +367,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const onMessagesChange = vi.fn();
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     fireEvent.click(container.querySelector('[data-kai-conversations-toggle]')!);
     await tick();
@@ -380,7 +380,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
   it('C-6: no id is generated and nothing is saved until the first message', async () => {
     const store = localStorageStore('t');
     const saveSpy = vi.spyOn(store, 'save');
-    render(() => <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />);
+    render(() => <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />);
     await tick();
     expect(saveSpy).not.toHaveBeenCalled();
     expect(await store.list()).toEqual([]);
@@ -397,7 +397,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
     const store = localStorageStore('t');
     const saveSpy = vi.spyOn(store, 'save');
     const [messages, setMessages] = createSignal<ChatMessage[]>([]);
-    render(() => <ChatThread messages={messages()} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />);
+    render(() => <ChatApp messages={messages()} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />);
     await tick();
     expect(saveSpy).not.toHaveBeenCalled();
 
@@ -423,7 +423,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
   // a needless full-thread PUT for `fetchStore`). This wires the consumer
   // side exactly like a real app would (`onConversationLoad` feeding a
   // signal back into `messages`) to catch the bounce, not just assert on
-  // ChatThread's own internals.
+  // ChatApp's own internals.
   it('a reload (hostOpen=false, already fully read) does not phantom-badge or call save() for the load bounce — a REAL new message still saves and badges', async () => {
     const store = localStorageStore('t');
     vi.useFakeTimers();
@@ -438,7 +438,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
     const onUnreadChange = vi.fn();
     const [messages, setMessages] = createSignal<ChatMessage[]>([]);
     render(() => (
-      <ChatThread
+      <ChatApp
         messages={messages()}
         conversations={true}
         store={store}
@@ -473,7 +473,7 @@ describe('conversations (C-1, C-2, C-6, C-8)', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const failingStore = { ...localStorageStore('t'), list: () => Promise.reject(new Error('offline')) };
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={failingStore} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} conversations={true} store={failingStore} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     fireEvent.click(container.querySelector('[data-kai-conversations-toggle]')!);
     await tick();
@@ -498,7 +498,7 @@ describe('conversations — list view is a full content-area takeover (owner rew
     const store = localStorageStore('t');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     // Chat view: the composer is present.
     expect(container.querySelector('textarea, [contenteditable]')).toBeTruthy();
@@ -513,7 +513,7 @@ describe('conversations — list view is a full content-area takeover (owner rew
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const onMessagesChange = vi.fn();
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     fireEvent.click(container.querySelector('[data-kai-conversations-toggle]')!);
     await tick();
@@ -539,7 +539,7 @@ describe('conversations — list view is a full content-area takeover (owner rew
       { id: 'm2', role: 'assistant', parts: [{ type: 'text', text: 'Here is the answer you were looking for' }] },
     ]);
     const { container, getByText } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     fireEvent.click(container.querySelector('[data-kai-conversations-toggle]')!);
     await tick();
@@ -550,7 +550,7 @@ describe('conversations — list view is a full content-area takeover (owner rew
   it('the header toggle swaps between a chat-bubble icon and a back arrow, each with its own aria-label', async () => {
     const store = localStorageStore('t');
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     const toggle = () => container.querySelector('[data-kai-conversations-toggle]') as HTMLButtonElement;
     expect(toggle()).toHaveAttribute('aria-label', 'Conversations');
@@ -586,7 +586,7 @@ describe('conversations — visitor continuity: auto-restore on mount (cross-tas
     const loadSpy = vi.spyOn(store, 'load');
     const onMessagesChange = vi.fn();
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     expect(loadSpy).toHaveBeenCalledTimes(1);
@@ -602,7 +602,7 @@ describe('conversations — visitor continuity: auto-restore on mount (cross-tas
     const loadSpy = vi.spyOn(store, 'load');
     const onMessagesChange = vi.fn();
     render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     expect(loadSpy).not.toHaveBeenCalled();
@@ -616,7 +616,7 @@ describe('conversations — visitor continuity: auto-restore on mount (cross-tas
     const onMessagesChange = vi.fn();
     const seeded: ChatMessage[] = [{ id: 'seed', role: 'user', parts: [{ type: 'text', text: 'seeded' }] }];
     const { getByText } = render(() => (
-      <ChatThread messages={seeded} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={seeded} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     expect(loadSpy).not.toHaveBeenCalled();
@@ -631,7 +631,7 @@ describe('conversations — visitor continuity: auto-restore on mount (cross-tas
     const store = localStorageStore('t');
     const onMessagesChange = vi.fn();
     render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     // The end-to-end continuity the finding is about: the visitor SEES their
@@ -642,7 +642,7 @@ describe('conversations — visitor continuity: auto-restore on mount (cross-tas
 
 // Owner follow-up, 2026-08-26: closing the widget while the list is open used
 // to leave `view` at 'list' — reopening landed back on the list instead of
-// the default chat screen. ChatThread has no knowledge of whatever chrome
+// the default chat screen. ChatApp has no knowledge of whatever chrome
 // hosts it (a Dock, a plain page, …), so the fix is a seam it DOES own: an
 // imperative `closeConversationsList()` on the existing `controllerRef`
 // handle, which a host calls on every hide. `Dock`'s own `onOpenChange`
@@ -655,9 +655,9 @@ describe('conversations — closeConversationsList() resets the list view back t
   it('calling it while the list is open swaps back to the chat view (composer visible again)', async () => {
     const store = localStorageStore('t');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
-    let controller: ChatThreadController | undefined;
+    let controller: ChatAppController | undefined;
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}}
         controllerRef={(c) => { controller = c; }}
       />
@@ -676,9 +676,9 @@ describe('conversations — closeConversationsList() resets the list view back t
 
   it('is a no-op when already on the chat view', async () => {
     const store = localStorageStore('t');
-    let controller: ChatThreadController | undefined;
+    let controller: ChatAppController | undefined;
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}}
         controllerRef={(c) => { controller = c; }}
       />
@@ -692,9 +692,9 @@ describe('conversations — closeConversationsList() resets the list view back t
   it('the NEXT open after a reset lands on the chat view, not the list (the exact regression: reopening a closed widget)', async () => {
     const store = localStorageStore('t');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
-    let controller: ChatThreadController | undefined;
+    let controller: ChatAppController | undefined;
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}}
         controllerRef={(c) => { controller = c; }}
       />
@@ -704,7 +704,7 @@ describe('conversations — closeConversationsList() resets the list view back t
     expect(container.querySelector('[data-conversation-id="c1"]')).toBeTruthy();
 
     // Simulate the host (Dock) closing and reopening: it calls
-    // closeConversationsList() on close; ChatThread itself is never
+    // closeConversationsList() on close; ChatApp itself is never
     // unmounted (Dock keeps its panel mounted while hidden — see dock.tsx).
     controller!.closeConversationsList();
     await tick();
@@ -744,7 +744,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
     const store = localStorageStore('t');
     await seedUnreadConversation(store);
     const { container } = render(() => (
-      <ChatThread messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     fireEvent.click(container.querySelector('[data-kai-conversations-toggle]')!);
     await tick();
@@ -755,7 +755,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
     const store = localStorageStore('t');
     await seedUnreadConversation(store);
     const { container } = render(() => (
-      <ChatThread messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-conversations-unread]')).toBeTruthy();
@@ -767,7 +767,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     await store.markRead!('c1');
     const { container } = render(() => (
-      <ChatThread messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-conversations-unread]')).toBeNull();
@@ -779,7 +779,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
     await seedUnreadConversation(store);
     const onMessagesChange = vi.fn();
     const { container } = render(() => (
-      <ChatThread messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     // Chat view, before touching the list: the badge is present (only
@@ -806,7 +806,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
     const store = localStorageStore('t');
     await seedUnreadConversation(store);
     const { container } = render(() => (
-      <ChatThread messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={seededMessages} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     // Header badge (chat view, before opening the list).
@@ -830,7 +830,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
   // currently-active conversation while the widget is closed. Both fail on
   // the pre-fix code (case (b) never reflects "unread" while hostOpen is
   // false; case (a)'s own markRead-gate existed before but had no direct
-  // test with hostOpen threaded through ChatThread's own prop).
+  // test with hostOpen threaded through ChatApp's own prop).
   describe('hostOpen (seenNow) — the shared seen memo', () => {
     it('markRead does NOT fire while hostOpen={false}, even with the conversation active in chat view', async () => {
       const store = localStorageStore('t');
@@ -840,7 +840,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
       // in `view() === 'chat'` by default — the only leg missing for "seen"
       // is `hostOpen`, which is false here throughout.
       render(() => (
-        <ChatThread messages={seededMessages} conversations={true} store={store} hostOpen={false} onSubmit={() => {}} onConversationLoad={() => {}} />
+        <ChatApp messages={seededMessages} conversations={true} store={store} hostOpen={false} onSubmit={() => {}} onConversationLoad={() => {}} />
       ));
       await tick();
       expect(markReadSpy).not.toHaveBeenCalled();
@@ -854,7 +854,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
         { id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] },
       ]);
       const { container } = render(() => (
-        <ChatThread
+        <ChatApp
           messages={messages()}
           conversations={true}
           store={store}
@@ -872,7 +872,7 @@ describe('conversations — unread indicators (owner round, 2026-08-26)', () => 
       onUnreadChange.mockClear();
 
       // Close the host, then simulate an assistant reply landing on the
-      // still-active conversation (ChatThread stays mounted while a Dock
+      // still-active conversation (ChatApp stays mounted while a Dock
       // hides it — see `hostOpen`'s own doc).
       setHostOpen(false);
       await tick();
@@ -908,7 +908,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
   it('1. home set: initial view is home — HomePanel + tab bar render, composer/thread absent', async () => {
     const store = localStorageStore('t-1');
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-home-panel]')).toBeTruthy();
@@ -919,7 +919,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
   it('2. home unset: today\'s widget exactly — initial chat, no tab bar, header list button present when conversations ready', () => {
     const store = localStorageStore('t-2');
     const { container } = render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     expect(container.querySelector('textarea, [contenteditable]')).toBeTruthy();
     expect(container.querySelector('[role="tablist"]')).toBeNull();
@@ -929,7 +929,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
   it('3. home set: header list-toggle button is NOT rendered', async () => {
     const store = localStorageStore('t-3');
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-conversations-toggle]')).toBeNull();
@@ -939,7 +939,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const store = localStorageStore('t-4a');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     fireEvent.click(container.querySelector('[data-kai-tab-messages]')!);
@@ -950,7 +950,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
 
   it('4b. Messages tab, conversations off: view is chat (root chat, no back arrow), with tab bar', async () => {
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} onSubmit={() => {}} />
+      <ChatApp messages={[]} home={{}} onSubmit={() => {}} />
     ));
     await tick();
     fireEvent.click(container.querySelector('[data-kai-tab-messages]')!);
@@ -964,7 +964,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const store = localStorageStore('t-5');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     fireEvent.click(container.querySelector('[data-kai-tab-messages]')!);
@@ -982,7 +982,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const store = localStorageStore('t-5b');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{ recentConversation: true }}
         conversations={true}
@@ -1009,7 +1009,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
   it('6. new-conversation (home card): drilled chat, back target is home', async () => {
     const store = localStorageStore('t-6');
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     fireEvent.click(container.querySelector('[data-kai-home-new]')!);
@@ -1023,9 +1023,9 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
 
   it('7. close-reset: closeConversationsList() resets to home when home is set', async () => {
     const store = localStorageStore('t-7');
-    let controller: ChatThreadController | undefined;
+    let controller: ChatAppController | undefined;
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{}}
         conversations={true}
@@ -1049,7 +1049,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const loadSpy = vi.spyOn(store, 'load');
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{ recentConversation: true }}
         conversations={true}
@@ -1071,7 +1071,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const loadSpy = vi.spyOn(store, 'load');
     const onMessagesChange = vi.fn();
     render(() => (
-      <ChatThread messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
+      <ChatApp messages={[]} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={onMessagesChange} />
     ));
     await tick();
     expect(loadSpy).toHaveBeenCalledTimes(1);
@@ -1082,7 +1082,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const store = localStorageStore('t-9a');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-home-recent]')).toBeNull();
@@ -1091,7 +1091,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
   it('9b. recent card absent when no conversations exist yet', async () => {
     const store = localStorageStore('t-9b');
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{ recentConversation: true }}
         conversations={true}
@@ -1116,7 +1116,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
       vi.useRealTimers();
     }
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{ recentConversation: true }}
         conversations={true}
@@ -1151,7 +1151,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const store = localStorageStore('t-10a');
     await seedUnreadConversation(store);
     const { container } = render(() => (
-      <ChatThread messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
+      <ChatApp messages={[]} home={{}} conversations={true} store={store} onSubmit={() => {}} onConversationLoad={() => {}} />
     ));
     await tick();
     expect(container.querySelector('[data-kai-tab-unread]')).toBeTruthy();
@@ -1162,7 +1162,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     await seedUnreadConversation(store);
     const onUnreadChange = vi.fn();
     render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         home={{}}
         conversations={true}
@@ -1189,7 +1189,7 @@ describe('home screen (H-2, H-3, H-5) — spec 2026-08-27', () => {
     const [messages, setMessages] = createSignal<ChatMessage[]>([]);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={messages()}
         home={{}}
         conversations={true}
@@ -1223,7 +1223,7 @@ describe('per-role default actions (B-7b)', () => {
 
   it('an assistant message with no actions of its own gets assistantActions, in order', () => {
     const { container } = render(() => (
-      <ChatThread messages={[msg('a1', 'assistant')]} assistantActions={['copy', 'like']} />
+      <ChatApp messages={[msg('a1', 'assistant')]} assistantActions={['copy', 'like']} />
     ));
     const ids = [...container.querySelectorAll('[data-action]')].map((b) => b.getAttribute('data-action'));
     expect(ids).toEqual(['copy', 'like']);
@@ -1231,7 +1231,7 @@ describe('per-role default actions (B-7b)', () => {
 
   it('a user message reads userActions, never assistantActions', () => {
     const { container } = render(() => (
-      <ChatThread messages={[msg('u1', 'user')]} userActions={['edit']} assistantActions={['copy', 'like']} />
+      <ChatApp messages={[msg('u1', 'user')]} userActions={['edit']} assistantActions={['copy', 'like']} />
     ));
     const ids = [...container.querySelectorAll('[data-action]')].map((b) => b.getAttribute('data-action'));
     expect(ids).toEqual(['edit']);
@@ -1239,7 +1239,7 @@ describe('per-role default actions (B-7b)', () => {
 
   it('override = replace, not merge: a per-message actions array wins whole, and [] renders NO bar', () => {
     const { container } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[msg('a1', 'assistant', { actions: ['regenerate'] }), msg('a2', 'assistant', { actions: [] })]}
         assistantActions={['copy', 'like']}
       />
@@ -1260,12 +1260,12 @@ describe('hideSources (B-8)', () => {
   }];
 
   it('default (absent) renders the citations row — today, byte-for-byte', () => {
-    const { container } = render(() => <ChatThread messages={sourced} />);
+    const { container } = render(() => <ChatApp messages={sourced} />);
     expect(container.querySelector('[part="citations"]')).not.toBeNull();
   });
 
   it('hideSources skips the row while the text still renders (parts stay in the array)', () => {
-    const { container, getByText } = render(() => <ChatThread messages={sourced} hideSources />);
+    const { container, getByText } = render(() => <ChatApp messages={sourced} hideSources />);
     expect(container.querySelector('[part="citations"]')).toBeNull();
     expect(getByText('the answer')).toBeInTheDocument();
   });
@@ -1274,7 +1274,7 @@ describe('hideSources (B-8)', () => {
 describe('composerStart/composerEnd (B-9)', () => {
   it('renders composerStart before and composerEnd after the composer region', () => {
     const { getByTestId } = render(() => (
-      <ChatThread
+      <ChatApp
         messages={[]}
         composerStart={<div data-testid="cs">start</div>}
         composerEnd={<div data-testid="ce">end</div>}
@@ -1286,7 +1286,7 @@ describe('composerStart/composerEnd (B-9)', () => {
   });
 });
 
-describe('ChatThread density axis', () => {
+describe('ChatApp density axis', () => {
   // The RENDERED attributes, not the map: a map entry that no call site reads would
   // pass a test over `THREAD_DENSITY_CLASSES` and change nothing on screen. Every
   // string below is byte-for-byte what this thread painted before the axis existed
@@ -1301,28 +1301,28 @@ describe('ChatThread density axis', () => {
     (c.querySelector('[data-kai-composer-editable]') as HTMLElement | null)?.closest('.shrink-0') as HTMLElement;
 
   it('renders the shipped box with no `density` given', () => {
-    const { container } = render(() => <ChatThread messages={[]} />);
+    const { container } = render(() => <ChatApp messages={[]} />);
     expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
     expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
     expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
   });
 
   it("renders the same box for an explicit `'default'`", () => {
-    const { container } = render(() => <ChatThread messages={[]} density="default" />);
+    const { container } = render(() => <ChatApp messages={[]} density="default" />);
     expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
     expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
     expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-4 pb-4');
   });
 
   it("renders the tighter band, gap and composer padding for `'compact'`", () => {
-    const { container } = render(() => <ChatThread messages={[]} density="compact" />);
+    const { container } = render(() => <ChatApp messages={[]} density="compact" />);
     expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-3 py-2');
     expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-2');
     expect(composerBand(container).getAttribute('class')).toBe('shrink-0 px-3 pb-3');
   });
 
   it('moves the accessory row above the composer with the composer band, so the edges line up', () => {
-    const { container } = render(() => <ChatThread messages={[]} composerActions density="compact" />);
+    const { container } = render(() => <ChatApp messages={[]} composerActions density="compact" />);
     const actions = composerBand(container).previousElementSibling as HTMLElement;
     expect(actions.getAttribute('class')).toBe('shrink-0 px-3');
   });
@@ -1331,11 +1331,11 @@ describe('ChatThread density axis', () => {
     // The prop's TYPE rejects this; a value a runtime consumer can still produce (an
     // attribute, a JS caller with `any`) has to land somewhere safe AND loud.
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const { container } = render(() => <ChatThread messages={[]} density={'cosy' as unknown as ThreadDensity} />);
+    const { container } = render(() => <ChatApp messages={[]} density={'cosy' as unknown as ThreadDensity} />);
     expect(log(container).getAttribute('class')).toBe('flex flex-col overflow-y-auto kai-focus-inset h-full px-4 py-3');
     expect(content(container).getAttribute('class')).toBe('flex flex-col mx-auto w-full max-w-3xl space-y-4');
     expect(error).toHaveBeenCalledTimes(1);
-    expect(String(error.mock.calls[0][0])).toContain('ChatThread');
+    expect(String(error.mock.calls[0][0])).toContain('ChatApp');
     error.mockRestore();
   });
 
@@ -1346,7 +1346,7 @@ describe('ChatThread density axis', () => {
     // `default` attribute below is byte-for-byte what the row painted before this axis.
     const rows = (c: HTMLElement) => [...c.querySelectorAll('[part="row"]')].map((r) => r.getAttribute('class'));
     const message = { id: 'u1', role: 'user' as const, parts: [{ type: 'text' as const, text: 'hi' }] };
-    const shipped = render(() => <ChatThread messages={[message]} />).container;
+    const shipped = render(() => <ChatApp messages={[message]} />).container;
     expect(shipped.querySelector('[role="log"]')!.firstElementChild!.getAttribute('class')).toContain('max-w-3xl');
     // (The user row's own `flex-col items-end` wins over `items-start` inside `cn`,
     // which is why the class reads as it does. `group` is the hover-reveal default for a
@@ -1354,19 +1354,19 @@ describe('ChatThread density axis', () => {
     // has to be the hover group its action bar reveals from.)
     expect(rows(shipped)).toEqual(['flex gap-3 group flex-col items-end']);
 
-    const compact = render(() => <ChatThread messages={[message]} density="compact" />).container;
+    const compact = render(() => <ChatApp messages={[message]} density="compact" />).container;
     expect(rows(compact)).toEqual(['flex gap-0 group flex-col items-end']);
     expect(compact.querySelector('[data-kai-composer-editable]')).toBeTruthy();
   });
 });
 
-describe('ChatThread scroll overlay', () => {
+describe('ChatApp scroll overlay', () => {
   // The other half of `thread.test.tsx`'s "Thread scroll overlay": this component ships its
   // own copy of the same wrapper over the same message band, so the pair has to hold here
   // too. jsdom cannot hit-test the strip — `scripts/probe-scroll-overlay.mjs` does.
   it('makes the band a hole for the pointer, and gives the pointer back to the button', () => {
     const { container } = render(() => (
-      <ChatThread messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />
+      <ChatApp messages={[{ id: 'u1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]} />
     ));
     const log = container.querySelector('[role="log"]') as HTMLElement;
     Object.defineProperty(log, 'scrollHeight', { value: 2000, configurable: true });
@@ -1387,11 +1387,11 @@ describe('controller.startNewConversation (B-10 seam)', () => {
     localStorage.clear();
     const store = localStorageStore('ctl-new-convo');
     await store.save('c1', [{ id: 'm1', role: 'user', parts: [{ type: 'text', text: 'hi' }] }]);
-    let controller: ChatThreadController | undefined;
+    let controller: ChatAppController | undefined;
     const loads: Array<{ id: string | undefined; count: number }> = [];
     const [messages, setMessages] = createSignal<ChatMessage[]>([]);
     render(() => (
-      <ChatThread
+      <ChatApp
         messages={messages()}
         conversations
         store={store}

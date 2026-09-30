@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { expect, fn, userEvent, waitFor } from 'storybook/test';
 import { createSignal } from 'solid-js';
-import { ChatThread, type ChatThreadProps } from './chat-thread';
+import { ChatApp, type ChatAppProps } from './chat-app';
 import type { ConversationStore } from '../../primitives/conversation-store';
 import type { ConversationSummary } from '../../types';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
@@ -90,8 +90,8 @@ const unreadFixtureConversations: ConversationSummary[] = fixtureConversations.m
  * entire content area.
  */
 const meta = {
-  title: 'Components/ChatThread',
-  component: ChatThread,
+  title: 'Components/ChatApp',
+  component: ChatApp,
   tags: ['autodocs'],
   parameters: {
     layout: 'centered',
@@ -191,15 +191,15 @@ const meta = {
   },
   render: (args) => (
     <div class="h-[600px] w-[380px] overflow-hidden rounded-2xl border border-border">
-      <ChatThread {...args} />
+      <ChatApp {...args} />
     </div>
   ),
-} satisfies Meta<typeof ChatThread>;
+} satisfies Meta<typeof ChatApp>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -210,7 +210,7 @@ export const ChatView: Story = {
     conversations: true,
     store: stubStore(fixtureConversations),
   },
-  ...src(`<ChatThread
+  ...src(`<ChatApp
   conversations
   store={conversationStore}
   chatTitle="Support"
@@ -241,7 +241,7 @@ export const ListViewPopulated: Story = {
     });
   },
   ...src(`// The header's conversations toggle opens the list view.
-<ChatThread conversations store={conversationStore} chatTitle="Support" />`),
+<ChatApp conversations store={conversationStore} chatTitle="Support" />`),
 };
 
 /** List view, no conversations yet: the empty state plus the same floating pill. */
@@ -260,7 +260,7 @@ export const ListViewEmpty: Story = {
     await waitFor(() => expect(canvasElement.querySelector('[data-kai-new-conversation]')).toBeTruthy());
   },
   ...src(`// An empty store shows the empty state and the floating "New conversation" pill.
-<ChatThread conversations store={emptyConversationStore} chatTitle="Support" />`),
+<ChatApp conversations store={emptyConversationStore} chatTitle="Support" />`),
 };
 
 /** Unread conversations, flagged in the header and the list. */
@@ -285,7 +285,7 @@ export const ListViewWithUnread: Story = {
   },
   ...src(`// Unread status comes from the store's summaries: lastReadAt older than
 // updatedAt renders a badge on the toggle and a dot on the row.
-<ChatThread conversations store={conversationStore} chatTitle="Support" />`),
+<ChatApp conversations store={conversationStore} chatTitle="Support" />`),
 };
 
 /** Role-scoped default action bars: the user turn gets `userActions`, the
@@ -308,7 +308,7 @@ export const PerRoleActions: Story = {
     userActions: ['edit', 'copy'],
     assistantActions: ['copy', 'like', 'dislike', 'speak'],
   },
-  ...src(`<ChatThread
+  ...src(`<ChatApp
   messages={messages}
   userActions={['edit', 'copy']}
   assistantActions={['copy', 'like', 'dislike', 'speak']}
@@ -331,7 +331,7 @@ export const HideSources: Story = {
     ],
     hideSources: true,
   },
-  ...src(`<ChatThread messages={messages} hideSources />`),
+  ...src(`<ChatApp messages={messages} hideSources />`),
 };
 
 /** The `compact` end of the density axis: the desktop-panel rhythm (8px between
@@ -348,7 +348,7 @@ export const CompactDensity: Story = {
       { id: 'cd-4', role: 'assistant', parts: [{ type: 'text', text: 'An hour. Ask for a new one if it expires.' }] },
     ],
   },
-  ...src(`<ChatThread
+  ...src(`<ChatApp
   density="compact"
   messages={messages}
   onSubmit={(text) => sendMessage(text)}
@@ -362,13 +362,13 @@ export const Playground: Story = {
     conversations: true,
     store: stubStore(fixtureConversations),
   },
-  render: (args: ChatThreadProps) => {
+  render: (args: ChatAppProps) => {
     const [store] = createSignal(stubStore(fixtureConversations));
     return (
       <div class="h-[600px] w-[380px] overflow-hidden rounded-2xl border border-border">
-        <ChatThread {...args} store={store()} />
+        <ChatApp {...args} store={store()} />
       </div>
     );
   },
-  ...src(`<ChatThread conversations store={conversationStore} chatTitle="Support" />`),
+  ...src(`<ChatApp conversations store={conversationStore} chatTitle="Support" />`),
 };

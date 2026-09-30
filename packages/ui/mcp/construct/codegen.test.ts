@@ -143,19 +143,19 @@ describe('generateProject (widget + mock core)', () => {
     }
   });
 
-  it('composes the kit\'s MOST-INTEGRATED chat surface — ChatThread, the same composition <kai-chat> renders', () => {
+  it('composes the kit\'s MOST-INTEGRATED chat surface — ChatApp, the same composition <kai-chat> renders', () => {
     // T5 demo defect history: a hand-rolled <For>/<Message>/<MessageContent>
     // list had no padding, no gap, both roles left-aligned (round 3); Thread +
     // a hand-composed PromptInput/Button sat flush against the Dock panel and
     // clipped a focus ring (round 4 patched the symptom with inline padding).
     // Owner-ruled root cause: emitApp was re-deriving layout the kit already
-    // owns. ChatThread (chat-thread.tsx) — the same composition
+    // owns. ChatApp (chat-app.tsx) — the same composition
     // src/web-components/chat/chat.tsx renders behind <kai-chat> — owns the message
     // list AND the composer (padding, focus ring, send button) as one unit,
     // so there is nothing left here to restate.
     const app = file(generateProject(construct()), 'src/App.tsx');
     expect(app).toContain("from '@kitn.ai/ui/solid'");
-    expect(app).toContain('<ChatThread messages={chat.messages()}');
+    expect(app).toContain('<ChatApp messages={chat.messages()}');
     expect(app).toContain('onSubmit={submit}');
     // Every hand-composed primitive from earlier rounds must be GONE, not
     // supplemented: no bare Thread, no hand-rolled message loop, no manually
@@ -174,9 +174,9 @@ describe('generateProject (widget + mock core)', () => {
     // must be explicitly false, not just omitted, so the gating decision is
     // visible in the emitted source.
     //
-    // `attach` was a real kit gap as of the previous round (ChatThread had no
+    // `attach` was a real kit gap as of the previous round (ChatApp had no
     // passthrough to DefaultPromptInput's disabling prop) — closed upstream
-    // (ChatThreadProps now forwards `attach`, mirroring voice), so this is a
+    // (ChatAppProps now forwards `attach`, mirroring voice), so this is a
     // real functional assertion now, not a documented-gap stand-in.
     //
     // Web search is asserted as an ABSENCE rather than a `false`: it stopped
@@ -193,13 +193,13 @@ describe('generateProject (widget + mock core)', () => {
     expect(app).not.toMatch(/\bmodels=\{/);
   });
 
-  it('ratchet: App.tsx carries (near) zero hand-authored inline styles now that ChatThread owns layout', () => {
+  it('ratchet: App.tsx carries (near) zero hand-authored inline styles now that ChatApp owns layout', () => {
     // Every prior round's fix for a layout defect (composer padding,
     // send-button alignment, the accent CSS var) was ANOTHER inline style —
     // treating the symptom, not the cause. This is the ratchet the owner
     // asked for: count `style={{` occurrences in the shadow-tree content
     // (App.tsx) and fail if it creeps back up. It's currently zero because
-    // ChatThread + Dock need no per-instance layout styling from us at all;
+    // ChatApp + Dock need no per-instance layout styling from us at all;
     // if a future change needs one, it should be a deliberate, reviewed
     // increase to this bound, not a silent regression back to hand-styling.
     const app = file(generateProject(construct()), 'src/App.tsx');
@@ -224,7 +224,7 @@ describe('generateProject (widget + mock core)', () => {
   it('routes the theme accent onto the HOST only — App.tsx (message content) carries no accent/primary token at all', () => {
     // Owner ruling: "accent brands CONTROLS, never content." element.tsx sets
     // --kai-color-primary once, on the host; the launcher (dock.tsx's own
-    // CSS) and the composer's send button (rendered inside ChatThread's
+    // CSS) and the composer's send button (rendered inside ChatApp's
     // DefaultPromptInput, using the kit's own Button `variant="default"`)
     // pick it up for free via ordinary custom-property inheritance — no
     // per-control code needed in App.tsx at all.
@@ -236,7 +236,7 @@ describe('generateProject (widget + mock core)', () => {
     const hexOccurrences = (element + app).match(/#e91e63/g) ?? [];
     expect(hexOccurrences).toHaveLength(1);
     expect(element).toContain("ctx.element.style.setProperty('--kai-color-primary', \"#e91e63\")");
-    // App.tsx (the shadow-tree content ChatThread renders messages into)
+    // App.tsx (the shadow-tree content ChatApp renders messages into)
     // authors NO styling at all any more — not a hex, not a CSS custom
     // property, not a Tailwind primary/accent utility class. If a future
     // regression routes the accent onto message content again, it will
@@ -275,7 +275,7 @@ describe('widget chrome (Task 19a)', () => {
       'src/App.tsx',
     );
     expect(app).toContain('launcher={<DockLauncherImage src={"https://example.com/a.png"} />}');
-    expect(app).toContain("import { ChatThread, createKaiChat, Dock, DockLauncherImage } from '@kitn.ai/ui/solid';");
+    expect(app).toContain("import { ChatApp, createKaiChat, Dock, DockLauncherImage } from '@kitn.ai/ui/solid';");
   });
 
   it('no launcherIcon: DockLauncherImage is not imported at all, not even unused', () => {
@@ -329,7 +329,7 @@ describe('widget chrome (Task 19a)', () => {
 });
 
 describe('header (Task 19c)', () => {
-  it('header.title threads into ChatThread\'s own chatTitle prop', () => {
+  it('header.title threads into ChatApp\'s own chatTitle prop', () => {
     const app = file(
       generateProject(construct({ header: { title: 'Acme Support' } })),
       'src/App.tsx',
@@ -371,11 +371,11 @@ describe('header (Task 19c)', () => {
 // owner feedback on the live widget: a mobile close X on its own dead row,
 // separate from the title, "doesn't look intentional". The fix: a `widget`
 // layout with a declared header.title gets its close control threaded into
-// ChatThread's own header row (headerEndContent) instead of relying only on
+// ChatApp's own header row (headerEndContent) instead of relying only on
 // Dock's floating fallback X — zero collision by construction, no reserved
 // dead-row band needed.
 describe('widget close control shares the header row (owner feedback fix)', () => {
-  it('widget + header.title: ChatThread gets headerEndContent, Dock gets hideClose + a controllerRef, App declares the closure', () => {
+  it('widget + header.title: ChatApp gets headerEndContent, Dock gets hideClose + a controllerRef, App declares the closure', () => {
     const app = file(
       generateProject(construct({ layout: 'widget', header: { title: 'Acme Support' } })),
       'src/App.tsx',
@@ -384,11 +384,11 @@ describe('widget close control shares the header row (owner feedback fix)', () =
     expect(app).toContain(
       '<Dock label="acme-support" hideClose={true} controllerRef={(api) => (dockClose = () => api.setOpen(false))}>',
     );
-    const chatThreadLine = app.split('\n').find((l) => l.includes('<ChatThread '));
-    expect(chatThreadLine).toBeDefined();
-    expect(chatThreadLine).toContain('headerEndContent={');
-    expect(chatThreadLine).toContain('onClick={() => dockClose?.()}');
-    expect(chatThreadLine).toContain('<DockCloseGlyph />');
+    const chatAppLine = app.split('\n').find((l) => l.includes('<ChatApp '));
+    expect(chatAppLine).toBeDefined();
+    expect(chatAppLine).toContain('headerEndContent={');
+    expect(chatAppLine).toContain('onClick={() => dockClose?.()}');
+    expect(chatAppLine).toContain('<DockCloseGlyph />');
     expect(app).toContain(', Button, DockCloseGlyph } from \'@kitn.ai/ui/solid\';');
   });
 
@@ -417,12 +417,12 @@ describe('widget close control shares the header row (owner feedback fix)', () =
 });
 
 describe('empty (Task 14 — welcome-screen)', () => {
-  it('threads the Empty composition straight onto ChatThread\'s emptyContent prop — no Portal, no App signature change', () => {
+  it('threads the Empty composition straight onto ChatApp\'s emptyContent prop — no Portal, no App signature change', () => {
     const app = file(
       generateProject(construct({ empty: { title: 'Hi, welcome' } })),
       'src/App.tsx',
     );
-    // emptyContent is a plain JSX prop: App composes ChatThread directly in the
+    // emptyContent is a plain JSX prop: App composes ChatApp directly in the
     // SAME shadow tree defineWebComponent attaches, so there is no light-DOM
     // boundary to cross and no Portal needed at all (that indirection used to
     // leave the Empty composition's Tailwind classes unstyled — light-DOM
@@ -473,7 +473,7 @@ describe('empty (Task 14 — welcome-screen)', () => {
   });
 
   // The whole point of the welcome screen: greeting AND starter chips both
-  // render for an empty thread. ChatThread's own doc comment on `empty`
+  // render for an empty thread. ChatApp's own doc comment on `empty`
   // states the REPLACE slot only stands in for the empty MESSAGE LIST — the
   // composer and its suggestions still render below it — so wiring both
   // fields must never make one crowd out the other in the emitted source.
@@ -489,12 +489,12 @@ describe('empty (Task 14 — welcome-screen)', () => {
     );
     expect(app).toContain('<EmptyTitle>{"Hi, welcome"}</EmptyTitle>');
     expect(app).toContain('suggestions={["Where\'s my order?","Request a refund"]}');
-    // Both attributes land on the SAME <ChatThread ... /> tag — emptyContent
+    // Both attributes land on the SAME <ChatApp ... /> tag — emptyContent
     // is not a substitute for the suggestions prop, and vice versa.
-    const chatThreadLine = app.split('\n').find((l) => l.includes('<ChatThread '));
-    expect(chatThreadLine).toBeDefined();
-    expect(chatThreadLine).toContain('emptyContent={');
-    expect(chatThreadLine).toContain('suggestions={');
+    const chatAppLine = app.split('\n').find((l) => l.includes('<ChatApp '));
+    expect(chatAppLine).toBeDefined();
+    expect(chatAppLine).toContain('emptyContent={');
+    expect(chatAppLine).toContain('suggestions={');
   });
 
   it('a hostile title/description cannot break out of their emitted string literals', () => {
@@ -678,8 +678,8 @@ describe('slots (Task 13)', () => {
 });
 
 describe('capabilities.starters', () => {
-  it('starters thread into ChatThread\'s own suggestions prop, which already submits on click', () => {
-    // ChatThread (chat-thread.tsx) already owns starter-prompt rendering AND
+  it('starters thread into ChatApp\'s own suggestions prop, which already submits on click', () => {
+    // ChatApp (chat-app.tsx) already owns starter-prompt rendering AND
     // submission end to end: its `suggestions` prop renders the chips, hides
     // them once `messages` is non-empty, and (default suggestionMode
     // "submit") calls onSubmit with the clicked text. So there is nothing to
@@ -690,8 +690,8 @@ describe('capabilities.starters', () => {
       'src/App.tsx',
     );
     expect(app).toContain('suggestions={["Track my order","Request a refund"]}');
-    expect(app).toContain('<ChatThread messages={chat.messages()}');
-    // No hand-rolled chip list — that would be restating layout ChatThread
+    expect(app).toContain('<ChatApp messages={chat.messages()}');
+    // No hand-rolled chip list — that would be restating layout ChatApp
     // already owns (the same lesson the ratchet test above pins).
     expect(app).not.toContain('<For each={chat.suggestions');
   });
@@ -713,13 +713,13 @@ describe('capabilities.starters', () => {
 });
 
 describe('capabilities.reasoning', () => {
-  it('"compact" threads into ChatThread\'s own reasoning prop as a plain string', () => {
+  it('"compact" threads into ChatApp\'s own reasoning prop as a plain string', () => {
     const app = file(
       generateProject(construct({ capabilities: { reasoning: 'compact' } })),
       'src/App.tsx',
     );
     expect(app).toContain('reasoning="compact"');
-    expect(app).toContain('<ChatThread messages={chat.messages()}');
+    expect(app).toContain('<ChatApp messages={chat.messages()}');
   });
 
   it('"off" threads into the same prop', () => {
@@ -738,7 +738,7 @@ describe('capabilities.reasoning', () => {
     expect(explicit).toEqual(omitted);
   });
 
-  it('reasoningOpen true emits reasoningOpen={true} on ChatThread', () => {
+  it('reasoningOpen true emits reasoningOpen={true} on ChatApp', () => {
     const app = file(
       generateProject(construct({ capabilities: { reasoningOpen: true } })),
       'src/App.tsx',
@@ -792,8 +792,8 @@ describe('CU-1: custom layout exclusion disclosure', () => {
 });
 
 describe('capabilities.attachments', () => {
-  it('threads accept into ChatThread\'s own attach/accept props — the paperclip, staging, and FileReader.readAsDataURL round-trip already live in ChatThread/DefaultPromptInput; nothing to hand-compose', () => {
-    // Branch reality (post kit-fix 93af0f62 + Task 3 gating): ChatThread
+  it('threads accept into ChatApp\'s own attach/accept props — the paperclip, staging, and FileReader.readAsDataURL round-trip already live in ChatApp/DefaultPromptInput; nothing to hand-compose', () => {
+    // Branch reality (post kit-fix 93af0f62 + Task 3 gating): ChatApp
     // already owns the whole attach affordance end to end — the button, the
     // hidden file input, staging previews, reading each file with
     // FileReader.readAsDataURL (never URL.createObjectURL), and handing the
@@ -815,7 +815,7 @@ describe('capabilities.attachments', () => {
     expect(app).toContain("type: 'file' as const, attachment");
     expect(app).toContain('detail.attachments.map');
     // No hand-rolled file input/FileReader/Attachments import: that would be
-    // restating ChatThread + Message's own implementation.
+    // restating ChatApp + Message's own implementation.
     expect(app).not.toContain('readAsDataURL');
     expect(app).not.toContain('createObjectURL');
     expect(app).not.toContain('<Attachments');
@@ -1161,7 +1161,7 @@ describe('cards', () => {
     expect(app).toContain('cardFromToolCall');
   });
 
-  it('does NOT register cardSchemas on ChatThread — a card\'s data is its own declared schema, not values shaped like it, so validating it against itself would always fail hard', () => {
+  it('does NOT register cardSchemas on ChatApp — a card\'s data is its own declared schema, not values shaped like it, so validating it against itself would always fail hard', () => {
     // Live-caught regression: registering `cardSchemas={cards}` here made
     // CardRenderer validate `cards[name]` (a JSON Schema / FormDefinition) AGAINST
     // `cards[name]` as if it were VALUES — e.g. "(root).amount: required" on a
@@ -1176,11 +1176,11 @@ describe('cards', () => {
     expect(app).not.toMatch(/\bcardSchemas=\{/);
   });
 
-  it('every declared card name routes to the kit\'s own form renderer, not the fallback — cardTypes registered on ChatThread', () => {
+  it('every declared card name routes to the kit\'s own form renderer, not the fallback — cardTypes registered on ChatApp', () => {
     // SUPERVISOR RULING: a construct card must render as a real schema-driven
     // form (BUILTIN_CARD_COMPONENTS.form), never as CardFallback. cardSchemas
     // alone is validation-only and does not select a renderer — CardRenderer
-    // picks the component from `types` (ChatThread's `cardTypes` prop), so
+    // picks the component from `types` (ChatApp's `cardTypes` prop), so
     // that map has to be registered too, keyed by the same card names.
     const app = file(
       generateProject(
@@ -1493,7 +1493,7 @@ describe('writeProject', () => {
 });
 
 describe('capabilities.conversations', () => {
-  it('threads conversations={true} and a wired localStorageStore onto ChatThread for local persistence', () => {
+  it('threads conversations={true} and a wired localStorageStore onto ChatApp for local persistence', () => {
     const app = file(
       generateProject(construct({ capabilities: { conversations: true, history: { persistence: 'local' } } })),
       'src/App.tsx',
@@ -1504,9 +1504,9 @@ describe('capabilities.conversations', () => {
     expect(app).toContain('store={');
   });
 
-  // Task 6 live-browser regression: ChatThread never mutates `messages`
-  // itself (chat-thread.tsx's own doc on `onConversationLoad`) — select/new/
-  // mount-restore all resolve through ChatThread's internal state (activeId,
+  // Task 6 live-browser regression: ChatApp never mutates `messages`
+  // itself (chat-app.tsx's own doc on `onConversationLoad`) — select/new/
+  // mount-restore all resolve through ChatApp's internal state (activeId,
   // view, the list) but the actually-RENDERED thread only changes if the
   // host wires `onConversationLoad` back to its own message store. Every
   // jsdom test above this one passed `messages`/`store` explicitly and so
@@ -1550,31 +1550,31 @@ describe('capabilities.conversations', () => {
 });
 
 // Owner follow-up, 2026-08-26: closing the widget while its conversations
-// list was open left ChatThread's internal view state at 'list', so the NEXT
+// list was open left ChatApp's internal view state at 'list', so the NEXT
 // open landed back on the list instead of the default chat screen. Every
-// jsdom-level ChatThread test for this covers the component itself
-// (chat-thread.test.tsx's own describe block); these assert the EMITTED wire
+// jsdom-level ChatApp test for this covers the component itself
+// (chat-app.test.tsx's own describe block); these assert the EMITTED wire
 // directly, at the layer that actually connects Dock's close notification to
-// ChatThread's reset — the same "layer that would have caught it" reasoning
+// ChatApp's reset — the same "layer that would have caught it" reasoning
 // as the onConversationLoad regression test above (a construct with no
-// wiring here would still pass every ChatThread-level test, since those
-// drive ChatThread's own controllerRef directly).
+// wiring here would still pass every ChatApp-level test, since those
+// drive ChatApp's own controllerRef directly).
 describe('conversations + widget: reset the list view to chat on Dock close (owner follow-up)', () => {
-  it('declares chatController, wires it onto ChatThread, and wires Dock onOpenChange to reset it on close', () => {
+  it('declares chatController, wires it onto ChatApp, and wires Dock onOpenChange to reset it on close', () => {
     const app = file(
       generateProject(construct({ layout: 'widget', capabilities: { conversations: true, history: { persistence: 'local' } } })),
       'src/App.tsx',
     );
-    expect(app).toContain('let chatController: ChatThreadController | undefined;');
+    expect(app).toContain('let chatController: ChatAppController | undefined;');
     expect(app).toContain('controllerRef={(api) => (chatController = api)}');
     expect(app).toContain('onOpenChange={(open) => { setDockOpen(open); if (!open) chatController?.closeConversationsList(); }}');
-    expect(app).toContain("import type { AttachmentData, ChatThreadController } from '@kitn.ai/ui/solid'");
+    expect(app).toContain("import type { AttachmentData, ChatAppController } from '@kitn.ai/ui/solid'");
   });
 
   it('no conversations capability on a widget: none of the reset wiring is emitted', () => {
     const app = file(generateProject(construct({ layout: 'widget' })), 'src/App.tsx');
     expect(app).not.toContain('chatController');
-    expect(app).not.toContain('ChatThreadController');
+    expect(app).not.toContain('ChatAppController');
   });
 
   it('custom layout with conversations on: no reset wiring — there is no Dock to close/reopen', () => {
@@ -1583,7 +1583,7 @@ describe('conversations + widget: reset the list view to chat on Dock close (own
       'src/App.tsx',
     );
     expect(app).not.toContain('chatController');
-    expect(app).not.toContain('ChatThreadController');
+    expect(app).not.toContain('ChatAppController');
   });
 
   it('composes with the header-close wiring (both closures declared, distinct names, no collision)', () => {
@@ -1598,23 +1598,23 @@ describe('conversations + widget: reset the list view to chat on Dock close (own
       'src/App.tsx',
     );
     expect(app).toContain('let dockClose: (() => void) | undefined;');
-    expect(app).toContain('let chatController: ChatThreadController | undefined;');
+    expect(app).toContain('let chatController: ChatAppController | undefined;');
     expect(app).toContain('onClick={() => dockClose?.()}');
     expect(app).toContain('onOpenChange={(open) => { setDockOpen(open); if (!open) chatController?.closeConversationsList(); }}');
   });
 });
 
 // Unread indicators (owner round, 2026-08-26): row dots + a header-toggle
-// badge live entirely inside ChatThread (its own conversation-summary state);
+// badge live entirely inside ChatApp (its own conversation-summary state);
 // the FAB's badge does not — Dock is a SIBLING, not a descendant, so the only
 // way for it to reflect "any conversation is unread" is the emitted App
-// mirroring ChatThread's report (onUnreadChange) onto Dock's own (pre-
+// mirroring ChatApp's report (onUnreadChange) onto Dock's own (pre-
 // existing, unchanged) `unread` prop. Same "layer that would have caught it"
 // reasoning as the onConversationLoad/reset-on-close regression tests above:
-// every ChatThread-level jsdom test drives `onUnreadChange` directly, so none
-// of them can catch the wire between ChatThread and Dock being absent.
+// every ChatApp-level jsdom test drives `onUnreadChange` directly, so none
+// of them can catch the wire between ChatApp and Dock being absent.
 describe('conversations + widget: unread indicators wired onto Dock (owner round)', () => {
-  it('declares dockOpen/anyUnread signals, wires hostOpen/onUnreadChange onto ChatThread, and unread onto Dock', () => {
+  it('declares dockOpen/anyUnread signals, wires hostOpen/onUnreadChange onto ChatApp, and unread onto Dock', () => {
     const app = file(
       generateProject(construct({ layout: 'widget', capabilities: { conversations: true, history: { persistence: 'local' } } })),
       'src/App.tsx',
@@ -1666,7 +1666,7 @@ describe('CU-1: custom layout exclusion disclosure — conversations added', () 
 });
 
 describe('home (Task 5)', () => {
-  it('home threads through to ChatThread as one JSON.stringify\'d prop; onHomeLink wiring is NOT emitted (vocabulary-never-logic)', () => {
+  it('home threads through to ChatApp as one JSON.stringify\'d prop; onHomeLink wiring is NOT emitted (vocabulary-never-logic)', () => {
     const homeInput = { greeting: { title: 'Hi "there"' }, links: [{ label: 'Docs', href: 'https://ui.kitn.ai' }] };
     const c = construct({ home: homeInput });
     const app = file(generateProject(c), 'src/App.tsx');
@@ -1723,7 +1723,7 @@ describe('aside geometry (B-2)', () => {
 });
 
 describe('capabilities.messageActions (B-3)', () => {
-  it('threads role arrays onto ChatThread, whole-array JSON.stringify', () => {
+  it('threads role arrays onto ChatApp, whole-array JSON.stringify', () => {
     const app = file(generateProject(construct({
       capabilities: { messageActions: { user: ['edit', 'copy'], assistant: ['copy', 'like', 'speak'] } },
     })), 'src/App.tsx');
@@ -1749,7 +1749,7 @@ describe('capabilities.sources (B-4 — strip is the citations STRIP, a noun)', 
 });
 
 describe('composer.triggers (B-5)', () => {
-  it('maps slash/mention onto ChatThread triggers with the kit char/kind pairs', () => {
+  it('maps slash/mention onto ChatApp triggers with the kit char/kind pairs', () => {
     const app = file(generateProject(construct({
       composer: { triggers: { slash: [{ id: 'help', label: 'Help' }], mention: [{ id: 'docs', label: 'Docs', description: 'Search docs' }] } },
     })), 'src/App.tsx');
@@ -1853,7 +1853,7 @@ describe('shell (B-10)', () => {
   it('userMenu-only construct imports NO Button — the userMenu piece uses only Dropdown/Avatar (regression: Button used to be gated on the composed headerEndContent string, not on which piece actually used it)', () => {
     const app = file(generateProject(construct({ layout: 'fullscreen', shell: { userMenu: { name: 'Demo User' } } })), 'src/App.tsx');
     expect(app).toContain(
-      "import { ChatThread, createKaiChat, Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator, Avatar } from '@kitn.ai/ui/solid';",
+      "import { ChatApp, createKaiChat, Dropdown, DropdownTrigger, DropdownContent, DropdownItem, DropdownSeparator, Avatar } from '@kitn.ai/ui/solid';",
     );
     // Scoped to the import list / a real usage, not the giant static doc
     // comment above `export function App` (which mentions "Button" in prose
@@ -1867,7 +1867,7 @@ describe('shell (B-10)', () => {
 describe('the app header strip — `split` composes the promoted AppHeader (2026-08-30)', () => {
   // The owner-reported defect: the emitted Workspace rendered its header chrome
   // as a text "Theme" button, no search at all and a bare avatar, all inside
-  // ChatThread's own header row (so, inside the chat rail's width). The story
+  // ChatApp's own header row (so, inside the chat rail's width). The story
   // `src/stories/showcase/builder-workspace.stories.tsx` is the binding acceptance
   // surface; its `AppHeader` is now a real component and codegen composes THAT.
   const split = (over: Record<string, unknown> = {}): Construct =>
@@ -1909,7 +1909,7 @@ describe('the app header strip — `split` composes the promoted AppHeader (2026
     expect(app).toContain("new CustomEvent('kai-user-menu', { detail: { item } })");
   });
 
-  it('the strip sits ABOVE the split, as a SIBLING of WorkspaceShell — not inside ChatThread\'s header row', () => {
+  it('the strip sits ABOVE the split, as a SIBLING of WorkspaceShell — not inside ChatApp\'s header row', () => {
     const app = appOf(split());
     // The whole point of the defect: nothing lands in headerEndContent anymore.
     expect(app).not.toMatch(/\bheaderEndContent=\{/);
@@ -2043,7 +2043,7 @@ describe('workSurface — the split pane renders (2026-08-30)', () => {
     expect(app).toContain('startWidth={360}');
     expect(app).toContain('startMinWidth={280}');
     expect(app).toContain('startMaxWidth={520}');
-    expect(app).toMatch(/start=\{[^]*<ChatThread/);
+    expect(app).toMatch(/start=\{[^]*<ChatApp/);
   });
 
   it('threads url, kind and every chrome flag through as real props', () => {

@@ -90,7 +90,7 @@ export interface HomeLinkEntry {
 }
 
 /** The widget home screen's JSON-shaped config (Intercom-pattern home tab).
- *  Consumed by `ChatThread`'s `home` prop, which wires it into `HomePanel`/
+ *  Consumed by `ChatApp`'s `home` prop, which wires it into `HomePanel`/
  *  `WidgetTabBar` and, from there, into `<kai-chat>`'s own `home` property. */
 export interface HomeConfig {
   greeting?: { title?: string; subtitle?: string };

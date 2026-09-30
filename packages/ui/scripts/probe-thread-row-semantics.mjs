@@ -5,7 +5,7 @@
  *
  * WHY THIS EXISTS: `Message` gained `role="article"` + a speaker `aria-label` in
  * c80080e, and that fix was verified on `Message` in ISOLATION — rendered
- * directly, role asserted, axe clean. Neither `Thread` nor `ChatThread` passed
+ * directly, role asserted, axe clean. Neither `Thread` nor `ChatApp` passed
  * `role` when rendering the list, so every row a real consumer sees stayed an
  * unlabelled generic div. Verifying a mechanism is not verifying the thing that
  * uses it, and this probe is the difference: it drives the composed path.

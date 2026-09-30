@@ -1522,9 +1522,9 @@
         "optional": true,
         "scalar": false,
         "description": "Token usage, shown as a context meter in the header.",
-        "typeName": "ChatThreadContextUsage",
+        "typeName": "ChatAppContextUsage",
         "typeShape": "{ usedTokens: number; maxTokens: number; inputTokens?: undefined | number; outputTokens?: undefined | number; estimatedCost?: undefined | number }",
-        "typeImport": "ChatThreadContextUsage",
+        "typeImport": "ChatAppContextUsage",
         "displayType": "ContextData | undefined"
       },
       {
@@ -1903,7 +1903,7 @@
     ],
     "composedFrom": [
       {
-        "name": "ChatThread",
+        "name": "ChatApp",
         "group": "Components"
       }
     ],

@@ -60,7 +60,7 @@ test('no home property → no tab bar (the no-home widget is unchanged)', async 
 // AFTER the element is appended/upgraded (the React wrapper assigns them in
 // a post-mount `useLayoutEffect`) — so `props.home` is routinely still
 // unset on this component's FIRST render. The view signal's initial value
-// alone can't decide the home-landing view; ChatThread has to react to
+// alone can't decide the home-landing view; ChatApp has to react to
 // `home` turning on. This is the append-THEN-set ordering that catches the
 // whole mount-frozen-prop class.
 test('append THEN set home (React-wrapper ordering): the view still lands on home', async () => {

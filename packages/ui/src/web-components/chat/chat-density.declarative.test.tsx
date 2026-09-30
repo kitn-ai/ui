@@ -1,8 +1,8 @@
 /**
  * `<kai-chat>`'s `density` axis: the pass-through from the element's property/attribute
- * down to the `ChatThread` it renders. The component-level behavior (which classes each
+ * down to the `ChatApp` it renders. The component-level behavior (which classes each
  * value produces, and the loud fallback) is pinned in
- * `src/components/chat/chat-thread.test.tsx`; what this file rules out is the element
+ * `src/components/chat/chat-app.test.tsx`; what this file rules out is the element
  * declaring and documenting a `density` that never reaches the thread — i.e. a prop that
  * looks wired and changes nothing.
  *

@@ -22,7 +22,7 @@ export interface ThreadController {
 export interface ThreadProps {
   /** Extra classes for the thread root (e.g. `rounded-xl`). */
   class?: string;
-  // ONE axis, mirroring `ChatThread`'s (see `thread-density.ts`): the between-turn
+  // ONE axis, mirroring `ChatApp`'s (see `thread-density.ts`): the between-turn
   // gap and the message band's padding move together. This slice has no composer
   // band, so only those two of the four apply here.
   /** How much air the message list has: `'default'` (the shipped look) or
@@ -86,7 +86,7 @@ function DefaultEmpty() {
  * with a scroll-to-bottom button, an optional typing indicator, and an empty
  * state. No composer, header, suggestions, or sidebar. Those are sibling/preset
  * concerns. This is the source of truth behind the `<kai-thread>` facade; it is
- * composed from the same internal pieces `ChatThread` uses for its message list.
+ * composed from the same internal pieces `ChatApp` uses for its message list.
  */
 export function Thread(props: ThreadProps) {
   const outer = useChatConfig();
@@ -114,7 +114,7 @@ export function Thread(props: ThreadProps) {
   // Keyed by message id, NOT by object reference: a streaming message is a new
   // object every delta, and a reference-keyed <For> rebuilds the whole row for
   // each one — which is why expanding a tool/reasoning panel mid-stream used to
-  // do nothing. Full rationale (and why not `<Index>`) in `chat-thread.tsx`.
+  // do nothing. Full rationale (and why not `<Index>`) in `chat-app.tsx`.
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
 
   // Hand the imperative controller to the facade once mounted (rootEl is set).

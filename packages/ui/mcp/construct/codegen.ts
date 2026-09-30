@@ -268,7 +268,7 @@ function emitCardsImport(c: Construct): string {
 // Generative-UI cards, v1: every declared card renders as the kit's own
 // schema-driven FORM (BUILTIN_CARD_COMPONENTS.form, components/form/form.tsx) — it
 // walks the card's JSON Schema into real input fields, honoring
-// x-kai-format/x-kai-mask/x-kai-mask-guide hints itself. ChatThread's own
+// x-kai-format/x-kai-mask/x-kai-mask-guide hints itself. ChatApp's own
 // MessageBody already matches \`part.type === 'card'\` in its part rendering and
 // draws it with the kit's own \`CardRenderer\` (components/card/card-renderer.tsx),
 // which picks the component from \`cardTypes\` (below) by envelope.type — so
@@ -295,7 +295,7 @@ import { cardFromToolCall${toolsImport} } from '@kitn.ai/ui/schemas';
 // 'refund_approval'), and CardRenderer resolves a type's component from this
 // map.
 //
-// Deliberately NOT also wiring ChatThread's \`cardSchemas\` prop to this
+// Deliberately NOT also wiring ChatApp's \`cardSchemas\` prop to this
 // registry below. That prop validates envelope.data AGAINST the named schema,
 // and this card's data IS \`cards[name]\` itself (see emitApplyCardTools) — the
 // construct's declared field schema, not values shaped like it. Wiring it as
@@ -331,10 +331,10 @@ function mergeToolArgsIntoFormDefaults(
 }`;
 }
 
-/** `cardTypes={cardTypes}` on ChatThread — which component draws each
+/** `cardTypes={cardTypes}` on ChatApp — which component draws each
  *  declared card name (see emitCardsImport for why `cardSchemas` is
  *  deliberately NOT also registered). The host to emit card events off is
- *  already supplied by the ChatThread/kai-chat path (F-26); nothing else to
+ *  already supplied by the ChatApp/kai-chat path (F-26); nothing else to
  *  thread through here. */
 function emitCardTypesProp(c: Construct): string {
   return c.cards ? ' cardTypes={cardTypes}' : '';
@@ -584,7 +584,7 @@ function emitElement(c: Construct): string {
   const usesCtx = !!accent || !!unreadColor || hostTokenEntries.length > 0 || needsHost(c);
   const appJsx = needsHost(c) ? '<App host={ctx.element} />' : '<App />';
   if (!accent && !unreadColor && hostTokenEntries.length === 0 && darkTokenEntries.length === 0) {
-    // `empty` (Task 14) composes straight into ChatThread's own `emptyContent`
+    // `empty` (Task 14) composes straight into ChatApp's own `emptyContent`
     // prop now (see emitEmptyContentProp's doc) — a plain JSX value passed down
     // through App, not a Portal onto the host — so the facade needs no `ctx` and
     // every construct, `empty` declared or not, keeps this line byte-for-byte
@@ -733,7 +733,7 @@ defineWebComponent('${c.name}', { theme: '${themeMode(c)}' as 'light' | 'dark' |
 
 function emitApp(c: Construct): string {
   if (c.layout === 'custom') return emitCustomApp(c);
-  return `${emitSolidJsImports(c)}import { ChatThread, createKaiChat${emitLayoutImport(c)}${emitCardComponentImport(c)}${emitEmptyComponentImport(c)}${emitChromeImports(c)} } from '@kitn.ai/ui/solid';
+  return `${emitSolidJsImports(c)}import { ChatApp, createKaiChat${emitLayoutImport(c)}${emitCardComponentImport(c)}${emitEmptyComponentImport(c)}${emitChromeImports(c)} } from '@kitn.ai/ui/solid';
 import type { AttachmentData${emitHistoryTypeImport(c)}${emitConversationsResetTypeImport(c)} } from '@kitn.ai/ui/solid';
 ${emitProviderImports(c)}
 ${emitCardsImport(c)}
@@ -742,27 +742,27 @@ ${emitConversationsImport(c)}
 ${emitProviderSetup(c)}
 ${emitHistorySetup(c)}
 
-// ChatThread is the kit's own MOST-INTEGRATED chat surface — the same
+// ChatApp is the kit's own MOST-INTEGRATED chat surface — the same
 // composition <kai-chat>'s facade renders (src/web-components/chat/chat.tsx). It owns
 // the message list, the composer (padding, focus ring, the send button) and
 // their layout AS ONE UNIT, so nothing here re-derives spacing, alignment or
 // focus styling by hand: every prior version of this file that hand-composed
 // Thread + PromptInput + Button was restating layout the kit already owns,
 // and every visual defect the owner hit (flush composer, a clipped focus
-// ring) traced back to that restatement. Composing ChatThread directly
+// ring) traced back to that restatement. Composing ChatApp directly
 // leaves NOTHING here to restate it with.
 //
 // Capability gating (format rule: an undeclared capability's affordance must
 // be OFF). The construct schema carries ONE capability field so far
 // (capabilities.starters, Task 8) — every other affordance below is gated to
 // "off" unconditionally, not per-construct, until there's a field to gate ON.
-//   - voice: a real ChatThreadProps boolean, default OFF when omitted — set
+//   - voice: a real ChatAppProps boolean, default OFF when omitted — set
 //     to \`false\` explicitly rather than left implicit, so the gating
 //     decision is visible in the emitted source, not just inferred from an
 //     absent prop. Web search is NOT a prop any more: it is a capability a
 //     host declares as an item in the composer's \`tools\` tree, so an
 //     undeclared one is absent rather than false.
-//   - suggestions: ChatThread ALREADY owns starter prompts end to end — its
+//   - suggestions: ChatApp ALREADY owns starter prompts end to end — its
 //     own \`suggestions\` prop renders the chips, hides them once
 //     \`messages\` is non-empty, and (default \`suggestionMode="submit"\`)
 //     calls \`onSubmit\` with the clicked text exactly like a typed submit.
@@ -770,9 +770,9 @@ ${emitHistorySetup(c)}
 //     nothing to hand-compose. Omitted (undefined) when no starters are
 //     declared, same off-by-default effect as the booleans above.
 //   - models: omitted (undefined) — no model switcher; no capabilities field yet.
-//   - attachments (the paperclip): gated via ChatThread's \`attach\`/\`accept\`
-//     props (kit gap closed — ChatThread forwards both to DefaultPromptInput,
-//     mirroring voice). ChatThread ALREADY owns the whole
+//   - attachments (the paperclip): gated via ChatApp's \`attach\`/\`accept\`
+//     props (kit gap closed — ChatApp forwards both to DefaultPromptInput,
+//     mirroring voice). ChatApp ALREADY owns the whole
 //     round-trip end to end — the paperclip button, staged previews, staging
 //     each file as a data URI (never a blob object URL; see
 //     AttachmentData.url's doc in primitives/attachment-types.ts), and
@@ -780,45 +780,45 @@ ${emitHistorySetup(c)}
 //     Message component ALREADY groups consecutive file parts into one
 //     attachment row (message.tsx). So there is nothing to hand-compose
 //     here, same lesson as suggestions above: hand-rolling a second picker or
-//     a second file-part renderer would restate what ChatThread/Message
+//     a second file-part renderer would restate what ChatApp/Message
 //     already own. capabilities.attachments threads straight into
 //     attach/accept; the only App.tsx-owned piece is folding the picked
 //     attachments into the outgoing message's parts at the submit site
 //     (see emitProviderSetup) since createKaiChat's own append/streamAssistant
 //     ops don't do that folding themselves.
-//   - reasoning: gated via ChatThread's own \`reasoning\` prop (kit gap closed
-//     — ChatThread forwards it to every MessageBody as \`reasoningMode\`,
+//   - reasoning: gated via ChatApp's own \`reasoning\` prop (kit gap closed
+//     — ChatApp forwards it to every MessageBody as \`reasoningMode\`,
 //     mirroring attach/accept). \`'full'\` is both the schema default and
-//     ChatThread's own default, so it and an absent field emit no prop at
+//     ChatApp's own default, so it and an absent field emit no prop at
 //     all — the SAME off-by-default convention as every other capability
 //     here, just anchored on the medium's existing default instead of an
 //     "off" value, since a reasoning disclosure is normal chat behavior, not
 //     an opt-in affordance like the paperclip or a starter chip.
-//   - empty (the welcome-screen greeting, Task 14): gated via ChatThread's
+//   - empty (the welcome-screen greeting, Task 14): gated via ChatApp's
 //     own \`emptyContent\` prop, plain JSX rendered in the SAME shadow tree
-//     this file's App already composes ChatThread inside of (see
+//     this file's App already composes ChatApp inside of (see
 //     emitEmptyContentProp's own doc for why that boundary needs no Portal
 //     at all). \`capabilities.starters\`' chips and the composer still render
-//     underneath it: ChatThread's own doc comment on \`emptyContent\` is
+//     underneath it: ChatApp's own doc comment on \`emptyContent\` is
 //     explicit that it replaces only the empty MESSAGE LIST.
 //   - the widget close control (owner feedback on the live demo): a declared
 //     \`header.title\` on a \`widget\` layout gets its close button threaded
-//     into ChatThread's own header row via \`headerEndContent\`, wired back to
+//     into ChatApp's own header row via \`headerEndContent\`, wired back to
 //     Dock's \`controllerRef\` seam through a local closure — see
 //     emitDockCloseVar/emitHeaderEndContentProp's docs. No header means no
 //     row for it to sit in, so that case is untouched and Dock's own built-in
 //     mobile X keeps covering it.
-//   - conversations (Task 5): gated via ChatThread's own \`conversations\`/
+//   - conversations (Task 5): gated via ChatApp's own \`conversations\`/
 //     \`store\` props (kit-owned end to end — the prior-conversations list,
 //     list/load/save, autosave on every \`chat.messages()\` change). Requires
 //     capabilities.history persistence \`local\` or \`endpoint\` (schema
 //     superRefine, C-4) and SUBSUMES this file's hand-rolled history effect
 //     when on — see emitHistorySetup's own doc for the persistence-ownership
 //     decision: the store prop is the ONLY persistence mechanism emitted,
-//     never both. ChatThread never mutates \`messages\` itself, so
+//     never both. ChatApp never mutates \`messages\` itself, so
 //     \`onConversationLoad\` is ALSO wired here (\`chat.setMessages(() =>
 //     messages)\`) — without it, select/new/mount-restore all update
-//     ChatThread's own internal view/list state while the rendered thread
+//     ChatApp's own internal view/list state while the rendered thread
 //     never changes (see emitConversationsProps's own doc for the Task 6
 //     live-browser bug this fixes).
 //   - conversations + widget (owner follow-up): closing the widget while its
@@ -827,7 +827,7 @@ ${emitHistorySetup(c)}
 //     for \`widget\`, the one layout with something that closes/reopens at all.
 ${emitChromeComment(c)}export function App(${needsHost(c) ? 'props: { host: HTMLElement }' : ''}) {
 ${emitToggleThemeVar(c, '  ')}${emitDockCloseVar(c, '  ')}${emitChatControllerVar(c, '  ')}${emitConversationsSignalsVar(c, '  ')}${emitShellPaletteVars(c, '  ')}${emitPaneProbeVar(c, '  ')}${emitWorkSurfaceVars(c, '  ')}${emitHeaderActionDispatchVar(c, '  ')}  return (
-${hasShellPalette(c) ? '    <>\n' : ''}${emitLayoutOpen(c)}${emitSlots(c.slots, '      ')}      <ChatThread messages={chat.messages()} loading={chat.loading()} placeholder="Ask anything" onSubmit={submit} voice={false}${emitHeaderProp(c)}${emitHeaderEndContentProp(c)}${emitAttachProps(c)}${emitStartersProp(c)}${emitReasoningProp(c)}${emitReasoningOpenProp(c)}${emitMessageActionsProps(c)}${emitHideSourcesProp(c)}${emitTriggersProp(c)}${emitEmptyContentProp(c)}${emitCardTypesProp(c)}${emitHomeProp(c)}${emitConversationsProps(c)}${emitChatControllerRefProp(c)}${emitChatThreadUnreadProps(c)} />
+${hasShellPalette(c) ? '    <>\n' : ''}${emitLayoutOpen(c)}${emitSlots(c.slots, '      ')}      <ChatApp messages={chat.messages()} loading={chat.loading()} placeholder="Ask anything" onSubmit={submit} voice={false}${emitHeaderProp(c)}${emitHeaderEndContentProp(c)}${emitAttachProps(c)}${emitStartersProp(c)}${emitReasoningProp(c)}${emitReasoningOpenProp(c)}${emitMessageActionsProps(c)}${emitHideSourcesProp(c)}${emitTriggersProp(c)}${emitEmptyContentProp(c)}${emitCardTypesProp(c)}${emitHomeProp(c)}${emitConversationsProps(c)}${emitChatControllerRefProp(c)}${emitChatAppUnreadProps(c)} />
 ${emitLayoutClose(c)}${emitShellPaletteOverlay(c)}${hasShellPalette(c) ? '    </>\n' : ''}  );
 }
 `;
@@ -838,12 +838,12 @@ ${emitLayoutClose(c)}${emitShellPaletteOverlay(c)}${hasShellPalette(c) ? '    </
  * the bare chat spine plus the declared `slots` positioned by the consumer.
  * Composed from `Thread` (the message-list primitive, no composer/header/
  * suggestions of its own — components/thread/thread.tsx) + the `PromptInput`
- * compound primitive, NOT `ChatThread`: `ChatThread` bundles its composer
+ * compound primitive, NOT `ChatApp`: `ChatApp` bundles its composer
  * INSIDE itself (`DefaultPromptInput`, internal-only), which leaves no seam to
  * splice a slot between the thread and the input the way this layout's
  * placement rule needs. This is the one layout where hand-composing the spine
  * is correct rather than a restatement — every other layout in this file
- * wraps `ChatThread` precisely to avoid this hand-composition (see emitApp's
+ * wraps `ChatApp` precisely to avoid this hand-composition (see emitApp's
  * doc comment above).
  *
  * Slot placement is a fixed, deterministic rule, spelled out in the emitted
@@ -854,11 +854,11 @@ ${emitLayoutClose(c)}${emitShellPaletteOverlay(c)}${hasShellPalette(c) ? '    </
  * hand, which this format's own rule already commits to (no code-in-JSON).
  *
  * Capability gating: only cards are wired here (`Thread` accepts `cardTypes`
- * natively, same as `ChatThread`). starters/attachments/reasoning/
+ * natively, same as `ChatApp`). starters/attachments/reasoning/
  * reasoningOpen/header.title/empty/conversations are NOT wired for `custom`
  * in v1 — `Thread`/`PromptInput` don't carry the kit's own plumbing for
- * those (they live inside `ChatThread`'s composer, or — for conversations —
- * ChatThread itself owns the list/load/save wiring), and hand-rolling a
+ * those (they live inside `ChatApp`'s composer, or — for conversations —
+ * ChatApp itself owns the list/load/save wiring), and hand-rolling a
  * second copy here is exactly the restatement this file avoids everywhere
  * else. Decided loudly in the emitted comment below, not silently: this is
  * the eject artifact, so a construct author who needs one of them on
@@ -881,13 +881,13 @@ ${emitCardsImport(c)}
 ${emitProviderSetup(c)}
 ${emitHistorySetup(c)}
 
-// layout: custom — minimal chrome, no ChatThread/Dock/PaneGroup. The bare
+// layout: custom — minimal chrome, no ChatApp/Dock/PaneGroup. The bare
 // spine (Thread + PromptInput) plus the declared slots, positioned by hand so
 // YOU own the surrounding DOM. Capabilities beyond the spine (starters,
 // attachments, reasoning display-mode, reasoningOpen, header.title, empty,
 // conversations, header.themeToggle/actions, composer.triggers, shell) are
 // NOT wired here in v1 — this file is the eject artifact; add them the
-// way ChatThread composes them (components/chat/chat-thread.tsx in the kit's own
+// way ChatApp composes them (components/chat/chat-app.tsx in the kit's own
 // source) if this construct needs them on a custom layout.
 export function App() {
   const [value, setValue] = createSignal('');
@@ -917,7 +917,7 @@ ${emitSlots(restSlots, '      ')}    </div>
 `;
 }
 
-/** header.title -> ChatThread's own \`chatTitle\` prop. Construct-authored/
+/** header.title -> ChatApp's own \`chatTitle\` prop. Construct-authored/
  *  untrusted text like starters/theme.accent/provider.url, so JSON.stringify'd
  *  into a real JS string-literal expression. Omitted entirely (not even the
  *  prop) when no header is declared — the same off-by-default gating as every
@@ -928,32 +928,32 @@ function emitHeaderProp(c: Construct): string {
   return ` chatTitle={${JSON.stringify(title)}}`;
 }
 
-/** `empty` -> ChatThread's own `emptyContent` prop (chat-thread.tsx), a plain
- *  JSX value rendered INSIDE ChatThread's own tree — fully covered by the
+/** `empty` -> ChatApp's own `emptyContent` prop (chat-app.tsx), a plain
+ *  JSX value rendered INSIDE ChatApp's own tree — fully covered by the
  *  shadow root's adopted stylesheet, unlike the `empty`/`slot="empty"` boolean
  *  pairing this used to go through. That boundary was LIGHT-DOM: `<Portal
  *  mount={element}>` manufactured a real child of the host element tagged
- *  `slot="empty"` so ChatThread's `<slot name="empty">` could redistribute it
+ *  `slot="empty"` so ChatApp's `<slot name="empty">` could redistribute it
  *  — a detour needed only because a shadow `<slot>` redistributes light-DOM
  *  children of the HOST, never a Solid sibling's own JSX. It worked, but light
  *  DOM sits outside the shadow root's adopted stylesheet, so the Tailwind
  *  utility classes the kit's own `Empty` composition is built from resolved to
  *  nothing — the greeting rendered, unstyled (owner report against the live
  *  widget: "doesn't look like the empty component"). `App` already composes
- *  `ChatThread` directly as a plain Solid component in the SAME shadow tree
+ *  `ChatApp` directly as a plain Solid component in the SAME shadow tree
  *  `defineWebComponent` attaches, so there is no boundary to cross here at
  *  all — `emptyContent` just hands the JSX straight down, and it inherits the
  *  same styling as the rest of `App`. No Portal, no host-element param on
  *  `App`, no light-DOM indirection.
  *
  *  `capabilities.starters`' chips and the composer still render underneath
- *  it: ChatThread's own doc comment on `empty`/`emptyContent` is explicit
+ *  it: ChatApp's own doc comment on `empty`/`emptyContent` is explicit
  *  that this REPLACES only the empty MESSAGE LIST.
  *
  *  Uses the kit's own `Empty`/`EmptyHeader`/`EmptyMedia`/`EmptyTitle`/
  *  `EmptyDescription` composition (components/empty/empty.tsx) rather than hand-
  *  rolled markup — the same "don't restate the kit's own layout" rule
- *  `emitApp`'s header comment states for ChatThread itself. `title`/
+ *  `emitApp`'s header comment states for ChatApp itself. `title`/
  *  `description` are construct-authored/untrusted text, JSON.stringify'd into
  *  real JS string-literal expressions like every other free-text field in
  *  this file; `icon` is schema-validated by `isSafeUrl` (schema.ts) before
@@ -972,7 +972,7 @@ function emitEmptyContentProp(c: Construct): string {
 }
 
 /** The `Empty` composition components `emitEmptyContentProp` needs, appended
- *  onto the same `@kitn.ai/ui/solid` import ChatThread/createKaiChat already
+ *  onto the same `@kitn.ai/ui/solid` import ChatApp/createKaiChat already
  *  use — never a second import statement for the same module. `EmptyMedia`/
  *  `EmptyDescription` are named only when `icon`/`description` are actually
  *  declared: `verify:scaffold` compiles emitted output with `tsc --strict
@@ -987,7 +987,7 @@ function emitEmptyComponentImport(c: Construct): string {
 }
 
 /** `widget` layout with a declared `header.title` gets its own close control
- *  integrated INTO ChatThread's header row instead of relying solely on
+ *  integrated INTO ChatApp's header row instead of relying solely on
  *  Dock's own floating mobile X (see `dock.tsx`'s `hideClose` doc for the
  *  "why": a header-row X and a floating X over that same row read as
  *  unintentional together — owner feedback against the live widget). No
@@ -1000,14 +1000,14 @@ function widgetHasHeaderClose(c: Construct): boolean {
 /** `widget` layout with `capabilities.conversations` on: whether the widget
  *  needs the close-resets-the-list-view wiring below (owner follow-up,
  *  2026-08-26 — closing the widget while its conversations list was open
- *  left `ChatThread`'s internal `view` state at `'list'`, so the NEXT open
+ *  left `ChatApp`'s internal `view` state at `'list'`, so the NEXT open
  *  landed back on the list instead of the default chat screen). Only
  *  `widget` has a `Dock` to close/reopen at all; every other layout renders
- *  ChatThread inline with nothing that ever hides it, so the regression
+ *  ChatApp inline with nothing that ever hides it, so the regression
  *  can't occur there and nothing is emitted for them.
  *
  *  ALSO gates unread indicators (owner round, 2026-08-26): the FAB's `Dock
- *  unread` badge and `ChatThread`'s own `hostOpen` prop both need the exact
+ *  unread` badge and `ChatApp`'s own `hostOpen` prop both need the exact
  *  same `dockOpen` tracking this reset wiring already needs, and both need
  *  the same "is there even a Dock to reflect this on" condition — one gate,
  *  reused, rather than two nearly-identical predicates drifting apart.
@@ -1100,21 +1100,21 @@ function emitShellPaletteOverlay(c: Construct): string {
 }
 
 /** Declares the closure `emitChatControllerRefProp`/`emitDockOnOpenChangeProp`
- *  share: `ChatThread`'s own `controllerRef` (chat-thread.tsx) hands back a
- *  `ChatThreadController` — the existing imperative seam, not a new one — and
+ *  share: `ChatApp`'s own `controllerRef` (chat-app.tsx) hands back a
+ *  `ChatAppController` — the existing imperative seam, not a new one — and
  *  this captures it so `Dock`'s `onOpenChange` (a sibling prop on a sibling
- *  element, not a ChatThread descendant) can call
+ *  element, not a ChatApp descendant) can call
  *  `closeConversationsList()` on it. Declared inside `App()`, not at module
  *  scope, for the same instance-isolation reason as `emitDockCloseVar`.
  *  Widened (B-10) to also fire for `shell.commandPalette`: its
  *  "Focus composer"/"New conversation" entries drive the same controller. */
 function emitChatControllerVar(c: Construct, indent: string): string {
   return widgetHasConversationsChrome(c) || hasShellPalette(c)
-    ? `${indent}let chatController: ChatThreadController | undefined;\n`
+    ? `${indent}let chatController: ChatAppController | undefined;\n`
     : '';
 }
 
-/** Threads `emitChatControllerVar`'s closure onto `<ChatThread controllerRef>`. */
+/** Threads `emitChatControllerVar`'s closure onto `<ChatApp controllerRef>`. */
 function emitChatControllerRefProp(c: Construct): string {
   return widgetHasConversationsChrome(c) || hasShellPalette(c)
     ? ' controllerRef={(api) => (chatController = api)}'
@@ -1131,7 +1131,7 @@ function emitChatControllerRefProp(c: Construct): string {
  *  visitor taps the toggle again, and a mid-open reset call would fight
  *  anyone still viewing the list. `setDockOpen(open)` fires on BOTH
  *  transitions unconditionally — it's a plain mirror of Dock's own state
- *  into a signal `ChatThread`'s `hostOpen` prop can read (see
+ *  into a signal `ChatApp`'s `hostOpen` prop can read (see
  *  `emitConversationsSignalsVar`'s doc for why a signal, not a variable). */
 function emitDockOnOpenChangeProp(c: Construct): string {
   return widgetHasConversationsChrome(c)
@@ -1139,21 +1139,21 @@ function emitDockOnOpenChangeProp(c: Construct): string {
     : '';
 }
 
-/** `ChatThreadController` is needed only when `emitChatControllerVar` above
+/** `ChatAppController` is needed only when `emitChatControllerVar` above
  *  declares a variable of that type — appended onto the same `import type`
  *  statement as `AttachmentData`/`ChatMessage`, never a second import
  *  statement for the module (same convention as `emitHistoryTypeImport`). */
 function emitConversationsResetTypeImport(c: Construct): string {
-  return widgetHasConversationsChrome(c) || hasShellPalette(c) ? ', ChatThreadController' : '';
+  return widgetHasConversationsChrome(c) || hasShellPalette(c) ? ', ChatAppController' : '';
 }
 
 /** Declares the two signals `Dock`'s `onOpenChange` (above) writes and
- *  `ChatThread`'s `hostOpen`/`onUnreadChange` props (below) read/write:
+ *  `ChatApp`'s `hostOpen`/`onUnreadChange` props (below) read/write:
  *  `dockOpen` mirrors whether the panel is currently open — a SIGNAL, not a
  *  plain closure variable like `dockClose`/`chatController` above, because
- *  `ChatThread` reads it REACTIVELY every render (`hostOpen={dockOpen()}`),
+ *  `ChatApp` reads it REACTIVELY every render (`hostOpen={dockOpen()}`),
  *  not just calls it imperatively on an event; `anyUnread` is the reverse
- *  direction, `ChatThread` writing outward via `onUnreadChange={setAnyUnread}`
+ *  direction, `ChatApp` writing outward via `onUnreadChange={setAnyUnread}`
  *  so `Dock`'s own `unread` prop (components/dock/dock.tsx — already exists, already
  *  tested, no change needed there) can mirror it onto the FAB.
  *  `dockOpen`'s initial value matches `widget.defaultOpen` (mirroring
@@ -1167,9 +1167,9 @@ function emitConversationsSignalsVar(c: Construct, indent: string): string {
   return `${indent}const [dockOpen, setDockOpen] = createSignal(${defaultOpen});\n${indent}const [anyUnread, setAnyUnread] = createSignal(false);\n`;
 }
 
-/** Threads the two signals above onto `<ChatThread hostOpen>`/
- *  `<ChatThread onUnreadChange>`. */
-function emitChatThreadUnreadProps(c: Construct): string {
+/** Threads the two signals above onto `<ChatApp hostOpen>`/
+ *  `<ChatApp onUnreadChange>`. */
+function emitChatAppUnreadProps(c: Construct): string {
   return widgetHasConversationsChrome(c) ? ' hostOpen={dockOpen()} onUnreadChange={setAnyUnread}' : '';
 }
 
@@ -1182,7 +1182,7 @@ function emitDockUnreadProp(c: Construct): string {
 /** The local closure `emitHeaderEndContentProp`/`emitDockControllerRef` share:
  *  Dock's `controllerRef` hands back `{ open, setOpen }` (components/dock/dock.tsx) — the
  *  existing imperative seam, not a new one — and this captures `setOpen`
- *  behind a plain function so ChatThread's `headerEndContent` button (which
+ *  behind a plain function so ChatApp's `headerEndContent` button (which
  *  renders as a sibling, not a Dock descendant) can call it. Declared inside
  *  `App()`, not at module scope: `App()` runs once per widget instance, and a
  *  module-level variable would let one instance's close button reach into
@@ -1197,7 +1197,7 @@ function emitDockControllerRef(c: Construct): string {
 }
 
 /** Suppresses Dock's own built-in mobile close X (see its `hideClose` doc)
- *  when ChatThread's header row is carrying an equivalent control instead —
+ *  when ChatApp's header row is carrying an equivalent control instead —
  *  otherwise the two stack, one floating over the other's row. */
 function emitDockHideClose(c: Construct): string {
   return widgetHasHeaderClose(c) ? ' hideClose={true}' : '';
@@ -1247,7 +1247,7 @@ ${indent}};
 `;
 }
 
-/** ChatThread's `headerEndContent` prop (chat-thread.tsx): an ORDERED
+/** ChatApp's `headerEndContent` prop (chat-app.tsx): an ORDERED
  *  composition of every header-end piece this construct declares —
  *  header.actions, header.themeToggle, shell.userMenu, and (last, unchanged)
  *  the widget close control — all against this ONE prop, wrapped in a
@@ -1287,16 +1287,16 @@ function hasUserMenuChrome(c: Construct): boolean {
  * app-header.tsx) as a strip ACROSS the frame, above the layout — the
  * arrangement `builder-workspace.stories.tsx` has always shipped and the owner
  * ruled on twice (2026-08-30 defect: the emitted app rendered a text "Theme"
- * button, no search at all and a bare avatar, all crammed into ChatThread's own
+ * button, no search at all and a bare avatar, all crammed into ChatApp's own
  * header row inside the chat rail).
  *
  * SCOPED TO `split` ON PURPOSE. `split` is the workspace shape — a chat rail
  * beside a work surface — and an app-level top bar is a fact about THAT shape,
  * which is the one the promoted design was drawn for. The other layouts keep
  * their existing `headerEndContent` chrome, and it is right that they do:
- * `widget` is a docked panel whose only header row is ChatThread's own (and
+ * `widget` is a docked panel whose only header row is ChatApp's own (and
  * whose close control lives in it), and `fullscreen`/`aside` are a single chat
- * column where a second full-width bar above ChatThread's own title row would
+ * column where a second full-width bar above ChatApp's own title row would
  * be two headers stacked. Widening this to another layout means drawing that
  * layout's header first, not flipping this predicate.
  *
@@ -1315,7 +1315,7 @@ function hasAppHeader(c: Construct): boolean {
   );
 }
 
-/** Whether the header-chrome pieces land in ChatThread's own header-end row.
+/** Whether the header-chrome pieces land in ChatApp's own header-end row.
  *  They move OUT of it wholesale when the app header strip takes them
  *  (`hasAppHeader`) — never split across both, which would put Share in one
  *  bar and the avatar in another. */
@@ -1502,7 +1502,7 @@ function emitChromeComment(c: Construct): string {
   return lines.length ? `${lines.join('\n')}\n` : '';
 }
 
-/** capabilities.messageActions -> ChatThread's per-role default-action props
+/** capabilities.messageActions -> ChatApp's per-role default-action props
  *  (B-3/B-7b). Enum-validated ids only — no CustomAction vocabulary (a
  *  construct has no app code to handle a custom id; emitting one is a dead
  *  affordance) — but the whole array is still JSON.stringify'd at this one
@@ -1518,7 +1518,7 @@ function emitMessageActionsProps(c: Construct): string {
   return out;
 }
 
-/** capabilities.sources -> ChatThread's `hideSources` (B-4/B-8). `strip` is
+/** capabilities.sources -> ChatApp's `hideSources` (B-4/B-8). `strip` is
  *  a NOUN — the citations STRIP (the `part="citations"` row message.tsx
  *  already renders): `strip: false` turns the row OFF; `strip: true` or
  *  the key absent emits NOTHING, because the kit default IS the on state —
@@ -1527,7 +1527,7 @@ function emitHideSourcesProp(c: Construct): string {
   return c.capabilities?.sources?.strip === false ? ' hideSources={true}' : '';
 }
 
-/** composer.triggers -> ChatThread's real `triggers` prop: `slash` maps to
+/** composer.triggers -> ChatApp's real `triggers` prop: `slash` maps to
  *  `{ char: '/', kind: 'command', items }` and `mention` to `{ char: '@',
  *  kind: 'mention', items }` (B-5). Entries carry only display data
  *  (id/label/description — schema-narrowed from the kit's own TriggerItem),
@@ -1544,7 +1544,7 @@ function emitTriggersProp(c: Construct): string {
   return ` triggers={${JSON.stringify(defs)}}`;
 }
 
-/** capabilities.attachments -> ChatThread's own \`attach\`/\`accept\` props.
+/** capabilities.attachments -> ChatApp's own \`attach\`/\`accept\` props.
  *  Undeclared keeps the explicit off-by-default gating (\`attach={false}\`,
  *  matching voice above). Declared flips \`attach={true}\` and
  *  threads the accept list through — construct-authored/untrusted like
@@ -1559,7 +1559,7 @@ function emitAttachProps(c: Construct): string {
   return ` attach={true} accept={${JSON.stringify(attachments.accept.join(','))}}`;
 }
 
-/** capabilities.starters -> ChatThread's own \`suggestions\` prop. Starter
+/** capabilities.starters -> ChatApp's own \`suggestions\` prop. Starter
  *  strings are construct-authored (untrusted the same way theme.accent and
  *  provider.url are) — JSON.stringify produces a real JS array-of-string-
  *  literals expression, the same safe-interpolation convention used for the
@@ -1573,8 +1573,8 @@ function emitStartersProp(c: Construct): string {
   return ` suggestions={${JSON.stringify(starters)}}`;
 }
 
-/** capabilities.reasoning -> ChatThread's own `reasoning` prop. `'full'`
- *  and absent are the SAME thing (the schema default, matching ChatThread's
+/** capabilities.reasoning -> ChatApp's own `reasoning` prop. `'full'`
+ *  and absent are the SAME thing (the schema default, matching ChatApp's
  *  own default) so both emit nothing at all — the off-by-default gating
  *  convention every other capability in this file follows: only a value that
  *  DEVIATES from the medium's default costs a byte in the emitted source.
@@ -1588,16 +1588,16 @@ function emitReasoningProp(c: Construct): string {
   return ` reasoning="${reasoning}"`;
 }
 
-/** capabilities.reasoningOpen -> ChatThread's own `reasoningOpen` prop. Only
+/** capabilities.reasoningOpen -> ChatApp's own `reasoningOpen` prop. Only
  *  `true` costs a byte (off-by-default, matching every capability here);
  *  false/absent matches the kit's own new default (closed chip). */
 function emitReasoningOpenProp(c: Construct): string {
   return c.capabilities?.reasoningOpen === true ? ' reasoningOpen={true}' : '';
 }
 
-/** capabilities.conversations -> ChatThread's own `conversations`/`store`
+/** capabilities.conversations -> ChatApp's own `conversations`/`store`
  *  props (C-8: this is the ONLY logic codegen contributes — everything else
- *  is kit code behind ChatThread). `local` persistence wires
+ *  is kit code behind ChatApp). `local` persistence wires
  *  localStorageStore(name[, userId]); `endpoint` wires fetchStore(url[,
  *  userId]) — both re-exported from @kitn.ai/ui/solid, never hand-rolled
  *  here (composition-over-reauthoring, same discipline as every other
@@ -1612,26 +1612,26 @@ function emitReasoningOpenProp(c: Construct): string {
  *  is needed here.
  *
  *  BUG FIX (Task 6 live-browser demo, both defects traced to one root cause):
- *  `conversations`/`store` alone only drive ChatThread's OWN internal
+ *  `conversations`/`store` alone only drive ChatApp's OWN internal
  *  view/list/activeId state machine — select/new/mount-restore all resolve
- *  through `store.load()`/a cleared array, but ChatThread never mutates
- *  `props.messages` itself (doc comment on `onConversationLoad`, chat-thread.tsx
+ *  through `store.load()`/a cleared array, but ChatApp never mutates
+ *  `props.messages` itself (doc comment on `onConversationLoad`, chat-app.tsx
  *  line ~144: "this component does not mutate props.messages itself"). Without
  *  `onConversationLoad` wired back to this app's own `chat` store, every
- *  load/new/restore updated ChatThread's internal bookkeeping (active id, list
+ *  load/new/restore updated ChatApp's internal bookkeeping (active id, list
  *  entry) while the actually-rendered `chat.messages()` never changed — the
  *  exact silent-drop class this codebase's CLAUDE.md calls out ("decide
  *  loudly"), except here the drop was an OMITTED wire, not a decision: "+ New
  *  conversation" appeared to do nothing (same messages kept rendering) and a
  *  reload's mount-time auto-restore updated the list's active row but left the
  *  chat view on the empty/welcome screen. `chat.setMessages(() => messages)`
- *  closes the loop — ChatThread already hands back a FRESH array reference on
- *  every call (`[...messages]` at both call sites in chat-thread.tsx), so no
+ *  closes the loop — ChatApp already hands back a FRESH array reference on
+ *  every call (`[...messages]` at both call sites in chat-app.tsx), so no
  *  extra clone is needed here; the updater-returns-new-array form is what the
  *  reactivity contract (CLAUDE.md) requires and is what emitHistorySetup's
  *  own hand-rolled local/endpoint restore already did before conversations
  *  subsumed it. */
-/** `home` -> ChatThread's own `home` prop (chat-thread.tsx, Task 1-4), plain
+/** `home` -> ChatApp's own `home` prop (chat-app.tsx, Task 1-4), plain
  *  data threaded straight through as ONE JSON.stringify'd object literal —
  *  vocabulary-never-logic (this format's binding rule): the construct only
  *  ever DECLARES the home screen's content, never wires a handler for it.
@@ -1659,7 +1659,7 @@ function emitConversationsProps(c: Construct): string {
 /** A dedicated named import for whichever store constructor
  *  emitConversationsProps used — its own statement (mirrors emitCardsImport's
  *  own `import { cards } from './cards'` line) rather than spliced onto the
- *  ChatThread import list, so noUnusedLocals never trips when conversations
+ *  ChatApp import list, so noUnusedLocals never trips when conversations
  *  is absent. */
 function emitConversationsImport(c: Construct): string {
   if (!c.capabilities?.conversations) return '';
@@ -1675,7 +1675,7 @@ function emitConversationsImport(c: Construct): string {
  *  capabilities.conversations SUBSUMES this on every layout EXCEPT `custom`
  *  (CU-1: conversations is one of the capabilities excluded from the custom
  *  layout's escape hatch, so custom never wires the store-based path and
- *  must keep this hand-rolled one). Where it applies, ChatThread's own
+ *  must keep this hand-rolled one). Where it applies, ChatApp's own
  *  conversations feature owns persistence entirely through the `store` prop
  *  (see emitHistorySetup's doc for the full decision) and this file's
  *  hand-rolled effect is never emitted, so it needs no `createEffect` import
@@ -1749,7 +1749,7 @@ function emitHistoryTypeImport(c: Construct): string {
  *  CLAUDE.md), which the updater-returns-parsed-array form does for free. A
  *  parsed value that is well-formed JSON but the WRONG SHAPE (an object, a
  *  number, ...) is just as dangerous as a storage exception — handing it to
- *  `chat.setMessages` would crash ChatThread's render — so it gets the same
+ *  `chat.setMessages` would crash ChatApp's render — so it gets the same
  *  `Array.isArray` gate as the endpoint variant below, not just a try/catch
  *  around the parse.
  *  localStorage access is wrapped: it can throw in private mode or over
@@ -1794,8 +1794,8 @@ function emitHistorySetup(c: Construct): string {
   if (!history || history.persistence === 'none') return '';
 
   // PERSISTENCE-OWNERSHIP DECISION (Task 5): capabilities.conversations
-  // SUBSUMES this hand-rolled block entirely. ChatThread's own conversations
-  // feature (chat-thread.tsx) already autosaves the current thread on every
+  // SUBSUMES this hand-rolled block entirely. ChatApp's own conversations
+  // feature (chat-app.tsx) already autosaves the current thread on every
   // `chat.messages()` change through whatever ConversationStore its `store`
   // prop wires — localStorageStore(name) for `local`, fetchStore(url) for
   // `endpoint` (see emitConversationsProps below), the SAME "keyed by
@@ -1889,7 +1889,7 @@ import { readOpenAIStream } from '@kitn.ai/ui/wire';`;
 }
 
 function emitProviderSetup(c: Construct): string {
-  // ChatThread owns its own composer draft (uncontrolled — no `value` prop
+  // ChatApp owns its own composer draft (uncontrolled — no `value` prop
   // passed below) and clears it after submit itself; `onSubmit` hands back
   // the value directly, so there's no PromptInput-specific signal-reading
   // workaround to carry here any more.
@@ -2011,7 +2011,7 @@ function emitLayoutImport(c: Construct): string {
     case 'custom':
       // Unreachable: emitApp special-cases 'custom' into emitCustomApp before
       // this is ever called (custom's spine is Thread + PromptInput, not
-      // ChatThread, so there is no shared import line to splice onto). Kept
+      // ChatApp, so there is no shared import line to splice onto). Kept
       // only so this switch stays exhaustive over the widened layout enum.
       return '';
   }
@@ -2029,7 +2029,7 @@ function emitSlots(slots: readonly string[] | undefined, indent: string): string
 }
 
 /**
- * The layout shell wrapping ChatThread — one pair (open above, close below)
+ * The layout shell wrapping ChatApp — one pair (open above, close below)
  * per `layout`, composing the kit's own layout primitives over a hand-rolled
  * div wherever the kit ships one:
  *
@@ -2068,7 +2068,7 @@ function emitSlots(slots: readonly string[] | undefined, indent: string): string
  *    own, not a restatement.
  *
  * `custom` is handled entirely by `emitCustomApp` instead (its spine is
- * Thread + PromptInput composed by hand, not ChatThread, so there's no shared
+ * Thread + PromptInput composed by hand, not ChatApp, so there's no shared
  * chrome to open/close here) — `emitApp` special-cases it before either of
  * these is called. Both switches still carry a `case 'custom'` so they stay
  * exhaustive over the widened layout enum: TypeScript is what caught this
@@ -2298,7 +2298,7 @@ function emitLayoutOpen(c: Construct): string {
       // SIBLING of WorkspaceShell, never inside it — so it spans the frame and
       // survives the work surface's Expand (which collapses the chat rail).
       // That is the arrangement builder-workspace.stories.tsx ships; putting
-      // this chrome in ChatThread's own header row instead is exactly the
+      // this chrome in ChatApp's own header row instead is exactly the
       // defect this replaced (it rendered inside the chat rail's width).
       // No wrapper div around the shell: the frame becomes a flex COLUMN and
       // WorkspaceShell becomes its flexing item (`min-h-0 flex-1` in place of

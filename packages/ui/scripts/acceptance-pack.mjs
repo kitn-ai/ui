@@ -458,7 +458,7 @@ The token names are in THEME.md.
 
 ## The Solid component names on the web-component pages
 
-Each web-component page names the SolidJS component it wraps (\`ChatThread\`,
+Each web-component page names the SolidJS component it wraps (\`ChatApp\`,
 \`Conversations\`, …). **Those names are provenance, not import paths.** Of the
 ${solidExports.total} names that appear, ${solidExports.exported} are also exported from
 \`@kitn.ai/ui\` for SolidJS consumers and ${solidExports.internal} are internal and

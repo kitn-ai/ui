@@ -11,7 +11,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import './message';
 
-// jsdom doesn't implement Element.scrollTo; see chat-thread.test.tsx / thread.test.tsx.
+// jsdom doesn't implement Element.scrollTo; see chat-app.test.tsx / thread.test.tsx.
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
 type MessageEl = HTMLElement & { message?: unknown; actionsReveal?: 'always' | 'hover' };

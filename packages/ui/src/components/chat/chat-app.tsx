@@ -33,7 +33,7 @@ import { resolveThreadDensity, THREAD_DENSITY_CLASSES, type ThreadDensity } from
 import { createConversationController, type ConversationController } from '../../stores/conversation-controller';
 import type { HomeConfig, HomeLinkEntry } from '../../types';
 
-export interface ChatThreadContextUsage {
+export interface ChatAppContextUsage {
   usedTokens: number;
   maxTokens: number;
   inputTokens?: number;
@@ -41,7 +41,7 @@ export interface ChatThreadContextUsage {
   estimatedCost?: number;
 }
 
-export interface ChatThreadProps {
+export interface ChatAppProps {
   /** Extra classes for the thread root (e.g. `h-full`). */
   class?: string;
   // ONE axis, not three props: the between-turn gap, the message band's padding and
@@ -108,7 +108,7 @@ export interface ChatThreadProps {
   /** The currently selected model id (pairs with `models`). */
   currentModel?: string;
   /** Token usage, shown as a context meter in the header. */
-  context?: ChatThreadContextUsage;
+  context?: ChatAppContextUsage;
   /** Show the scroll-to-bottom button inside the scroll area. Default true. */
   scrollButton?: boolean;
   /** Whether `slot="header-start"` content is projected, which forces the header
@@ -116,7 +116,7 @@ export interface ChatThreadProps {
   headerStart?: boolean;
   /** Whether the host has `slot="header-end"` content (right of the controls). */
   headerEnd?: boolean;
-  // A Solid caller composing ChatThread directly has no shadow-DOM host, so there is
+  // A Solid caller composing ChatApp directly has no shadow-DOM host, so there is
   // no light-DOM node to slot; the docked construct widget is the motivating case.
   /** JSX rendered after `slot="header-end"` in the header row rather than replacing
    *  it, which forces the header open. */
@@ -137,7 +137,7 @@ export interface ChatThreadProps {
   /** Fires when a loaded conversation is about to replace `messages`; the caller
    *  owns and re-renders them. Required when `conversations` is on. */
   onConversationLoad?: (messages: ChatMessage[], id?: string) => void;
-  // The seam for whatever chrome hosts this thread, which ChatThread knows nothing
+  // The seam for whatever chrome hosts this thread, which ChatApp knows nothing
   // about. Third leg of "seen": the active conversation is marked read (and
   // `store.markRead` called for it) only while it is the active one AND the chat view
   // (not the list) shows AND this is true. A consumer that never wires it simply never
@@ -247,17 +247,17 @@ export interface ChatThreadProps {
   onToolSelect?: (detail: { id: string; checked?: boolean }) => void;
   onVoice?: () => void;
   /** Receive the imperative controller once mounted. */
-  controllerRef?: (controller: ChatThreadController) => void;
+  controllerRef?: (controller: ChatAppController) => void;
 }
 
 /** Imperative handle exposed via `controllerRef`: the input half of the chat's
  *  interaction surface, forwarded onto `<kai-chat>` as instance methods. */
-export interface ChatThreadController {
+export interface ChatAppController {
   focus(options?: FocusOptions): void;
   clear(): void;
   send(): void;
   scrollToBottom(behavior?: ScrollBehavior): void;
-  // ChatThread knows nothing of whatever chrome hosts it, so it cannot know when that
+  // ChatApp knows nothing of whatever chrome hosts it, so it cannot know when that
   // host closes. A host that can hide and re-show calls this on every hide. Dock's own
   // `onOpenChange` fires on every close path (header X, launcher, Escape), so a single
   // `onOpenChange={(open) => !open && controller.closeConversationsList()}` covers all.
@@ -291,7 +291,7 @@ export interface ChatThreadController {
  */
 const ASSISTANT_ALIGN = 'items-stretch';
 
-export function ChatThread(props: ChatThreadProps) {
+export function ChatApp(props: ChatAppProps) {
   const outer = useChatConfig();
   // The reveal mode is resolved PER ROW, from that row's own speaker, so one thread can hold
   // a hover-revealed user turn and a pinned assistant turn at once. The rule itself lives in
@@ -301,7 +301,7 @@ export function ChatThread(props: ChatThreadProps) {
   // Resolved ONCE per render and used twice, for the same reason `thread.tsx` does it:
   // the band/gap classes here, and the value handed down to every row, so the rows agree
   // with the list they sit in.
-  const resolvedDensity = () => resolveThreadDensity(props.density, 'ChatThread');
+  const resolvedDensity = () => resolveThreadDensity(props.density, 'ChatApp');
   const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
@@ -442,14 +442,14 @@ export function ChatThread(props: ChatThreadProps) {
           // blip mid-drilled-chat (or on the root/home views) must stay a
           // harmless no-op, not teleport the visitor; the list view itself
           // is the one view with nothing to show without a summaries array.
-          console.warn('ChatThread: conversations list() failed; staying in chat-only mode.', error);
+          console.warn('ChatApp: conversations list() failed; staying in chat-only mode.', error);
           if (listShowing()) nav.selectTab(homeEnabled() ? 'home' : 'chat');
         } else if (op === 'load') {
-          console.warn('ChatThread: conversations load() failed.', error);
+          console.warn('ChatApp: conversations load() failed.', error);
         } else {
           // Decide loudly (save/markRead): the thread stays usable, the
           // failure is surfaced, never a silent no-op.
-          console.error(`ChatThread: conversations ${op}() failed.`, error);
+          console.error(`ChatApp: conversations ${op}() failed.`, error);
         }
       },
     });
@@ -457,9 +457,9 @@ export function ChatThread(props: ChatThreadProps) {
 
   onMount(() => {
     if (props.conversations && !props.store) {
-      console.error('ChatThread: `conversations` is true but no `store` was provided: the conversations feature needs a ConversationStore to persist to. Staying in chat-only mode.');
+      console.error('ChatApp: `conversations` is true but no `store` was provided: the conversations feature needs a ConversationStore to persist to. Staying in chat-only mode.');
     } else if (props.conversations && props.store && !props.onConversationLoad) {
-      console.error('ChatThread: `conversations` is true but no `onConversationLoad` handler was provided: row-select, "new conversation", and mount auto-restore would have nowhere to deliver the loaded messages, leaving row-tap/new/restore inert (and mount\'s auto-restore would still stamp an active conversation id the save effect could then clobber). Staying in chat-only mode.');
+      console.error('ChatApp: `conversations` is true but no `onConversationLoad` handler was provided: row-select, "new conversation", and mount auto-restore would have nowhere to deliver the loaded messages, leaving row-tap/new/restore inert (and mount\'s auto-restore would still stamp an active conversation id the save effect could then clobber). Staying in chat-only mode.');
     }
   });
 
@@ -737,7 +737,7 @@ export function ChatThread(props: ChatThreadProps) {
           >
             <header part="header" class="shrink-0"><slot name="header" /></header>
           </Show>
-          {/* The view container: ChatThread's old `relative flex-1
+          {/* The view container: ChatApp's old `relative flex-1
               overflow-hidden` body, now the public PanelBody part. */}
           <PanelBody>
             <Switch

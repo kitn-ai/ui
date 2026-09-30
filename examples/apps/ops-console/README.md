@@ -585,7 +585,7 @@ straight at the kit elements again.
     kit fix landed and the app code went back to plain kit tags.** The
     parameters form rendered ~285px wide in a 768px column: its width was its own button row.
     `<kai-chat>` laid an assistant turn out as `flex flex-col items-start`
-    (`packages/ui/src/components/chat-thread.tsx`) and no card surface —
+    (`packages/ui/src/components/chat-app.tsx`) and no card surface —
     neither the Solid `Card` root nor the `kai-*` card element hosts — carried
     `w-full` or `align-self: stretch`, so every card was a flex item sized to
     `min(max-content, column)`. The approval card only LOOKED right: its prose is

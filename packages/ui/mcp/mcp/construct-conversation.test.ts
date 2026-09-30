@@ -129,9 +129,9 @@ describe('four-sentence conversational construction', () => {
     // NOTE (deviation from brief): the brief's literal marker list was
     // ['readAsDataURL', 'localStorage', 'PromptSuggestion', '<Dock']. Codegen
     // (Tasks 12/13, closed) deliberately does NOT hand-roll readAsDataURL —
-    // ChatThread/DefaultPromptInput already own the whole attach round-trip,
+    // ChatApp/DefaultPromptInput already own the whole attach round-trip,
     // and codegen.test.ts:355 pins `app).not.toContain('readAsDataURL')` as
-    // the intended behavior. Likewise starters wire through ChatThread's own
+    // the intended behavior. Likewise starters wire through ChatApp's own
     // `suggestions` prop, never a `PromptSuggestion` component/string. Markers
     // below assert the real wiring signals instead: `attach={true}` for the
     // attachments round-trip and `suggestions={` for starters.
@@ -142,13 +142,13 @@ describe('four-sentence conversational construction', () => {
       // Task 5: capabilities.conversations is on in the fixture, which
       // SUBSUMES the hand-rolled THREAD_KEY/localStorage.getItem/setItem
       // effect this test used to assert here (emitHistorySetup's own doc
-      // has the persistence-ownership decision) — ChatThread's own
+      // has the persistence-ownership decision) — ChatApp's own
       // `conversations`/`store` props are the ONE persistence mechanism in
       // this emitted App now, so the marker list asserts THOSE instead of
       // the old THREAD_KEY string.
       'conversations={true}',
       'localStorageStore(',
-      // Task 6 live-browser regression: without this wire, ChatThread's own
+      // Task 6 live-browser regression: without this wire, ChatApp's own
       // select/new/mount-restore never change the rendered thread (see
       // emitConversationsProps's doc in codegen.ts).
       'onConversationLoad={(messages) => chat.setMessages(() => messages)}',
@@ -156,7 +156,7 @@ describe('four-sentence conversational construction', () => {
       'position="top-start"',
       'defaultOpen={true}',
       JSON.stringify(finalConstruct.header.title),
-      // empty wires through ChatThread's own `emptyContent` prop as a plain
+      // empty wires through ChatApp's own `emptyContent` prop as a plain
       // JSX Empty/EmptyHeader/EmptyTitle/EmptyDescription composition, not a
       // boolean `empty` prop or a slot/Portal (emitEmptyContentProp in
       // codegen.ts) — assert the real emission site.

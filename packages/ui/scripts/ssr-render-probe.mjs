@@ -70,7 +70,7 @@ const classify = (e) => {
 // `props.items.length` and `props.x.some(...)` all need. Symbols pass through as
 // undefined so Solid's own brand checks on the props object still behave.
 //
-// It buys real coverage, measured on this tree: `Thread` and `ChatThread` — the
+// It buys real coverage, measured on this tree: `Thread` and `ChatApp` — the
 // two flagship composables, and the components a consumer is most likely to
 // server-render — only get executed at all under this pass. It cannot invent
 // coverage it did not get: everything it unlocks produced non-empty markup.

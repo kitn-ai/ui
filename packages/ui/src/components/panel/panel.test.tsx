@@ -10,7 +10,7 @@
  *   1. every chrome color is a KIT TOKEN class (bg-background /
  *      text-foreground / border-border), never an invented palette, so a
  *      `--kai-color-*` override retints the chrome with the web components;
- *   2. the header row's box is byte-for-byte ChatThread's built-in header
+ *   2. the header row's box is byte-for-byte ChatApp's built-in header
  *      (h-14 · border-b · px-5 · gap-2 clusters · sm semibold title), so the
  *      P-9 refactor can render kai-chat's header THROUGH these parts with no
  *      visual delta;
@@ -29,8 +29,8 @@ import { Panel, PanelHeader, PanelBody, PanelFooter } from './panel';
 
 afterEach(cleanup);
 
-/** The exact header-row box classes ChatThread's built-in header paints. */
-const CHAT_THREAD_HEADER_BOX = ['flex', 'h-14', 'shrink-0', 'items-center', 'justify-between', 'border-b', 'border-border', 'px-5'];
+/** The exact header-row box classes ChatApp's built-in header paints. */
+const CHAT_APP_HEADER_BOX = ['flex', 'h-14', 'shrink-0', 'items-center', 'justify-between', 'border-b', 'border-border', 'px-5'];
 
 describe('Panel — surface and frame', () => {
   it('paints the surface from kit tokens (bg-background / text-foreground)', () => {
@@ -61,14 +61,14 @@ describe('Panel — surface and frame', () => {
   });
 });
 
-describe('PanelHeader — ChatThread header-row parity', () => {
-  it("renders ChatThread's exact header box (h-14, border-b border-border, px-5)", () => {
+describe('PanelHeader — ChatApp header-row parity', () => {
+  it("renders ChatApp's exact header box (h-14, border-b border-border, px-5)", () => {
     const { getByRole } = render(() => <PanelHeader>Support</PanelHeader>);
     const row = getByRole('banner');
-    expect(row).toHaveClass(...CHAT_THREAD_HEADER_BOX);
+    expect(row).toHaveClass(...CHAT_APP_HEADER_BOX);
   });
 
-  it("styles the title exactly as ChatThread's (text-sm font-semibold text-foreground)", () => {
+  it("styles the title exactly as ChatApp's (text-sm font-semibold text-foreground)", () => {
     const { getByText } = render(() => <PanelHeader>Aurora Support</PanelHeader>);
     const title = getByText('Aurora Support');
     expect(title).toHaveClass('text-sm', 'font-semibold', 'text-foreground');
@@ -90,7 +90,7 @@ describe('PanelHeader — ChatThread header-row parity', () => {
     // Leading cluster holds back + title, in that order.
     expect(back.parentElement).toBe(title.parentElement);
     expect(back.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    // Trailing cluster is a different box, gap-2 like ChatThread's.
+    // Trailing cluster is a different box, gap-2 like ChatApp's.
     expect(close.parentElement).not.toBe(back.parentElement);
     expect(close.parentElement).toHaveClass('gap-2');
     expect(back.parentElement).toHaveClass('gap-2');
@@ -114,7 +114,7 @@ describe('PanelHeader — ChatThread header-row parity', () => {
 });
 
 describe('PanelBody / PanelFooter — the view container regions', () => {
-  it("PanelBody is ChatThread's view container: relative flex-1 overflow-hidden, min-h-0", () => {
+  it("PanelBody is ChatApp's view container: relative flex-1 overflow-hidden, min-h-0", () => {
     const { getByText } = render(() => <PanelBody>view</PanelBody>);
     const body = getByText('view');
     expect(body).toHaveClass('relative', 'flex-1', 'overflow-hidden', 'min-h-0', 'flex', 'flex-col');

@@ -13,8 +13,8 @@ import type { TriggerDef, TriggerItem } from '../composer/composer';
  *
  * It wires the kit's REAL mechanism, not a stub: `composer.tsx` ships
  * `ComposerProps.triggers?: TriggerDef[]`, an atomic-pill trigger system that
- * `ChatThread` forwards through to its own composer, so typing the configured
- * character in a mounted `ChatThread` opens the real menu and inserts a real pill.
+ * `ChatApp` forwards through to its own composer, so typing the configured
+ * character in a mounted `ChatApp` opens the real menu and inserts a real pill.
  * (`slashCommands`-as-flat-config was removed from the kit in favour of this.)
  *
  * `buildTriggerDefs` converts this panel's editable rows into `TriggerDef[]`: the one
@@ -50,7 +50,7 @@ export const DEFAULT_MENTION_ENTRIES: TriggerEntryRow[] = [
 ];
 
 /** The one translation point from this panel's editable rows to the real
- *  `TriggerDef[]` a `ChatThread`/`Composer` `triggers` prop takes. `/` maps
+ *  `TriggerDef[]` a `ChatApp`/`Composer` `triggers` prop takes. `/` maps
  *  to `kind: 'command'`, `@` to `kind: 'agent'`, the two kinds
  *  `composer-highlight.ts`'s built-in glyphs already cover (checked before
  *  choosing them, see that file's `kindGlyph`). */
@@ -196,7 +196,7 @@ export function ComposerTriggersSection(props: {
         </>
       )}
       <p class="text-xs text-muted-foreground">
-        Real triggers, wired to ChatThread's own `triggers` prop (components/composer/composer.tsx). Typing the character opens the real menu
+        Real triggers, wired to ChatApp's own `triggers` prop (components/composer/composer.tsx). Typing the character opens the real menu
         and inserts a real pill.
       </p>
     </div>

@@ -4,7 +4,7 @@ import { MessageCircle } from 'lucide-solid';
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { cn } from '../../utils/cn';
 import type { ChatMessage } from '../../web-components/chat/chat-types';
 
@@ -90,7 +90,7 @@ function ChatPanel(props: { construct: BuilderConstruct; class?: string }): JSX.
   const accentStyle = createMemo(() => resolveAccentWrapperStyle(props.construct.theme));
   return (
     <div class={cn('flex flex-col overflow-hidden border border-border bg-background', props.class)} style={accentStyle()}>
-      <ChatThread
+      <ChatApp
         class="h-full"
         messages={stubMessages}
         chatTitle={props.construct.header?.title}
@@ -190,7 +190,7 @@ type Story = StoryObj;
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point, so the snippet below
 // names the real composition and wiring rather than a package import.
-const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -211,7 +211,7 @@ export const SupportWidget: Story = {
     // The template's own framing: the construct's chat in a floating card with a
     // launcher in the corner - the widget layout, minus the mobile takeover.
     <div class="relative h-[640px] w-[400px]">
-      <ChatThread class="h-full w-full rounded-[28px] shadow-2xl" messages={messages} onSubmit={() => {}} />
+      <ChatApp class="h-full w-full rounded-[28px] shadow-2xl" messages={messages} onSubmit={() => {}} />
       <button type="button" aria-label="Open the chat" class="absolute -bottom-4 -right-4 size-14 rounded-full bg-primary text-primary-foreground" />
     </div>
   }

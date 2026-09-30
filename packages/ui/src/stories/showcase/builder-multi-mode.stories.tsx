@@ -4,7 +4,7 @@ import { ChevronUp, ChevronDown, X, PanelLeft, Search } from 'lucide-solid';
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { ConversationList } from '../../components/conversation/conversation-list';
 import { mix, StubStatTile, StubCodeBlock } from '../../components/builder/builder-skeleton';
 import {
@@ -106,9 +106,9 @@ import type { ConversationGroup, ConversationSummary } from '../../types';
 // own instruction — not reimplemented, and RESTRUCTURED this revision to
 // split each mode into separate RAIL and MAIN pieces (matching the fixed
 // placement above): mode "assistant" reuses `Labs/Builder/Assistant`'s own
-// real pieces (`ConversationList` for the rail, `ChatThread` for the main
+// real pieces (`ConversationList` for the rail, `ChatApp` for the main
 // column — that template's own real split). Mode "workspace" reuses `Labs/
-// Builder/Workspace`'s own real pieces the other way around: a `ChatThread`
+// Builder/Workspace`'s own real pieces the other way around: a `ChatApp`
 // (that template's own chat rail) for THIS template's rail column, and the
 // skeleton work-pane language from `builder-skeleton.tsx` for the main
 // column — Workspace's own big-pane-beside-a-thin-rail shape, just
@@ -216,10 +216,10 @@ function AssistantModeRail(props: { activeId: string; onSelect: (id: string) => 
   return <ConversationList groups={GROUPS} conversations={CONVERSATIONS} activeId={props.activeId} onSelect={props.onSelect} onNewChat={() => {}} class="h-full" />;
 }
 
-/** MAIN content for the `assistant` mode — the real `ChatThread`. */
+/** MAIN content for the `assistant` mode — the real `ChatApp`. */
 function AssistantModeMain(props: { construct: BuilderConstruct; triggers: ReturnType<typeof buildTriggerDefs>; mic: boolean }): JSX.Element {
   return (
-    <ChatThread
+    <ChatApp
       class="h-full"
       messages={ASSISTANT_MESSAGES}
       chatTitle={props.construct.header?.title}
@@ -231,7 +231,7 @@ function AssistantModeMain(props: { construct: BuilderConstruct; triggers: Retur
   );
 }
 
-/** RAIL content for the `workspace` mode — a compact `ChatThread` (the chat
+/** RAIL content for the `workspace` mode — a compact `ChatApp` (the chat
  *  side of Workspace's own real split) plus the context pills, if any. */
 function WorkspaceModeRail(props: { construct: BuilderConstruct; triggers: ReturnType<typeof buildTriggerDefs>; mic: boolean; contextPills: ContextPill[] }): JSX.Element {
   return (
@@ -247,7 +247,7 @@ function WorkspaceModeRail(props: { construct: BuilderConstruct; triggers: Retur
           </For>
         </div>
       )}
-      <ChatThread
+      <ChatApp
         class="h-full min-h-0 flex-1"
         messages={WORKSPACE_MESSAGES}
         chatTitle={props.construct.header?.title}
@@ -617,10 +617,10 @@ type Story = StoryObj;
 
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
-// names the real composition and wiring rather than a package import; ChatThread and
+// names the real composition and wiring rather than a package import; ChatApp and
 // ConversationList ARE public (@kitn.ai/ui) and are shown as the two modes actually use them.
 const IMPORT = `import { ConversationList } from '@kitn.ai/ui';
-import { ChatThread } from '@kitn.ai/ui/solid';`;
+import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -646,12 +646,12 @@ export const MultiMode: Story = {
     activeMode === 'assistant' ? (
       <div class="flex h-full">
         <ConversationList groups={groups} conversations={conversations} activeId={activeId} onSelect={setActiveId} />
-        <ChatThread messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
+        <ChatApp messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
       </div>
     ) : (
       <div class="flex h-full">
         <div class="flex-1">{/* the work pane */}</div>
-        <ChatThread class="w-96 shrink-0" messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
+        <ChatApp class="w-96 shrink-0" messages={messages} chatTitle={construct.header?.title} onSubmit={sendMessage} />
       </div>
     )
   }

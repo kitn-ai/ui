@@ -507,7 +507,7 @@ const unreachable = [...publicValues]
 //
 // Deliberately NOT scoped to the web components' composable set: `expandToPublic`
 // stops walking at a public boundary, so the moment a coarse component (Thread,
-// ChatThread) becomes public the pieces below it drop out of that set. Scoping
+// ChatApp) becomes public the pieces below it drop out of that set. Scoping
 // the type check to it would mean improving coverage silently *shrinks* what
 // gets checked. This rule only grows.
 const declOf = (name, file) => {

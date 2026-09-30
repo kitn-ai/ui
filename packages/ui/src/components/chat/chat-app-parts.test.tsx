@@ -1,5 +1,5 @@
 /**
- * P-9 (blocks-and-parts, 2026-08-31): `ChatThread` — the `<kai-chat>`
+ * P-9 (blocks-and-parts, 2026-08-31): `ChatApp` — the `<kai-chat>`
  * facade's interior — is a thin preset over the public parts. These tests pin
  * the STRUCTURAL half of that ruling:
  *
@@ -18,16 +18,16 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { render, cleanup } from '@solidjs/testing-library';
-import { ChatThread } from './chat-thread';
+import { ChatApp } from './chat-app';
 
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
 afterEach(cleanup);
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const source = readFileSync(resolve(HERE, 'chat-thread.tsx'), 'utf8');
+const source = readFileSync(resolve(HERE, 'chat-app.tsx'), 'utf8');
 
-describe('P-9 grep-level assertions over chat-thread.tsx', () => {
+describe('P-9 grep-level assertions over chat-app.tsx', () => {
   it('imports the conversation policy from the shipped controller (P-5)', () => {
     // Matched by MODULE PATH, not by depth: a colocated test's specifier is a fact
     // about where this file sits, and the family reorg moved it a level deeper.
@@ -69,7 +69,7 @@ describe('P-9 grep-level assertions over chat-thread.tsx', () => {
 
 describe('the chrome renders through the parts', () => {
   it('the built-in header is the PanelHeader box (part="header-bar", start/end regions)', () => {
-    const { container } = render(() => <ChatThread messages={[]} chatTitle="Assistant" />);
+    const { container } = render(() => <ChatApp messages={[]} chatTitle="Assistant" />);
     const header = container.querySelector('header[part="header-bar"]');
     expect(header).toBeTruthy();
     expect(header!.querySelector('[part="start"]')).toBeTruthy();
@@ -78,7 +78,7 @@ describe('the chrome renders through the parts', () => {
   });
 
   it('the widget tab bar dot is the shared tab-bar part mark (both hook names)', () => {
-    const { container } = render(() => <ChatThread messages={[]} home={{}} onSubmit={() => {}} />);
+    const { container } = render(() => <ChatApp messages={[]} home={{}} onSubmit={() => {}} />);
     // No unread yet: the bar renders, no dot.
     expect(container.querySelector('[role="tablist"]')).toBeTruthy();
     expect(container.querySelector('[data-kai-tab-dot]')).toBeNull();
@@ -87,7 +87,7 @@ describe('the chrome renders through the parts', () => {
 
 describe('P-6 region slot: home (replace)', () => {
   it('homeFull stands the slot in for the built-in HomePanel', () => {
-    const { container } = render(() => <ChatThread messages={[]} home={{}} homeFull onSubmit={() => {}} />);
+    const { container } = render(() => <ChatApp messages={[]} home={{}} homeFull onSubmit={() => {}} />);
     expect(container.querySelector('slot[name="home"]')).toBeTruthy();
     expect(container.querySelector('[data-kai-home-panel]')).toBeNull();
     // Navigation chrome stays built in around the replaced content.
@@ -95,7 +95,7 @@ describe('P-6 region slot: home (replace)', () => {
   });
 
   it('absent homeFull changes nothing: the built-in home screen renders', () => {
-    const { container } = render(() => <ChatThread messages={[]} home={{}} onSubmit={() => {}} />);
+    const { container } = render(() => <ChatApp messages={[]} home={{}} onSubmit={() => {}} />);
     expect(container.querySelector('slot[name="home"]')).toBeNull();
     expect(container.querySelector('[data-kai-home-panel]')).toBeTruthy();
   });

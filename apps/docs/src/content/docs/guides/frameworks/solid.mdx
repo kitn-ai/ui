@@ -8,13 +8,13 @@ import SolidComponentIndex from '../../../../components/SolidComponentIndex.astr
 
 Solid apps get an extra path the other frameworks don't: the components are authored in SolidJS, so you can import them straight into your JSX instead of going through the `kai-*` web components. Both paths ship in the package and mix freely:
 
-- **Native SolidJS components** (`@kitn.ai/ui/solid`) — import `ChatThread`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
+- **Native SolidJS components** (`@kitn.ai/ui/solid`) — import `ChatApp`, `Message`, `PromptInput`, and the rest directly into your JSX. Full compositional control, tree-shaken alongside your own code. Reach for this in a Solid app.
 - **`kai-*` web components** (`@kitn.ai/ui/web-components`) — the drop-in shells when you want batteries included or need to share UI across frameworks.
 
 <Aside type="note" title="`@kitn.ai/ui/solid` is the Solid entry point">
 Import Solid components from `@kitn.ai/ui/solid`, not from the root `@kitn.ai/ui`. The root entry is what every consumer resolves, including the React / Vue / Svelte / vanilla majority who only ever touch the web components, so it carries the shared layer: the chat components, the types, the state and card helpers.
 
-`@kitn.ai/ui/solid` is that entry plus the rest of the Solid catalog (`ChatThread`, `Dialog`, `Popover`, `Input`, `Nav`, `Tabs`, and the other primitives the web components are built from), compiled as its own bundle so a React consumer never pays for it. It is a superset, so one import covers everything.
+`@kitn.ai/ui/solid` is that entry plus the rest of the Solid catalog (`ChatApp`, `Dialog`, `Popover`, `Input`, `Nav`, `Tabs`, and the other primitives the web components are built from), compiled as its own bundle so a React consumer never pays for it. It is a superset, so one import covers everything.
 </Aside>
 
 ## Install

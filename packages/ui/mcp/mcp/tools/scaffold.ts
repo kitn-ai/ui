@@ -1596,7 +1596,7 @@ function slottedChildMarkup(
   return slottedInChat(components).flatMap((s) => [
     // What the shell DOES, and — the half a comment gets wrong by being generous
     // — what it does not. `<kai-chat>`'s sidebar region is one fixed-width aside
-    // (`chat-thread.tsx`), exposed as a part and nothing more: it does not listen
+    // (`chat-app.tsx`), exposed as a part and nothing more: it does not listen
     // for the rail's collapse, and it has no responsive behaviour, so a rail that
     // collapses inside it leaves the column exactly as wide as it was.
     ...htmlComment(
@@ -1853,7 +1853,7 @@ function fileToAttachmentLines(pad: string, typeName: string): string[] {
 /**
  * Why the submit handler merges TWO sources of staged files.
  *
- * `<kai-chat>` renders its own paperclip unconditionally — `ChatThread` always
+ * `<kai-chat>` renders its own paperclip unconditionally — `ChatApp` always
  * passes `onAttachmentsChange` to the composer, and there is no prop on the
  * element that turns it off — so every scaffold ALREADY has an attach button,
  * and every scaffold before this one dropped whatever was attached through it on

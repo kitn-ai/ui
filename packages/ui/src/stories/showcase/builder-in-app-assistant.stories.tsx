@@ -3,7 +3,7 @@ import { type JSX, createSignal, createMemo } from 'solid-js';
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { mix, SkeletonBar, StubStatTile, StubNavRow, StubTableRow } from '../../components/builder/builder-skeleton';
 import {
   type UserActionId,
@@ -60,7 +60,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 // — Composer/Mic, Messages/Message actions, Rail placement — each one a
 // genuine T-5 vocabulary-gap candidate, not decided here, listed so the
 // gap is loud rather than silently faked as already-wired:
-//  - **Mic** (`ChatThread`'s own `voice` prop, `components/chat/chat-thread.tsx`)
+//  - **Mic** (`ChatApp`'s own `voice` prop, `components/chat/chat-app.tsx`)
 //    exists at the COMPONENT tier today; `construct.v1`'s `capabilities`
 //    block has no `voice`/`mic` key, so an emitted construct can't turn
 //    this on yet. Candidate: `capabilities.voice: boolean`.
@@ -88,7 +88,7 @@ import type { ChatMessage, ChatMessageAction, CustomAction } from '../../web-com
 //    resorting happens there).
 //  - Checked whether any built-in id is hard-coupled to a role anywhere in
 //    the kit: it is NOT. `message.tsx` (`normalizeAction`/`feedbackVoteOf`/
-//    the action-bar render) and `chat-thread.tsx` (`actions={m().actions}`,
+//    the action-bar render) and `chat-app.tsx` (`actions={m().actions}`,
 //    line ~886) both treat `actions` as opaque per-message data with zero
 //    role awareness — `edit` renders identically on an assistant message as
 //    on a user one if a caller puts it there. Role-appropriateness (edit on
@@ -369,7 +369,7 @@ function InAppAssistantPreview(props: {
       )}
       style={{ width: isMobile() ? '100%' : '380px' }}
     >
-      <ChatThread
+      <ChatApp
         class="h-full"
         messages={previewMessages()}
         chatTitle={props.construct.header?.title}
@@ -594,9 +594,9 @@ type Story = StoryObj;
 
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
-// names the real composition and wiring rather than a package import; ChatThread IS public
+// names the real composition and wiring rather than a package import; ChatApp IS public
 // (@kitn.ai/ui) and is shown as this preview actually uses it, docked beside the host app.
-const IMPORT = `import { ChatThread } from '@kitn.ai/ui/solid';`;
+const IMPORT = `import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -619,7 +619,7 @@ export const InAppAssistant: Story = {
     // Docked aside beside a stand-in skeleton of the host app
     <div class="flex h-full">
       <div class="flex-1">{/* the rest of your app */}</div>
-      <ChatThread
+      <ChatApp
         class="w-96 shrink-0 border-l border-border"
         messages={messages}
         chatTitle={construct.header?.title}

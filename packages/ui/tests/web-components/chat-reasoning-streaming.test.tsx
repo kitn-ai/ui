@@ -5,7 +5,7 @@
  * it stays a CLOSED shimmering chip, matching "closed chip, expand on click."
  * The pre-19f auto-open/auto-close behavior (the exact path that regressed in
  * the field: .superpowers/sdd/2026-08-20-rung-3/latency-debug/report.md) is
- * now opt-in via `reasoningOpen` on `<kai-chat>`, forwarded to ChatThread's
+ * now opt-in via `reasoningOpen` on `<kai-chat>`, forwarded to ChatApp's
  * `reasoningOpen` -> message.tsx's `reasoningDefaultOpen` -> Reasoning's
  * `defaultOpen`/`openOnStream` (src/components/message/message.tsx, src/web-components/chat/chat.tsx).
  */

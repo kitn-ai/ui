@@ -34,7 +34,7 @@ export interface ConversationPanelProps {
  *
  * Modeled directly on Intercom's Messenger "Messages" tab. A box this size
  * gets one job at a time, browsing conversations OR having one, never both,
- * and the list replaces the ENTIRE content area (`ChatThread` hides the
+ * and the list replaces the ENTIRE content area (`ChatApp` hides the
  * thread, suggestions and composer while this renders; see its
  * `view() === 'list'` branch).
  *
@@ -44,7 +44,7 @@ export interface ConversationPanelProps {
  * box fed a raw `store.list()` array reads the same as one fed the controller's cache.
  */
 export function ConversationPanel(props: ConversationPanelProps) {
-  // Most-recently-updated first inside each half - the same rules ChatThread's own
+  // Most-recently-updated first inside each half - the same rules ChatApp's own
   // auto-restore reads, minus the pin hoist that pick deliberately does not use.
   const ordered = createMemo(() => orderedSummaries(props.conversations));
 

@@ -151,7 +151,7 @@ const CAPABILITY_VALUES = {
   // combo already carries its own `history` entry, so no injection needed
   // there).
   conversations: true,
-  // Phase-1 (B-11a): role-scoped defaults exercise BOTH new ChatThread props
+  // Phase-1 (B-11a): role-scoped defaults exercise BOTH new ChatApp props
   // through the emit chain.
   messageActions: { user: ['edit', 'copy'], assistant: ['copy', 'like', 'dislike', 'speak'] },
   // strip: FALSE deliberately — that is the value that actually EMITS

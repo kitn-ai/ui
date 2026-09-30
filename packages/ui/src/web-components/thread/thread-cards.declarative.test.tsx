@@ -9,7 +9,7 @@ import './thread';
 // jsdom doesn't implement Element.scrollTo; mounting a real <kai-thread> calls
 // it via the stick-to-bottom primitive on a requestAnimationFrame, which
 // otherwise throws as an unhandled async error and fails the whole run even
-// though every test still passes. Same shim as chat-thread.test.tsx / thread.test.tsx.
+// though every test still passes. Same shim as chat-app.test.tsx / thread.test.tsx.
 if (!Element.prototype.scrollTo) (Element.prototype as unknown as { scrollTo: () => void }).scrollTo = () => {};
 
 afterEach(() => {

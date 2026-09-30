@@ -1,7 +1,7 @@
 /**
  * `AppHeader`, the workspace's app-level top bar: a top-level strip ABOVE the split (a
  * sibling of `WorkspaceShell`, not inside it), so it persists through the work surface's
- * Expand toggle. It does NOT replace `ChatThread`'s own header row; both ship together.
+ * Expand toggle. It does NOT replace `ChatApp`'s own header row; both ship together.
  *
  * The arrangement is NOT configurable, deliberately: title on the left, a utility cluster
  * (search, theme toggle), a divider, the header actions row, another divider, then the

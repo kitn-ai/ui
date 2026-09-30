@@ -3,7 +3,7 @@ import { type JSX, createSignal, createMemo } from 'solid-js';
 import { BuilderPanel, type BuilderConstruct } from '../../components/builder/builder-panel';
 import { BuilderLayout, type BuilderViewport } from '../../components/builder/builder-layout';
 import { resolveAccentWrapperStyle } from '../../components/builder/builder-preview';
-import { ChatThread } from '../../components/chat/chat-thread';
+import { ChatApp } from '../../components/chat/chat-app';
 import { ConversationList } from '../../components/conversation/conversation-list';
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from '../../components/empty/empty';
 import {
@@ -45,23 +45,23 @@ import type { ConversationGroup, ConversationSummary, ModelOption } from '../../
 // layout, so there is no Layout radio (`sections={{ layout: false, widget:
 // 'never', provider: true, home: false }}`).
 //
-// SIDEBAR IS A STORY-OWN COMPOSITION, NOT `ChatThread`'s `sidebar` SLOT:
-// `ChatThread`'s own `sidebar` prop (`components/chat/chat-thread.tsx`) renders a
+// SIDEBAR IS A STORY-OWN COMPOSITION, NOT `ChatApp`'s `sidebar` SLOT:
+// `ChatApp`'s own `sidebar` prop (`components/chat/chat-app.tsx`) renders a
 // `<slot name="sidebar">` — real light-DOM slotting, meant for the
 // `kai-chat` web-component facade's projected children, not something a
-// bare Solid `<ChatThread>` usage can fill with JSX. This preview instead
+// bare Solid `<ChatApp>` usage can fill with JSX. This preview instead
 // composes the kit's own real `ConversationList` component directly beside
-// `ChatThread` in a flex row — the same sidebar CONTENT a construct's real
+// `ChatApp` in a flex row — the same sidebar CONTENT a construct's real
 // `conversations: true` capability would eventually back, just assembled
 // by this story rather than through the slot mechanism a full construct
 // emission uses. Conversation summaries are stub data (never wired to
-// `ChatThread`'s own list/load/save cycle) — clicking a row swaps which
+// `ChatApp`'s own list/load/save cycle) — clicking a row swaps which
 // stub thread the preview shows, proving the interaction without a real
 // `ConversationStore`.
 //
-// MODEL SWITCHER: `ChatThread` has a REAL built-in header model switcher
+// MODEL SWITCHER: `ChatApp` has a REAL built-in header model switcher
 // (`models`/`currentModel`/`onModelChange` props, confirmed in
-// `components/chat/chat-thread.tsx` before use) — no bespoke switcher built here.
+// `components/chat/chat-app.tsx` before use) — no bespoke switcher built here.
 //
 // Panel sections: Identity, Provider, Theme, Capabilities (starters/
 // attachments/history/conversations toggle), plus the same role-scoped,
@@ -83,7 +83,7 @@ import type { ConversationGroup, ConversationSummary, ModelOption } from '../../
 //    existing boolean: `capabilities.conversations` already exists and
 //    toggles the LIST FEATURE, but has no room for "always show it as a
 //    persistent rail" vs. the existing two-state list/thread toggle
-//    `ChatThread`'s own `conversations` prop implements. Candidate:
+//    `ChatApp`'s own `conversations` prop implements. Candidate:
 //    `capabilities.conversations: boolean | { persistent: boolean }`.
 //  - Message actions: same `capabilities.messageActions: { user: [...],
 //    assistant: [...] }` candidate `Labs/Builder/In-app assistant`'s Round
@@ -91,7 +91,7 @@ import type { ConversationGroup, ConversationSummary, ModelOption } from '../../
 //    new one.
 //  - Attachments/history/mic are ALREADY real `capabilities` fields
 //    (`capabilities.attachments`, `capabilities.history`) or an existing
-//    component-tier prop (`ChatThread`'s `voice`) — no new proposal there,
+//    component-tier prop (`ChatApp`'s `voice`) — no new proposal there,
 //    same as `Labs/Builder/In-app assistant`'s mic note.
 
 const GROUPS: ConversationGroup[] = [
@@ -154,8 +154,8 @@ const DEFAULT_CONSTRUCT: BuilderConstruct = {
 
 /**
  * The Assistant template's preview: a device frame filled edge-to-edge —
- * `ConversationList` as a persistent left rail, `ChatThread` filling the
- * rest, a model switcher in `ChatThread`'s own header. No widget chrome,
+ * `ConversationList` as a persistent left rail, `ChatApp` filling the
+ * rest, a model switcher in `ChatApp`'s own header. No widget chrome,
  * no launcher/FAB (T-1: this is the fullscreen shape, not the floating
  * one) — the frame itself IS the whole preview canvas.
  */
@@ -210,7 +210,7 @@ function AssistantPreview(props: {
         </div>
       )}
       <div class="flex min-w-0 flex-1 flex-col">
-        <ChatThread
+        <ChatApp
           class="h-full"
           messages={messages()}
           chatTitle={props.construct.header?.title}
@@ -412,10 +412,10 @@ type Story = StoryObj;
 
 // BuilderPanel/BuilderLayout are internal to the builder app (src/components/builder/builder-panel.tsx,
 // builder-layout.tsx) -- neither ships in a public @kitn.ai/ui entry point. The snippet below
-// names the real composition and wiring rather than a package import; ChatThread and
+// names the real composition and wiring rather than a package import; ChatApp and
 // ConversationList ARE public (@kitn.ai/ui) and are shown as this preview actually uses them.
 const IMPORT = `import { ConversationList } from '@kitn.ai/ui';
-import { ChatThread } from '@kitn.ai/ui/solid';`;
+import { ChatApp } from '@kitn.ai/ui/solid';`;
 const src = (code: string) => ({
   parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
 });
@@ -425,7 +425,7 @@ const src = (code: string) => ({
  * Provider, Theme, Capabilities, an empty-state greeting, and the
  * role-scoped Message actions picker; the live preview on the right fills
  * the whole frame edge-to-edge with a persistent conversations sidebar plus
- * the thread, model switcher visible in `ChatThread`'s own header. Click a
+ * the thread, model switcher visible in `ChatApp`'s own header. Click a
  * sidebar row to swap the stub thread; edit the accent to retint the whole
  * frame, same accent-cascade mapping every other template preview uses.
  */
@@ -450,7 +450,7 @@ export const Assistant: Story = {
         onSelect={setActiveId}
         onNewChat={() => setActiveId('new')}
       />
-      <ChatThread
+      <ChatApp
         messages={messages}
         chatTitle={construct.header?.title}
         suggestions={construct.capabilities?.starters}
