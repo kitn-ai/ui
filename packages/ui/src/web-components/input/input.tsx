@@ -31,7 +31,7 @@ interface Props extends Record<string, unknown> {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px field for a compact toolbar row. */
   size?: 'xs' | 'sm' | 'md';
   /** Disable interaction. */
   disabled?: boolean;

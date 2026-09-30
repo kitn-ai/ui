@@ -270,7 +270,7 @@ export interface KaiAvatarElement extends HTMLElement {
 export interface KaiBadgeElement extends HTMLElement {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
-  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
+  /** Badge style. The default is a muted pill; `outline` is a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
@@ -1129,7 +1129,7 @@ export interface KaiInputElement extends HTMLElement {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px field for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
@@ -1795,7 +1795,7 @@ export interface KaiSegmentedElement extends HTMLElement {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px track for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
   addEventListener<K extends keyof KaiSegmentedElementEventMap>(type: K, listener: (this: KaiSegmentedElement, ev: KaiSegmentedElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
   addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
@@ -3194,7 +3194,7 @@ export interface KaiAvatarElementProps {
 export interface KaiBadgeElementProps {
   /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
-  /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
+  /** Badge style. The default is a muted pill; `outline` is a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
@@ -3813,7 +3813,7 @@ export interface KaiInputElementProps {
   hint?: string;
   /** Error text; flips the field invalid (`aria-invalid` + destructive border). */
   error?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px field for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
   /** Disable interaction. */
   disabled?: boolean;
@@ -4319,7 +4319,7 @@ export interface KaiSegmentedElementProps {
   options: { value: string; label: string; icon?: undefined | string }[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px track for a compact toolbar row. */
   size?: "xs" | "sm" | "md";
 }
 

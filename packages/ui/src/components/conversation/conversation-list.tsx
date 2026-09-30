@@ -300,8 +300,7 @@ export interface ConversationListProps {
   /** Click handler for the item-mode list region (the facade wires
    *  `createConversationItemsController.handleClick`). */
   itemsClick?: (e: MouseEvent) => void;
-  /** The item region's role. `list` for flat rows (the default); `group` when rows are
-   *  nested in folders, where a list would hold non-listitems. */
+  /** The item region's role. Flat rows are a list by default; nested folders need `group`, since a list would hold non-listitems. */
   itemsRole?: 'list' | 'group';
   class?: string;
 }

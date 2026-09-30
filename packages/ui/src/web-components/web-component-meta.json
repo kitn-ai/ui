@@ -708,7 +708,7 @@
         "type": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\"",
         "optional": true,
         "scalar": true,
-        "description": "Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border.",
+        "description": "Badge style. The default is a muted pill; `outline` is a transparent one with a control-strength border.",
         "default": "'default'",
         "displayType": "undefined | \"default\" | \"count\" | \"citation\" | \"outline\""
       }
@@ -4994,7 +4994,7 @@
         "type": "undefined | \"xs\" | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density. Defaults to `md`. `xs` is a 28px field for a compact toolbar row.",
+        "description": "Control density, medium by default. `xs` is a 28px field for a compact toolbar row.",
         "default": "'md'",
         "displayType": "undefined | \"xs\" | \"sm\" | \"md\""
       },
@@ -8670,7 +8670,7 @@
         "type": "undefined | \"xs\" | \"sm\" | \"md\"",
         "optional": true,
         "scalar": true,
-        "description": "Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row.",
+        "description": "Control density, medium by default. `xs` is a 28px track for a compact toolbar row.",
         "default": "'md'",
         "displayType": "undefined | \"xs\" | \"sm\" | \"md\""
       }

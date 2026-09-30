@@ -12,7 +12,7 @@ interface Props extends Record<string, unknown> {
   options: KaiSegmentedOption[];
   /** Controlled selected `value`, reflected to the `value` attribute. Choosing a segment updates it and fires `kai-change`. */
   value?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px track for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px track for a compact toolbar row. */
   size?: 'xs' | 'sm' | 'md';
 }
 

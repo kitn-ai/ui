@@ -16,7 +16,7 @@ export interface InputProps extends Omit<JSX.InputHTMLAttributes<HTMLInputElemen
   hint?: string;
   /** Error text; rendered below the control and flips the field invalid. */
   error?: string;
-  /** Control density. Defaults to `md`. `xs` is a 28px (`h-7`) field for a compact toolbar row. */
+  /** Control density, medium by default. `xs` is a 28px (`h-7`) field for a compact toolbar row. */
   size?: 'xs' | 'sm' | 'md';
   /** Force the invalid (destructive-border) state without an `error` string. */
   invalid?: boolean;
