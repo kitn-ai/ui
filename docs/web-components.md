@@ -584,7 +584,7 @@ Project your own markup with `slot="name"` on a light-DOM child.
 
 | Slot | Mode | Description |
 |------|------|-------------|
-| _(default)_ | inject | The message body, in place of `message`: a `<kai-markdown>`, or any element of yours. The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body. |
+| _(default)_ | inject | The message body, in place of `message`: a `<kai-markdown>`, any element of yours, or plain text (a bare text node renders as text, never as HTML). The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body. |
 | `before-body` | inject | A per-message header at the TOP of the body, above reasoning/tools/content: a model-name label, a role + timestamp line. |
 | `after-body` | inject | A row at the BOTTOM of the body, below the action bar: a citation/sources row, a token-cost/latency line. |
 | `avatar` | replace | Replaces the built-in avatar rail with your own node. Use `avatar="none"` to omit the rail and let the body span the full row. |

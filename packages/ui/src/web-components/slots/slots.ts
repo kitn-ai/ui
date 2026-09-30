@@ -971,7 +971,7 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-command': { parts: COMMAND_PARTS },
   'kai-conversations': { slots: CONVERSATIONS_SLOTS, parts: CONVERSATIONS_PARTS, children: 'Your own `<kai-conversation-item>` rows (item mode: the consumer-owned loop). Data rows do not render while any are present.' },
   'kai-conversation-item': { slots: CONVERSATION_ITEM_SLOTS, parts: CONVERSATION_ITEM_PARTS, children: 'The row title. `leading`, `meta` and `menu` are the named regions around it.' },
-  'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS, children: 'The message body, in place of `message`: a `<kai-markdown>`, or any element of yours. The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body.' },
+  'kai-message': { slots: MESSAGE_SLOTS, parts: MESSAGE_PARTS, children: 'The message body, in place of `message`: a `<kai-markdown>`, any element of yours, or plain text (a bare text node renders as text, never as HTML). The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body.' },
   'kai-thread': { slots: THREAD_SLOTS, children: 'Your own `<kai-message>` rows (item mode: the consumer-owned loop). `messages` is ignored while any are present. The thread keeps the scroll, stick-to-bottom, the live region and the empty state.' },
   'kai-prompt-input': { slots: PROMPT_INPUT_SLOTS, parts: PROMPT_INPUT_PARTS },
   'kai-button': { slots: BUTTON_SLOTS, parts: BUTTON_PARTS, children: 'The button\'s label. Omit it for an icon-only button (pair with `aria-label`).' },

@@ -6200,7 +6200,7 @@
       {
         "name": "",
         "mode": "inject",
-        "doc": "The message body, in place of `message`: a `<kai-markdown>`, or any element of yours. The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body."
+        "doc": "The message body, in place of `message`: a `<kai-markdown>`, any element of yours, or plain text (a bare text node renders as text, never as HTML). The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body."
       },
       {
         "name": "before-body",

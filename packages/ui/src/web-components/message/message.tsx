@@ -224,8 +224,9 @@ defineWebComponent<Props, Events>('kai-message', {
   // Composed mode has no `parts` to derive the copied text from, so it is read off the body
   // children: their `content` (a `<kai-markdown>`) or, failing that, their text.
   const childText = (): string =>
-    bodyChildren()
+    bodyNodes()
       .map((c) => {
+        if (c.nodeType === Node.TEXT_NODE) return (c.textContent ?? '').trim();
         const content = (c as unknown as { content?: unknown }).content;
         return typeof content === 'string' ? content : (c.textContent ?? '').trim();
       })
@@ -267,10 +268,17 @@ defineWebComponent<Props, Events>('kai-message', {
     [...element.children].filter(
       (c) => !c.hasAttribute('slot') && !c.hasAttribute('hidden') && c.localName !== 'kai-action',
     );
+  // A bare text node is a body too (`<kai-message role="user">hello</kai-message>`). The
+  // native default slot paints it as a text node, so it is inert by construction: never
+  // parsed, never assigned to innerHTML. Whitespace between elements is not a body.
+  const bodyNodes = (): Node[] =>
+    [...element.childNodes].filter((n) =>
+      n.nodeType === Node.TEXT_NODE ? !!n.textContent?.trim() : bodyChildren().includes(n as Element),
+    );
   const [composed, setComposed] = createSignal(false);
   onMount(() => {
     const read = () => {
-      setComposed(bodyChildren().length > 0);
+      setComposed(bodyNodes().length > 0);
       const nodes = [...element.querySelectorAll('kai-action')];
       setSlottedActions(nodes.map(n => {
         const id = n.id || n.getAttribute('action') || '';
@@ -289,7 +297,7 @@ defineWebComponent<Props, Events>('kai-message', {
     };
     read();
     const observer = new MutationObserver(read);
-    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    observer.observe(element, { childList: true, attributes: true, subtree: true, characterData: true });
     onCleanup(() => observer.disconnect());
   });
   // A consumer can set `role` at any point after the element is live
