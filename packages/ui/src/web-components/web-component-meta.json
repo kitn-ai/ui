@@ -1609,8 +1609,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -2732,8 +2731,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -5825,8 +5823,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme for fenced code blocks.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -6090,8 +6087,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name used for fenced code blocks in the content.",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {
@@ -6216,7 +6212,7 @@
       {
         "name": "",
         "mode": "inject",
-        "doc": "The message body, in place of `message`: a `<kai-markdown>`, or any element of yours. The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body."
+        "doc": "The message body, in place of `message`: a `<kai-markdown>`, any element of yours, or plain text (a bare text node renders as text, never as HTML). The row (alignment, speaker role, the action bar) stays. `<kai-action>` children are actions, not body."
       },
       {
         "name": "before-body",
@@ -10954,8 +10950,7 @@
         "type": "undefined | string",
         "optional": true,
         "scalar": true,
-        "description": "Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`).",
-        "default": "'github-dark-dimmed'",
+        "description": "Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark).",
         "displayType": "undefined | string"
       },
       {

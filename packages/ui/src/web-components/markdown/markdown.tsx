@@ -7,7 +7,8 @@ interface Props extends Record<string, unknown> {
   content: string;
   /** Text and markdown sizing. */
   proseSize?: ProseSize;
-  /** Shiki theme for fenced code blocks. */
+  // Default: `'github-light-default'` in light mode, `'github-dark-default'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Set false to render plain `pre` blocks, with no highlighter load. */
   codeHighlight?: boolean;
@@ -19,7 +20,7 @@ interface Props extends Record<string, unknown> {
 defineWebComponent<Props>('kai-markdown', {
   content: '',
   proseSize: 'sm',
-  codeTheme: 'github-dark-dimmed',
+  codeTheme: undefined,
   codeHighlight: true,
 }, (props, { flag }) => {
   const outer = useChatConfig();

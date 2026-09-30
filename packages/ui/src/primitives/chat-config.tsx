@@ -5,17 +5,25 @@ export type ProseSize = 'xs' | 'sm' | 'base' | 'lg';
 export interface ChatConfigValue {
   /** Prose/text size for messages, markdown, and UI elements */
   proseSize: Accessor<ProseSize>;
-  /** Shiki theme for code blocks */
-  codeTheme: Accessor<string>;
+  /** Shiki theme for code blocks. `undefined` = the caller set none, so a code block picks the
+   *  theme from the colour scheme it renders in (see `DEFAULT_CODE_THEME`). */
+  codeTheme: Accessor<string | undefined>;
   /** Node the kit's overlays portal into; undefined → document.body */
   portalMount: Accessor<HTMLElement | undefined>;
   /** Whether code blocks are syntax-highlighted; false → plain text, no Shiki loaded */
   codeHighlight: Accessor<boolean>;
 }
 
+/** The code theme a block uses when nobody set one: it follows the resolved colour scheme, so a
+ *  light page gets a light block and a `.dark` toggle switches it live. An explicit `codeTheme`
+ *  (config, prop or per-block `theme`) always wins over this. */
+// Chosen on measured token contrast against the block background (lowest token): github-light-default
+// 4.55:1 and github-dark-default 6.15:1, where github-light is 3.49:1 and github-dark-dimmed 3.88:1.
+export const DEFAULT_CODE_THEME = { light: 'github-light-default', dark: 'github-dark-default' } as const;
+
 const defaultConfig: ChatConfigValue = {
   proseSize: () => 'sm' as ProseSize,
-  codeTheme: () => 'github-dark-dimmed',
+  codeTheme: () => undefined,
   portalMount: () => undefined,
   codeHighlight: () => true,
 };
@@ -38,7 +46,7 @@ export interface ChatConfigProps {
 export function ChatConfig(props: ChatConfigProps) {
   const value: ChatConfigValue = {
     proseSize: () => props.proseSize ?? 'sm',
-    codeTheme: () => props.codeTheme ?? 'github-dark-dimmed',
+    codeTheme: () => props.codeTheme,
     portalMount: () => props.portalMount,
     codeHighlight: () => props.codeHighlight ?? true,
   };

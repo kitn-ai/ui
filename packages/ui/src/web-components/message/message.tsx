@@ -3,6 +3,8 @@ import { defineWebComponent } from '../define/define';
 import { readSlots, MESSAGE_SLOTS } from '../slots/slots';
 import { ChatConfig, useChatConfig, type ProseSize } from '../../primitives/chat-config';
 import { Message, MessageAvatar, MessageBody, resolveActionsReveal } from '../../components/message/message';
+// lint-preset-parts: private BUILTIN_ACTION_LABEL -- the built-in action label table, the same one the data-mode bar reads, not a renderable part
+import { BUILTIN_ACTION_LABEL } from '../../components/action-icons/action-icons';
 import { createMessageFeedback } from '../../primitives/message-feedback';
 import {
   mergeCardTags,
@@ -80,7 +82,8 @@ interface Props extends Record<string, unknown> {
   markdown?: boolean;
   /** Text/markdown sizing for the message body. */
   proseSize?: ProseSize;
-  /** Shiki theme name used for fenced code blocks in the content. */
+  // Default: `'github-light-default'` in light mode, `'github-dark-default'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
@@ -170,7 +173,7 @@ defineWebComponent<Props, Events>('kai-message', {
   role: 'assistant',
   markdown: undefined,
   proseSize: 'sm',
-  codeTheme: 'github-dark-dimmed',
+  codeTheme: undefined,
   codeHighlight: true,
   // NO default here, deliberately: `resolveActionsReveal` keys an omitted value to the
   // message's own role (a user row reveals on hover or focus, an assistant row stays
@@ -230,8 +233,9 @@ defineWebComponent<Props, Events>('kai-message', {
   // Composed mode has no `parts` to derive the copied text from, so it is read off the body
   // children: their `content` (a `<kai-markdown>`) or, failing that, their text.
   const childText = (): string =>
-    bodyChildren()
+    bodyNodes()
       .map((c) => {
+        if (c.nodeType === Node.TEXT_NODE) return (c.textContent ?? '').trim();
         const content = (c as unknown as { content?: unknown }).content;
         return typeof content === 'string' ? content : (c.textContent ?? '').trim();
       })
@@ -273,22 +277,36 @@ defineWebComponent<Props, Events>('kai-message', {
     [...element.children].filter(
       (c) => !c.hasAttribute('slot') && !c.hasAttribute('hidden') && c.localName !== 'kai-action',
     );
+  // A bare text node is a body too (`<kai-message role="user">hello</kai-message>`). The
+  // native default slot paints it as a text node, so it is inert by construction: never
+  // parsed, never assigned to innerHTML. Whitespace between elements is not a body.
+  const bodyNodes = (): Node[] =>
+    [...element.childNodes].filter((n) =>
+      n.nodeType === Node.TEXT_NODE ? !!n.textContent?.trim() : bodyChildren().includes(n as Element),
+    );
   const [composed, setComposed] = createSignal(false);
   onMount(() => {
     const read = () => {
-      setComposed(bodyChildren().length > 0);
+      setComposed(bodyNodes().length > 0);
       const nodes = [...element.querySelectorAll('kai-action')];
-      setSlottedActions(nodes.map(n => ({
-        id: n.id || n.getAttribute('action') || '',
-        label: n.textContent?.trim() || n.getAttribute('label') || n.id || '',
+      setSlottedActions(nodes.map(n => {
+        const id = n.id || n.getAttribute('action') || '';
+        return {
+        id,
+        // Text, then `label`, then the built-in's own label (the one data-mode `actions: ['copy']`
+        // gets), then the raw id: a bare `<kai-action action="copy">` never ends up nameless.
+        label: n.textContent?.trim() || n.getAttribute('label')
+          || (Object.hasOwn(BUILTIN_ACTION_LABEL, id) ? BUILTIN_ACTION_LABEL[id as keyof typeof BUILTIN_ACTION_LABEL] : '')
+          || id,
         icon: n.getAttribute('icon') ?? undefined,
         tooltip: n.getAttribute('tooltip') ?? undefined,
-      })));
+        };
+      }));
       setSlots(readSlots(element, MESSAGE_SLOTS));
     };
     read();
     const observer = new MutationObserver(read);
-    observer.observe(element, { childList: true, attributes: true, subtree: true });
+    observer.observe(element, { childList: true, attributes: true, subtree: true, characterData: true });
     onCleanup(() => observer.disconnect());
   });
   // A consumer can set `role` at any point after the element is live

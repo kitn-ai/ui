@@ -456,7 +456,7 @@ export interface ChatProps extends WebComponentProps {
   persistSuggestions?: boolean;
   /** Body/prose font scale for rendered markdown. Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
-  /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** How an image tile reveals full size. `'lightbox'` is the only value keyboard and touch can reach. Default `'hover'`. */
   imagePreview?: "hover" | "lightbox";
@@ -696,7 +696,7 @@ export interface CodeBlockProps extends WebComponentProps {
   code: string;
   /** Language grammar (e.g. `js`, `python`). Defaults to `tsx`. */
   language?: string;
-  /** Shiki theme name. */
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Disable syntax highlighting (renders plain text, no Shiki). */
   codeHighlight?: boolean;
@@ -1345,7 +1345,7 @@ export interface MarkdownProps extends WebComponentProps {
   content: string;
   /** Text and markdown sizing. */
   proseSize?: "xs" | "sm" | "base" | "lg";
-  /** Shiki theme for fenced code blocks. */
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Set false to render plain `pre` blocks, with no highlighter load. */
   codeHighlight?: boolean;
@@ -1401,7 +1401,7 @@ export interface MessageProps extends WebComponentProps {
   markdown?: boolean;
   /** Text/markdown sizing for the message body. */
   proseSize?: "xs" | "sm" | "base" | "lg";
-  /** Shiki theme name used for fenced code blocks in the content. */
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Disable syntax highlighting for code blocks (no Shiki loads). */
   codeHighlight?: boolean;
@@ -2480,7 +2480,7 @@ export interface ThreadProps extends WebComponentProps {
   loading?: boolean;
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`). Defaults to `'sm'`. */
   proseSize?: "xs" | "sm" | "base" | "lg";
-  /** Shiki theme name for syntax-highlighted code blocks (e.g. `'github-dark-dimmed'`). */
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain `<pre>` blocks (lighter, no highlighter load). Default true. */
   codeHighlight?: boolean;

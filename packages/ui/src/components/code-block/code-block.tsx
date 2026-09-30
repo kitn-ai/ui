@@ -1,7 +1,8 @@
-import { type JSX, splitProps, createResource, createSignal, onCleanup, Show } from 'solid-js';
+import { type JSX, splitProps, createResource, createSignal, createMemo, onCleanup, onMount, Show } from 'solid-js';
 import { Copy, Check } from 'lucide-solid';
 import { cn } from '../../utils/cn';
-import { useChatConfig } from '../../primitives/chat-config';
+import { useChatConfig, DEFAULT_CODE_THEME } from '../../primitives/chat-config';
+import { createResolvedColorScheme } from '../../primitives/color-scheme';
 import { highlight, isCodeHighlightingEnabled } from '../../primitives/highlighter';
 
 // --- CodeBlock (Root) ---
@@ -100,13 +101,44 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
   const config = useChatConfig();
 
   const lang = () => local.language ?? 'tsx';
-  const theme = () => local.theme ?? config.codeTheme();
+  // The scheme is read off a STABLE hidden probe that sits in the block's own position in the
+  // composed tree, and only once that probe is CONNECTED: `getComputedStyle` on a detached node
+  // has no inherited `--kai-color-scheme`, so it would fall through to the OS and ignore
+  // `html.dark`, `body.dark`, a scoped `.dark` container and the host's `theme`. Until then, with
+  // no explicit theme, `theme()` is undefined and the plain `<pre>` shows: no Shiki chunk is
+  // fetched for a theme that is about to change.
+  let probeEl: HTMLSpanElement | undefined;
+  const [probe, setProbe] = createSignal<HTMLElement>();
+  onMount(() => {
+    let raf = 0;
+    const settle = () => {
+      if (probeEl?.isConnected) setProbe(probeEl);
+      else raf = requestAnimationFrame(settle);
+    };
+    settle();
+    onCleanup(() => cancelAnimationFrame(raf));
+  });
+  const scheme = createMemo(() => {
+    const el = probe();
+    return el ? createResolvedColorScheme(el) : undefined;
+  });
+  // A memo, so the string only notifies when it CHANGES: the node swaps when the highlighted
+  // node replaces the plain one, and that must not re-run the highlight.
+  const theme = createMemo<string | undefined>(() => {
+    const explicit = local.theme ?? config.codeTheme();
+    if (explicit) return explicit;
+    const s = scheme()?.();
+    return s ? DEFAULT_CODE_THEME[s] : undefined;
+  });
   const highlightingOn = () => isCodeHighlightingEnabled() && config.codeHighlight();
 
   // When highlighting is off, the source is null so the fetcher never runs and
   // no Shiki code is ever imported — the plain `<pre>` fallback renders instead.
   const [highlighted] = createResource(
-    () => (highlightingOn() ? { code: local.code, lang: lang(), theme: theme() } : null),
+    () => {
+      const t = theme();
+      return highlightingOn() && t ? { code: local.code, lang: lang(), theme: t } : null;
+    },
     (src) => highlight(src.code, src.lang, src.theme)
   );
 
@@ -134,6 +166,8 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
     // `tabindex={0}` makes the horizontally-scrollable region reachable by
     // keyboard (axe `scrollable-region-focusable`); `{...rest}` lets a consumer
     // override it. No `role="region"` — that would demand an accessible name.
+    <>
+    <span ref={probeEl} hidden aria-hidden="true" />
     <Show
       when={highlighted()}
       fallback={
@@ -144,6 +178,7 @@ function CodeBlockCode(props: CodeBlockCodeProps) {
     >
       <div class={classNames()} tabindex={0} innerHTML={highlighted()} {...rest} />
     </Show>
+    </>
   );
 }
 

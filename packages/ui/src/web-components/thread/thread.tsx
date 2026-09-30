@@ -21,8 +21,8 @@ interface Props extends Record<string, unknown> {
   /** Body/prose font scale for rendered markdown (`'xs' | 'sm' | 'base' | 'lg'`).
    *  Defaults to `'sm'`. */
   proseSize?: ProseSize;
-  /** Shiki theme name for syntax-highlighted code blocks (e.g.
-   *  `'github-dark-dimmed'`). */
+  // Default: `'github-light-default'` in light mode, `'github-dark-default'` in dark, live with `html.dark`.
+  /** Shiki theme for code blocks. Unset, it follows the colour scheme (light or dark). */
   codeTheme?: string;
   /** Enable Shiki syntax highlighting in code blocks. Turn off to render plain
    *  `<pre>` blocks (lighter, no highlighter load). Default true. */
@@ -90,7 +90,7 @@ defineWebComponent<Props, Events>('kai-thread', {
   messages: undefined,
   loading: false,
   proseSize: 'sm',
-  codeTheme: 'github-dark-dimmed',
+  codeTheme: undefined,
   codeHighlight: true,
   imagePreview: 'hover',
   // No default, deliberately: an omitted value keys the reveal to each message's own role
