@@ -611,6 +611,59 @@ const exposeMethods = (scope, sourceFile) => {
   return out;
 };
 
+// collect exposeState({ name: () => value }) READ-ONLY members: state the element owns and a
+// composed sibling reads (`el.canGoBack`). The sibling of `expose`, walked the same way and
+// scoped to the same callback. The type is DERIVED, never typed by hand: it is the RETURN TYPE
+// of the getter, rendered through the same `renderType` props use, so it is self-contained and
+// cannot drift from what the getter really returns. A member whose getter cannot be resolved to
+// a function fails the build rather than becoming a runtime property typed nowhere.
+const exposeStateMembers = (scope, sourceFile) => {
+  const out = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'exposeState' &&
+      node.arguments[0] &&
+      ts.isObjectLiteralExpression(node.arguments[0])
+    ) {
+      for (const prop of node.arguments[0].properties) {
+        let name, fn, valueSym;
+        if (ts.isPropertyAssignment(prop) && (ts.isIdentifier(prop.name) || ts.isStringLiteralLike(prop.name))) {
+          name = prop.name.text; fn = prop.initializer;
+        } else if (ts.isMethodDeclaration(prop) && ts.isIdentifier(prop.name)) {
+          name = prop.name.text; fn = prop;
+        } else if (ts.isShorthandPropertyAssignment(prop)) {
+          name = prop.name.text;
+          valueSym = checker.getShorthandAssignmentValueSymbol(prop);
+          const d = valueSym?.valueDeclaration ?? valueSym?.declarations?.[0];
+          fn = d && ts.isVariableDeclaration(d) ? d.initializer : d;
+        } else {
+          throw new Error(`gen-web-component-api: exposeState() in ${basename(sourceFile.fileName)} has a member that is not \`name: () => value\`; it cannot be typed.`);
+        }
+        if (!fn || !ts.isFunctionLike(fn)) {
+          throw new Error(
+            `gen-web-component-api: exposeState({ ${name} }) in ${basename(sourceFile.fileName)} does not resolve to a getter function, so its type cannot be derived.`,
+          );
+        }
+        const sig = checker.getSignatureFromDeclaration(fn);
+        if (!sig) throw new Error(`gen-web-component-api: exposeState({ ${name} }) has no resolvable signature.`);
+        const type = renderType(checker.getReturnTypeOfSignature(sig), fn);
+        let description = '';
+        for (const r of ts.getLeadingCommentRanges(sourceFile.text, prop.getFullStart()) ?? []) {
+          const t = sourceFile.text.slice(r.pos, r.end);
+          if (t.startsWith('/**')) description = t.replace(/^\/\*\*|\*\/$/g, '').replace(/^\s*\*\s?/gm, '').replace(/\s+/g, ' ').trim();
+        }
+        if (!description && valueSym) description = jsdocOf(valueSym);
+        out.push({ name, type, readonly: true, description });
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(scope);
+  return out;
+};
+
 const elements = [];
 for (const file of facadeFiles) {
   const sf = program.getSourceFile(file);
@@ -649,6 +702,7 @@ for (const file of facadeFiles) {
       const children = node.arguments[2] ? declarativeChildren(node.arguments[2]) : [];
       // Same scoping as `children` above, and for the same reason.
       const methods = node.arguments[2] ? exposeMethods(node.arguments[2], sf) : [];
+      const state = node.arguments[2] ? exposeStateMembers(node.arguments[2], sf) : [];
       const description = jsdocOfStatement(ts.isExpressionStatement(node.parent) ? node.parent : node, sf);
       const el = {
         tag, className, displayName: displayNameFromClass(className),
@@ -658,7 +712,7 @@ for (const file of facadeFiles) {
         // tests/scripts/catalog-derived.test.ts ("an element with no doc comment…").
         ...(description ? { description } : {}),
         props: [...UNIVERSAL_PROPS, ...props],
-        events, methods, composedFrom: composed, tokens,
+        events, methods, ...(state.length ? { state } : {}), composedFrom: composed, tokens,
         ...(children.length ? { declarativeChildren: children } : {}),
       };
       // Source-module basename (e.g. confirm-card.tsx → "confirm-card"). The
@@ -859,6 +913,14 @@ const cem = {
           type: { text: p.type },
           description: p.description,
           privacy: 'public',
+        })),
+        ...(el.state ?? []).map((s) => ({
+          kind: 'field',
+          name: s.name,
+          type: { text: s.type },
+          description: s.description,
+          privacy: 'public',
+          readonly: true,
         })),
         ...el.methods.map((m) => ({
           kind: 'method',

@@ -120,36 +120,6 @@
           "fn": false
         },
         {
-          "name": "noNav",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "noReload",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "noHome",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "noPathField",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
-          "name": "noTabs",
-          "scalar": true,
-          "optional": true,
-          "fn": false
-        },
-        {
           "name": "standalone",
           "scalar": true,
           "optional": true,
@@ -170,6 +140,7 @@
       ],
       "events": [
         "kai-file-select",
+        "kai-history-change",
         "kai-maximize-change",
         "kai-maximize-intent",
         "kai-navigate",

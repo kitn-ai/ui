@@ -350,6 +350,17 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
   // `m.dts` is the self-contained signature (gen-web-component-api.mjs); the `params`/
   // `returns` fallback keeps this working for a caller that re-reads the model from
   // web-component-meta.json, where `dts` is deliberately absent.
+  // READ-ONLY state (`exposeState`): `readonly canGoBack: boolean`, typed from the getter's return
+  // type by the generator. Element interfaces only, for the same reason as methods: a Vue/React
+  // props interface is the construct side, and a getter-only member is not something to set.
+  const stateBody = (el) =>
+    (el.state ?? [])
+      .flatMap((s) => [
+        ...(s.description ? [`  /** ${s.description} */`] : []),
+        `  readonly ${s.name}: ${clean(s.type, false)};`,
+      ])
+      .join('\n');
+
   const methodBody = (el) =>
     (el.methods ?? [])
       .flatMap((m) => [
@@ -412,7 +423,7 @@ export function writeTypes(root, elements, _toAttr, IMPORTS, { domMembers = new 
 
   const interfaces = elements
     .map((el) => {
-      const body = [propBody(el, true), methodBody(el), listenerOverloads(el)].filter(Boolean).join('\n');
+      const body = [propBody(el, true), stateBody(el), methodBody(el), listenerOverloads(el)].filter(Boolean).join('\n');
       return `export interface ${el.className} extends HTMLElement {\n${body}\n}`;
     })
     .join('\n\n');

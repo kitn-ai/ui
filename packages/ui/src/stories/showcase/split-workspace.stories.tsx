@@ -2157,7 +2157,7 @@ type Agent = {
         {/* BROWSER — full-screen kai-artifact + your own preview tab strip */}
         <Match when={topView() === 'browser'}>
           <PreviewTabs tabs={browserTabs()} />
-          <kai-artifact src={activeTab().src} displayUrl={activeTab().url} noTabs />
+          <kai-artifact src={activeTab().src} displayUrl={activeTab().url} />
         </Match>
       </Switch>
     </kai-resizable-item>

@@ -50,23 +50,28 @@ test('open-in-tab calls window.open(url, _blank, noopener,noreferrer)', () => {
   vi.unstubAllGlobals();
 });
 
-test('no-* flags hide their affordances; all hidden → no toolbar', () => {
-  const { container } = render(() => (
-    <Artifact
-      src="https://x.test"
-      showNav={false}
-      showReload={false}
-      showHome={false}
-      showPathField={false}
-      showTabs={false}
-    />
-  ));
+test('toolbar={null} means no toolbar; undefined keeps the built-in one', () => {
+  const { container } = render(() => <Artifact src="https://x.test" toolbar={null} />);
   expect(btn(container, 'Back')).toBeNull();
-  expect(btn(container, 'Reload')).toBeNull();
   expect(container.querySelector('[role="tablist"]')).toBeNull();
-  expect(container.querySelector('input#kai-artifact-path')).toBeNull();
-  // showAnyToolbar false → the toolbar bar is omitted entirely.
   expect(container.querySelector('[data-artifact-toolbar]')).toBeNull();
+  const { container: dflt } = render(() => <Artifact src="https://x.test" />);
+  expect(dflt.querySelector('[data-artifact-toolbar]')).toBeTruthy();
+});
+
+test('a custom toolbar replaces the built-in one; toolbarStart/End sit at its ends', () => {
+  const { container } = render(() => (
+    <Artifact src="https://x.test" toolbar={<div data-mine>mine</div>} toolbarStart={<i data-s />} />
+  ));
+  expect(container.querySelector('[data-mine]')).toBeTruthy();
+  expect(container.querySelector('[data-artifact-toolbar]')).toBeNull();
+  expect(container.querySelector('[data-s]')).toBeNull(); // start/end are for the built-in bar only
+  const { container: ends } = render(() => (
+    <Artifact src="https://x.test" toolbarStart={<i data-s />} toolbarEnd={<i data-e />} />
+  ));
+  const bar = ends.querySelector('[data-artifact-toolbar]')!;
+  expect(bar.firstElementChild!.hasAttribute('data-s')).toBe(true);
+  expect(bar.lastElementChild!.hasAttribute('data-e')).toBe(true);
 });
 
 test('standalone toggles the root rounded/border chrome', () => {

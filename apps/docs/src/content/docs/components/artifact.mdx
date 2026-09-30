@@ -48,7 +48,7 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 ```
 
 - **`files`** — each entry needs a `path`; add `url` for the preview, `code` + `language` for the Code tab, and `type` (`html | pdf | image | other`). Folders come from the `/` in paths.
-- **Toolbar** — hide any default control with its `no-*` flag (`no-nav`, `no-reload`, `no-home`, `no-path-field`, `no-tabs`); `expandable` and `open-in-tab` are opt-in.
+- **Toolbar** — replace the whole bar with a `toolbar` slot (an empty element means no toolbar) or add controls at its ends with `toolbar-start` / `toolbar-end`; read `url` (display only), `urlSafe`, `canGoBack` and `canGoForward` off the element and listen for `kai-history-change`. `expandable` and `open-in-tab` are opt-in.
 - **Sandbox** defaults to `allow-scripts allow-forms`. Widen it only for trusted content.
 
 ## Examples
@@ -59,7 +59,7 @@ Point `src` at your hosted artifact and set `files` in JavaScript (it's an array
 
 ### Preview only
 
-<Example client:visible tag="kai-artifact" config={{ noNav: true, noReload: true, noHome: true, noPathField: true, noTabs: true }} />
+<Example client:visible tag="kai-artifact" config={{ tab: 'preview' }} />
 
 ### Open in new tab
 

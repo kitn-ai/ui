@@ -1,5 +1,6 @@
 import {
   type JSX,
+  children,
   splitProps,
   mergeProps,
   createSignal,
@@ -42,6 +43,8 @@ export type ArtifactFile = FileTreeFile;
  *  facade can forward them as instance methods. Each delegates to the SAME internal
  *  handler the toolbar buttons use, so every existing event still fires. */
 export interface ArtifactController {
+  /** Snapshot of the history state (the same shape `onHistoryChange` reports). */
+  getHistory(): ArtifactHistoryState;
   /** Go back in the artifact's own history stack (no-op when there's no prior entry). */
   back(): void;
   /** Go forward in the history stack (no-op when there's no forward entry). */
@@ -60,6 +63,18 @@ export interface ArtifactController {
   maximize(): void;
   /** Exit the maximized view-state. */
   restore(): void;
+}
+
+/** The read-only history state a composed toolbar reads. */
+export interface ArtifactHistoryState {
+  // `url` is the RAW url, and it is the REAL one: never `displayUrl`. A path field should show what
+  // was refused, so it is not filtered. It is display text, not a link target.
+  /** The current url as it arrived. Display only: use it as an href/src/window.open target ONLY when `urlSafe`. */
+  url: string;
+  /** `isSafeUrl(url)`, the same predicate the open-in-tab button uses. False for `javascript:`, `vbscript:`, `data:` and an empty url. */
+  urlSafe: boolean;
+  canGoBack: boolean;
+  canGoForward: boolean;
 }
 
 export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 'onSelect'> {
@@ -93,17 +108,18 @@ export interface ArtifactProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, 
   maximized?: boolean;
   /** Fired when the expand/restore button toggles the maximize view-state. */
   onMaximizeChange?: (maximized: boolean) => void;
-  // toolbar composition — existing five default SHOWN (no-* flags invert in the facade)
-  /** Show the back/forward nav buttons. Default `true`. */
-  showNav?: boolean;
-  /** Show the reload button. Default `true`. */
-  showReload?: boolean;
-  /** Show the home button. Default `true`. */
-  showHome?: boolean;
-  /** Show the editable path/address field. Default `true`. */
-  showPathField?: boolean;
-  /** Show the Preview|Code tab toggle. Default `true`. */
-  showTabs?: boolean;
+  // toolbar composition
+  // `null`/`false`/an empty fragment means "no toolbar"; build your own from `controllerRef` + `onHistoryChange`.
+  /** Replaces the built-in toolbar entirely. `undefined` keeps it. */
+  toolbar?: JSX.Element;
+  /** Extra controls at the LEADING end of the built-in toolbar (ignored when `toolbar` is set). */
+  toolbarStart?: JSX.Element;
+  /** Extra controls at the TRAILING end of the built-in toolbar (ignored when `toolbar` is set). */
+  toolbarEnd?: JSX.Element;
+  // `url` is reported AS IT ARRIVED, like `onNavigate`, so it is NOT scheme-validated. Use it for
+  // display; put it in an href, src or window.open ONLY when `urlSafe` is true.
+  /** Fired on every navigation with `{ url, urlSafe, canGoBack, canGoForward }`, for a composed toolbar. */
+  onHistoryChange?: (state: ArtifactHistoryState) => void;
   // New affordances are OPT-IN: hidden by default.
   /** Show the expand-to-fill button. Default `false` (opt-in). */
   expandable?: boolean;
@@ -172,11 +188,6 @@ export function Artifact(props: ArtifactProps): JSX.Element {
       // initial tab comes from `defaultTab` (seeded into the internal signal below).
       defaultTab: 'preview' as ArtifactTab,
       sandbox: DEFAULT_SANDBOX,
-      showNav: true,
-      showReload: true,
-      showHome: true,
-      showPathField: true,
-      showTabs: true,
       expandable: false,
       openInTab: false,
       standalone: false,
@@ -198,17 +209,16 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     'onFileSelect',
     'maximized',
     'onMaximizeChange',
-    'showNav',
-    'showReload',
-    'showHome',
-    'showPathField',
-    'showTabs',
     'expandable',
     'openInTab',
     'standalone',
     'readonlyPath',
     'displayUrl',
     'controllerRef',
+    'toolbar',
+    'toolbarStart',
+    'toolbarEnd',
+    'onHistoryChange',
     'class',
   ]);
 
@@ -280,10 +290,10 @@ export function Artifact(props: ArtifactProps): JSX.Element {
   // scheme filter is part of `canOpenInTab` rather than only of the handler so
   // the button renders DISABLED for a url that would be refused: a control that
   // looks live and does nothing is the worse failure.
-  const canOpenInTab = createMemo(() => {
-    const u = currentUrl();
-    return !!u && u !== 'about:blank' && isSafeUrl(u);
-  });
+  // ONE predicate for both: `urlSafe` is what a composed toolbar reads, and the open-in-tab button
+  // is gated on the very same answer, so the two can never disagree about a url.
+  const urlSafe = createMemo(() => isSafeUrl(currentUrl()));
+  const canOpenInTab = createMemo(() => currentUrl() !== 'about:blank' && urlSafe());
   const openInNewTab = () => {
     const u = currentUrl();
     if (!canOpenInTab()) {
@@ -297,17 +307,10 @@ export function Artifact(props: ArtifactProps): JSX.Element {
 
   // The expand button is suppressed in standalone (no enclosing resizable).
   const showExpand = createMemo(() => local.expandable && !local.standalone);
-  // Omit the whole toolbar when nothing is shown.
-  const showAnyToolbar = createMemo(
-    () =>
-      local.showNav ||
-      local.showReload ||
-      local.showHome ||
-      local.showPathField ||
-      local.showTabs ||
-      showExpand() ||
-      local.openInTab,
-  );
+  // `toolbar` REPLACES the built-in bar when it is anything but `undefined`, so `null` is a
+  // deliberate "no toolbar". Resolved once through `children` so the node is built one time.
+  const customToolbar = children(() => local.toolbar);
+  const hasCustomToolbar = () => customToolbar() !== undefined;
 
   let iframeEl: HTMLIFrameElement | undefined;
 
@@ -353,6 +356,17 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     loadCurrent();
   }
 
+  /** Report the history state. Called once per navigation, AFTER both signals have moved, so a
+   *  listener never sees a half-updated stack. `reload` is not a navigation and does not call it. */
+  const historyState = (): ArtifactHistoryState => ({
+    url: currentUrl(),
+    urlSafe: urlSafe(),
+    canGoBack: canBack(),
+    canGoForward: canForward(),
+  });
+  const emitHistory = () =>
+    local.onHistoryChange?.(historyState());
+
   /** Point the iframe at the current cursor entry + emit `navigate`. */
   function loadCurrent() {
     if (iframeEl) iframeEl.src = framedUrl() || 'about:blank';
@@ -360,6 +374,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
     // (or a card patching `src` back into its envelope) must not be told the
     // model sent something it did not.
     local.onNavigate?.(currentUrl());
+    emitHistory();
   }
 
   function selectTab(next: ArtifactTab) {
@@ -425,6 +440,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
         if (file) selectFile(path, file);
       },
       openExternal: () => openInNewTab(),
+      getHistory: () => historyState(),
       maximize: () => setMaximizeState(true),
       restore: () => setMaximizeState(false),
     });
@@ -440,6 +456,7 @@ export function Artifact(props: ArtifactProps): JSX.Element {
         setHistory((h) => [...h.slice(0, cursor() + 1), href]);
         setCursor((c) => c + 1);
         local.onNavigate?.(href);
+        emitHistory();
       }
     } catch {
       /* cross-origin (sandboxed without allow-same-origin): keep our own url */
@@ -469,7 +486,10 @@ export function Artifact(props: ArtifactProps): JSX.Element {
       )}
       {...rest}
     >
-      <Show when={showAnyToolbar()}>
+      <Show
+        when={!hasCustomToolbar()}
+        fallback={customToolbar()}
+      >
         <ArtifactToolbar
           url={() => local.displayUrl ?? currentUrl()}
           tab={tab}
@@ -482,11 +502,6 @@ export function Artifact(props: ArtifactProps): JSX.Element {
           onHome={goHome}
           onSubmitPath={submitPath}
           onTab={selectTab}
-          showNav={() => local.showNav}
-          showReload={() => local.showReload}
-          showHome={() => local.showHome}
-          showPathField={() => local.showPathField}
-          showTabs={() => local.showTabs}
           showExpand={showExpand}
           showOpenInTab={() => local.openInTab}
           maximized={maximized}
@@ -494,6 +509,8 @@ export function Artifact(props: ArtifactProps): JSX.Element {
           canOpenInTab={canOpenInTab}
           onOpenInTab={openInNewTab}
           readonlyPath={() => local.readonlyPath || local.displayUrl != null}
+          start={local.toolbarStart}
+          end={local.toolbarEnd}
         />
       </Show>
       <div class="relative min-h-0 flex-1">
@@ -543,11 +560,6 @@ interface ToolbarProps {
   onHome: () => void;
   onSubmitPath: (e: Event) => void;
   onTab: (tab: ArtifactTab) => void;
-  showNav: () => boolean;
-  showReload: () => boolean;
-  showHome: () => boolean;
-  showPathField: () => boolean;
-  showTabs: () => boolean;
   showExpand: () => boolean;
   showOpenInTab: () => boolean;
   maximized: () => boolean;
@@ -555,6 +567,8 @@ interface ToolbarProps {
   canOpenInTab: () => boolean;
   onOpenInTab: () => void;
   readonlyPath: () => boolean;
+  start?: JSX.Element;
+  end?: JSX.Element;
 }
 
 function ArtifactToolbar(props: ToolbarProps): JSX.Element {
@@ -563,69 +577,59 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
       data-artifact-toolbar
       class="flex shrink-0 items-center gap-1.5 border-b border-border bg-surface px-2 py-1.5"
     >
-      <Show when={props.showNav()}>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Back"
-          disabled={!props.canBack()}
-          onClick={() => props.onBack()}
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Forward"
-          disabled={!props.canForward()}
-          onClick={() => props.onForward()}
-        >
-          <ArrowRight size={16} aria-hidden="true" />
-        </Button>
-      </Show>
-      <Show when={props.showReload()}>
-        <Button variant="ghost" size="icon-sm" aria-label="Reload" onClick={() => props.onReload()}>
-          <RotateCw size={15} aria-hidden="true" />
-        </Button>
-      </Show>
-      <Show when={props.showHome()}>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          aria-label="Home"
-          disabled={!props.canHome()}
-          onClick={() => props.onHome()}
-        >
-          <House size={15} aria-hidden="true" />
-        </Button>
-      </Show>
-      <Show when={props.showPathField()}>
-        <form class="min-w-0 flex-1" onSubmit={(e) => props.onSubmitPath(e)}>
-          <label class="sr-only" for="kai-artifact-path">
-            Address
-          </label>
-          <input
-            id="kai-artifact-path"
-            name="kai-artifact-path"
-            type="text"
-            spellcheck={false}
-            autocomplete="off"
-            readonly={props.readonlyPath() || undefined}
-            aria-readonly={props.readonlyPath() ? 'true' : undefined}
-            value={props.url()}
-            class={cn(
-              'h-7 w-full rounded-md border border-border px-2.5 text-xs text-foreground font-mono outline-none',
-              props.readonlyPath()
-                ? 'bg-muted/40 cursor-default'
-                : 'bg-background focus-visible:ring-2 focus-visible:ring-ring',
-            )}
-            placeholder="Enter a path or URL…"
-          />
-        </form>
-      </Show>
-      <Show when={!props.showPathField()}>
-        <div class="flex-1" aria-hidden="true" />
-      </Show>
+      {props.start}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Back"
+        disabled={!props.canBack()}
+        onClick={() => props.onBack()}
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Forward"
+        disabled={!props.canForward()}
+        onClick={() => props.onForward()}
+      >
+        <ArrowRight size={16} aria-hidden="true" />
+      </Button>
+      <Button variant="ghost" size="icon-sm" aria-label="Reload" onClick={() => props.onReload()}>
+        <RotateCw size={15} aria-hidden="true" />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Home"
+        disabled={!props.canHome()}
+        onClick={() => props.onHome()}
+      >
+        <House size={15} aria-hidden="true" />
+      </Button>
+      <form class="min-w-0 flex-1" onSubmit={(e) => props.onSubmitPath(e)}>
+        <label class="sr-only" for="kai-artifact-path">
+          Address
+        </label>
+        <input
+          id="kai-artifact-path"
+          name="kai-artifact-path"
+          type="text"
+          spellcheck={false}
+          autocomplete="off"
+          readonly={props.readonlyPath() || undefined}
+          aria-readonly={props.readonlyPath() ? 'true' : undefined}
+          value={props.url()}
+          class={cn(
+            'h-7 w-full rounded-md border border-border px-2.5 text-xs text-foreground font-mono outline-none',
+            props.readonlyPath()
+              ? 'bg-muted/40 cursor-default'
+              : 'bg-background focus-visible:ring-2 focus-visible:ring-ring',
+          )}
+          placeholder="Enter a path or URL…"
+        />
+      </form>
       <Show when={props.showExpand()}>
         <Button
           variant="ghost"
@@ -650,26 +654,25 @@ function ArtifactToolbar(props: ToolbarProps): JSX.Element {
           <ExternalLink size={15} aria-hidden="true" />
         </Button>
       </Show>
-      <Show when={props.showTabs()}>
-        <div
-          role="tablist"
-          aria-label="View"
-          class="flex shrink-0 items-center gap-0.5 rounded-md bg-muted p-0.5"
-        >
-          <SegmentButton
-            label="Preview"
-            icon={<Eye size={14} aria-hidden="true" />}
-            selected={props.tab() === 'preview'}
-            onClick={() => props.onTab('preview')}
-          />
-          <SegmentButton
-            label="Code"
-            icon={<CodeIcon size={14} aria-hidden="true" />}
-            selected={props.tab() === 'code'}
-            onClick={() => props.onTab('code')}
-          />
-        </div>
-      </Show>
+      <div
+        role="tablist"
+        aria-label="View"
+        class="flex shrink-0 items-center gap-0.5 rounded-md bg-muted p-0.5"
+      >
+        <SegmentButton
+          label="Preview"
+          icon={<Eye size={14} aria-hidden="true" />}
+          selected={props.tab() === 'preview'}
+          onClick={() => props.onTab('preview')}
+        />
+        <SegmentButton
+          label="Code"
+          icon={<CodeIcon size={14} aria-hidden="true" />}
+          selected={props.tab() === 'code'}
+          onClick={() => props.onTab('code')}
+        />
+      </div>
+      {props.end}
     </div>
   );
 }

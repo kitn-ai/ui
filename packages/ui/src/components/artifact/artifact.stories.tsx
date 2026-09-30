@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from 'storybook-solidjs-vite';
 import { createSignal } from 'solid-js';
 import { fn } from 'storybook/test';
-import { Artifact, type ArtifactFile, type ArtifactTab } from './artifact';
+import { Artifact, type ArtifactController, type ArtifactFile, type ArtifactHistoryState, type ArtifactTab } from './artifact';
+import { Button } from '../button/button';
 import { componentDescription } from '../../stories/docs/web-component-controls';
 
 // Storybook serves examples/artifact-fixtures at /artifact-fixtures.
@@ -53,6 +54,7 @@ const meta = {
     onNavigate: { action: 'kai-navigate', description: 'The preview navigated to a new URL.', table: { category: 'Events' } },
     onTabChange: { action: 'kai-tab-change', description: 'The Preview | Code tab changed.', table: { category: 'Events' } },
     onFileSelect: { action: 'kai-file-select', description: 'A file was selected in the Code tree.', table: { category: 'Events' } },
+    onHistoryChange: { action: 'kai-history-change', description: 'The history state changed: `url`, `canGoBack`, `canGoForward`.', table: { category: 'Events' } },
     onMaximizeChange: { action: 'kai-maximize-change', description: 'The artifact entered/left the maximized view.', table: { category: 'Events' } },
   },
   args: {
@@ -85,8 +87,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const IMPORT = `import { Artifact, type ArtifactFile } from '@kitn.ai/ui';`;
-const src = (code: string) => ({
-  parameters: { docs: { source: { code: `${IMPORT}\n\n${code}`, language: 'tsx' } } },
+const src = (code: string, imports = IMPORT) => ({
+  parameters: { docs: { source: { code: `${imports}\n\n${code}`, language: 'tsx' } } },
 });
 
 export const Playground: Story = {
@@ -151,6 +153,69 @@ export const Controlled: Story = {
   ...src(`// \`files\` is your own ArtifactFile[].
 <Artifact src="https://your-app.dev/index.html" files={files}
   onNavigate={(url) => …} onTabChange={(t) => …} onFileSelect={(p) => …} />`),
+};
+
+/** The built-in toolbar plus your own controls at its ends. */
+export const ToolbarEnds: Story = {
+  name: 'Toolbar: start and end',
+  render: () => (
+    <div class="h-[420px] w-full max-w-[900px]">
+      <Artifact
+        src={`${BASE}/index.html`}
+        files={FILES}
+        iframeTitle="Starboard artifact preview"
+        toolbarStart={<span class="px-1 text-xs font-medium text-muted-foreground">Preview</span>}
+        toolbarEnd={<Button variant="ghost" size="sm">Share</Button>}
+      />
+    </div>
+  ),
+  ...src(`<Artifact src="https://your-app.dev/index.html" files={files}
+  toolbarStart={<span>Preview</span>}
+  toolbarEnd={<Button variant="ghost" size="sm">Share</Button>} />`, `import { Artifact, Button, type ArtifactFile } from '@kitn.ai/ui';`),
+};
+
+/** A toolbar you compose: it replaces the built-in one and drives the controller. */
+export const ComposedToolbar: Story = {
+  name: 'Toolbar: composed',
+  render: () => {
+    const [controller, setController] = createSignal<ArtifactController>();
+    const [history, setHistory] = createSignal<ArtifactHistoryState>({ url: `${BASE}/index.html`, urlSafe: true, canGoBack: false, canGoForward: false });
+    return (
+      <div class="h-[420px] w-full max-w-[900px]">
+        <Artifact
+          src={`${BASE}/index.html`}
+          files={FILES}
+          iframeTitle="Starboard artifact preview"
+          controllerRef={setController}
+          onHistoryChange={setHistory}
+          toolbar={
+            <div class="flex shrink-0 items-center gap-1.5 border-b border-border bg-surface px-2 py-1.5">
+              <Button variant="ghost" size="sm" disabled={!history().canGoBack} onClick={() => controller()?.back()}>Back</Button>
+              <Button variant="ghost" size="sm" disabled={!history().canGoForward} onClick={() => controller()?.forward()}>Forward</Button>
+              <span class="min-w-0 flex-1 truncate font-mono text-xs text-muted-foreground">{history().url}</span>
+            </div>
+          }
+        />
+      </div>
+    );
+  },
+  ...src(`// \`toolbar\` replaces the built-in bar. \`null\` means no toolbar at all.
+const [controller, setController] = createSignal<ArtifactController>();
+const [history, setHistory] = createSignal<ArtifactHistoryState>();
+
+<Artifact src="https://your-app.dev/index.html" files={files} controllerRef={setController} onHistoryChange={setHistory}
+  toolbar={<MyBar canGoBack={history()?.canGoBack} onBack={() => controller()?.back()} />} />`),
+};
+
+/** No toolbar: a viewer that only shows the artifact. */
+export const NoToolbar: Story = {
+  name: 'Toolbar: none',
+  render: () => (
+    <div class="h-[420px] w-full max-w-[900px]">
+      <Artifact src={`${BASE}/index.html`} files={FILES} iframeTitle="Starboard artifact preview" toolbar={null} />
+    </div>
+  ),
+  ...src(`<Artifact src="https://your-app.dev/index.html" files={files} toolbar={null} />`),
 };
 
 /** PDFs render inline via pdf.js (loaded on demand from a CDN). */

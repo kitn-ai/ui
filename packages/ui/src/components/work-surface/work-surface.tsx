@@ -277,11 +277,7 @@ export function WorkSurface(props: WorkSurfaceProps): JSX.Element {
                 <Artifact
                   src={codeSrc()}
                   iframeTitle={props.iframeTitle ? `${props.iframeTitle}: source` : 'Source'}
-                  showNav={false}
-                  showReload={false}
-                  showHome={false}
-                  showPathField={false}
-                  showTabs={false}
+                  toolbar={null}
                   expandable={false}
                   openInTab={false}
                 />
@@ -304,11 +300,7 @@ export function WorkSurface(props: WorkSurfaceProps): JSX.Element {
                 <Artifact
                   src={src()}
                   iframeTitle={props.iframeTitle ?? 'Work surface'}
-                  showNav={false}
-                  showReload={false}
-                  showHome={false}
-                  showPathField={false}
-                  showTabs={false}
+                  toolbar={null}
                   expandable={false}
                   openInTab={false}
                   controllerRef={(api) => (controller = api)}

@@ -191,51 +191,6 @@
         "displayType": "undefined | false | true"
       },
       {
-        "name": "noNav",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Hide back/forward.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
-        "name": "noReload",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Hide reload.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
-        "name": "noHome",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Hide home.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
-        "name": "noPathField",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Hide the address field.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
-        "name": "noTabs",
-        "type": "undefined | false | true",
-        "optional": true,
-        "scalar": true,
-        "description": "Hide the Preview|Code toggle.",
-        "default": "false",
-        "displayType": "undefined | false | true"
-      },
-      {
         "name": "standalone",
         "type": "undefined | false | true",
         "optional": true,
@@ -268,6 +223,12 @@
         "detail": "{ path: string }",
         "description": "Fired when a file is selected. `detail.path`.",
         "displayDetail": "{ path: string }"
+      },
+      {
+        "name": "kai-history-change",
+        "detail": "{ url: string; urlSafe: false | true; canGoBack: false | true; canGoForward: false | true }",
+        "description": "The history state changed (once per navigation, back and forward included). `urlSafe` is `isSafeUrl(url)`.",
+        "displayDetail": "{ url: string; urlSafe: false | true; canGoBack: false | true; canGoForward: false | true }"
       },
       {
         "name": "kai-maximize-change",
@@ -350,13 +311,56 @@
         "description": "Exit the maximized view-state (fires kai-maximize-change{maximized:false})."
       }
     ],
+    "state": [
+      {
+        "name": "url",
+        "type": "string",
+        "readonly": true,
+        "description": "The current url: the RAW, REAL one (never `displayUrl`), so a path field can show what was refused. Display only: use it as an href, src or window.open target ONLY when `urlSafe` is true."
+      },
+      {
+        "name": "urlSafe",
+        "type": "false | true",
+        "readonly": true,
+        "description": "`isSafeUrl(url)`, the predicate the open-in-tab button uses. False for `javascript:`, `vbscript:`, `data:` and an empty url. A composed `<a href={el.url}>` runs a model-steered `javascript:` in the host origin on one click, so gate every link on this."
+      },
+      {
+        "name": "canGoBack",
+        "type": "false | true",
+        "readonly": true,
+        "description": "Whether `back()` has an entry to go to. False right after load."
+      },
+      {
+        "name": "canGoForward",
+        "type": "false | true",
+        "readonly": true,
+        "description": "Whether `forward()` has an entry to go to."
+      }
+    ],
     "composedFrom": [
       {
         "name": "Artifact",
         "group": "Components"
       }
     ],
-    "tokens": []
+    "tokens": [],
+    "slots": [
+      {
+        "name": "toolbar",
+        "mode": "replace",
+        "doc": "Replaces the built-in toolbar entirely. An empty element here means no toolbar. You own its behavior: call the host's `back()`/`forward()`/`reload()`/`home()`/`navigate()` and read `canGoBack`/`canGoForward` (updated on `kai-history-change`). `url` is display text (the raw, real url, never `displayUrl`); use it as an href, src or window.open target only when `urlSafe` is true."
+      },
+      {
+        "name": "toolbar-start",
+        "mode": "inject",
+        "doc": "Extra controls at the leading end of the built-in toolbar (ignored while `toolbar` is filled)."
+      },
+      {
+        "name": "toolbar-end",
+        "mode": "inject",
+        "doc": "Extra controls at the trailing end of the built-in toolbar (ignored while `toolbar` is filled)."
+      }
+    ]
   },
   {
     "tag": "kai-attachments",

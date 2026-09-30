@@ -243,17 +243,13 @@ test('kai-maximize-state on the host flips the artifact button label', async () 
   expect(el.shadowRoot!.querySelector('[aria-label="Expand"]')).toBeTruthy();
 });
 
-test('no-* attributes hide affordances; standalone toggles root chrome', async () => {
+test('standalone toggles root chrome', async () => {
   const el = document.createElement('kai-artifact') as HTMLElement;
   el.setAttribute('src', 'https://x.test');
-  el.setAttribute('no-nav', '');
-  el.setAttribute('no-tabs', '');
   el.setAttribute('standalone', '');
   document.body.appendChild(el);
   await flush();
   const root = el.shadowRoot!;
-  expect(root.querySelector('[aria-label="Back"]')).toBeNull();
-  expect(root.querySelector('[role="tablist"]')).toBeNull();
   expect(root.querySelector('.rounded-xl')).toBeTruthy(); // standalone chrome
 });
 
