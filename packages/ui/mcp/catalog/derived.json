@@ -6140,6 +6140,7 @@
     "--kai-color-primary",
     "--kai-color-primary-foreground",
     "--kai-color-ring",
+    "--kai-color-scheme",
     "--kai-color-scrollbar-thumb",
     "--kai-color-scrollbar-thumb-hover",
     "--kai-color-secondary",

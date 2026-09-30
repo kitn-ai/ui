@@ -269,7 +269,7 @@ test('NumberWidget keeps the SAME input node when `invalid` flips', () => {
   const after = container.querySelector('input') as HTMLInputElement;
   expect(after, 'the invalid flip rebuilt the input node').toBe(before);
   expect(document.activeElement, 'focus did not survive the invalid flip').toBe(before);
-  expect(after.className).toContain('border-destructive');
+  expect(after.className).toContain('color:light-dark(');
 });
 
 test('NumberWidget forwards the schema bounds and invents none', () => {

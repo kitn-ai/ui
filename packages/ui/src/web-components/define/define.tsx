@@ -3,6 +3,7 @@ import { ChatConfig } from '../../primitives/chat-config';
 import { WEB_COMPONENT_CSS } from './css';
 import { webComponentDiagnosticsWanted, installElementDiagnostics } from '../web-component/web-component-diagnostics';
 import { createEffect, createSignal, onCleanup, Show, untrack, type JSX } from 'solid-js';
+import { createResolvedColorScheme } from '../../primitives/color-scheme';
 
 /**
  * Shared constructable stylesheet, built once and adopted by every web component's
@@ -26,20 +27,57 @@ function getSharedSheet(): CSSStyleSheet | null {
   return sharedSheet;
 }
 
-/** Resolve whether the element should render dark, given its `theme` and the
- *  system preference. `auto` (the default) follows `prefers-color-scheme`. */
-function createDarkMode(getTheme: () => string | undefined) {
-  const [systemDark, setSystemDark] = createSignal(false);
-  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    setSystemDark(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches);
-    mq.addEventListener('change', onChange);
-    onCleanup(() => mq.removeEventListener('change', onChange));
+/**
+ * The token scope every facade's content sits inside. `color-scheme` is what `light-dark()` in the
+ * colour tokens resolves against, and it reads the INHERITED `--kai-color-scheme` (light | dark) so one
+ * declaration on `:root` or on any ancestor themes every element under it; unset, it falls to
+ * `light dark`, i.e. the OS preference. `theme="light" | "dark"` writes the knob on THIS wrapper, which
+ * beats whatever it inherited, and `auto` writes nothing, so the element inherits. A string, not an
+ * object: Solid drops computed `style={{}}` keys (see the new-components notes), and a custom
+ * property cannot be a JSX style key anyway.
+ */
+function schemeStyle(theme: string | undefined): string {
+  const local = theme === 'dark' || theme === 'light' ? `--kai-color-scheme:${theme};` : '';
+  return `display:contents;${local}color-scheme:var(--kai-color-scheme, light dark);color:var(--color-foreground)`;
+}
+
+/**
+ * `.dark` / `.light` on the page root (or any ancestor) are the conventional way to pick a scheme, but
+ * a selector inside a shadow root's sheet cannot match a light-DOM ancestor, so the shadow copy of the
+ * `.dark`/`.light` rules in theme.css never fires for them. Register the same two rules once at
+ * DOCUMENT scope, so `<html class="dark">` needs no stylesheet from the consumer. The knob is a custom
+ * property, so it then inherits down through every shadow boundary.
+ */
+let documentSchemeInstalled = false;
+function installDocumentSchemeRules(): void {
+  if (documentSchemeInstalled || typeof document === 'undefined') return;
+  documentSchemeInstalled = true;
+  try {
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync('.dark{--kai-color-scheme:dark}.light{--kai-color-scheme:light}');
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
+  } catch {
+    // No constructable stylesheets: fall back to a <style>, same two rules.
+    const style = document.createElement('style');
+    style.setAttribute('data-kai-scheme', '');
+    style.textContent = '.dark{--kai-color-scheme:dark}.light{--kai-color-scheme:light}';
+    document.head?.append(style);
   }
+}
+
+/**
+ * Whether the element renders dark, for the few consumers that cannot read CSS. `theme="dark" | "light"`
+ * decides for this element; `auto` (the default) asks `createResolvedColorScheme` about the HOST, so it
+ * follows an inherited `--kai-color-scheme` (`.dark` / `.light` on any ancestor) and then the OS. It is
+ * the same fact the colour tokens resolve through `light-dark()`, read in JS.
+ */
+function createDarkMode(element: HTMLElement, getTheme: () => string | undefined) {
+  const inherited = createResolvedColorScheme(element);
   return () => {
     const theme = getTheme() ?? 'auto';
-    return theme === 'dark' || (theme === 'auto' && systemDark());
+    if (theme === 'dark') return true;
+    if (theme === 'light') return false;
+    return inherited() === 'dark';
   };
 }
 
@@ -102,13 +140,11 @@ export interface WebComponentContext<E = Record<string, unknown>> {
   // `undefined` from it means "not ready, leave the attribute alone".
   /** Reflect a flag to its host attribute and keep the property readable. Use instead of hand-rolling `toggleAttribute`. */
   reflectFlag: (name: string, source?: () => boolean | undefined) => void;
-  // Exactly the SAME resolved value that already drives the `.dark` class every facade's
-  // content sits inside (not a second computation of the `theme='light'|'dark'|'auto'`
-  // rule; see `createDarkMode` above). Most facades never need this directly, since the
-  // injected kit CSS already flips its custom properties under `.dark`. It exists for
-  // content that cannot read CSS at all -- e.g. a WebGL shader baking a colour choice
-  // into a GLSL uniform, which is why `kai-audio-visualizer` reads it.
-  /** The resolved dark-mode value that drives the `.dark` class. */
+  // The resolved scheme as a boolean, the SAME fact the colour tokens resolve through
+  // `light-dark()` (see `createDarkMode` above). Most facades never need this, since the kit CSS
+  // already follows `--kai-color-scheme`. It exists for content that cannot read CSS at all --
+  // e.g. a WebGL shader baking a colour choice into a GLSL uniform (`kai-audio-visualizer`).
+  /** Whether this element renders dark: its `theme`, else the inherited `--kai-color-scheme`, else the OS. Reactive. */
   dark: () => boolean;
 }
 
@@ -436,9 +472,10 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     }
   }
 
-  // Every element gets a `theme` property/attribute. It drives a `.dark` class on
-  // an inner wrapper, which the injected kit CSS already styles — so dark mode
-  // works in standalone Shadow-DOM usage with no token duplication.
+  // Every element gets a `theme` property/attribute. `light` / `dark` write
+  // `--kai-color-scheme` on an inner wrapper, which every colour token resolves
+  // through `light-dark()`; `auto` writes nothing, so the element inherits the page's
+  // scheme (a `.dark` / `.light` ancestor, or `--kai-color-scheme` set anywhere above).
   //
   // The `as` annotation is load-bearing, not decoration: scripts/gen-web-component-api.mjs
   // reads THIS object literal to learn which props every web component gets for free, and
@@ -447,7 +484,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
   // web-component-meta.json, the generated .d.ts, custom-elements.json and llms-full.txt
   // for all 79 web components, with no second list to update.
   const defaults = {
-    /** Color mode (`auto` follows prefers-color-scheme). */
+    /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
     theme: 'auto' as 'light' | 'dark' | 'auto',
     ...propDefaults,
   };
@@ -521,7 +558,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
       }
     };
 
-    const isDark = createDarkMode(() => props.theme as string | undefined);
+    const isDark = createDarkMode(element, () => props.theme as string | undefined);
 
     // Prefer a single shared stylesheet adopted into this shadow root; only emit
     // an inline <style> when Constructable Stylesheets aren't supported.
@@ -537,6 +574,7 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
     // and menu/dropdown trigger flashing as if hovered-then-un-hovered on first
     // render. Adopting first means the very first computed style of every node is
     // already the resting style, so no transition can fire on load.
+    installDocumentSchemeRules();
     const sheet = getSharedSheet();
     if (sheet) {
       const root = element.shadowRoot ?? element.attachShadow({ mode: 'open' });
@@ -550,11 +588,11 @@ export function defineWebComponent<P extends Record<string, unknown>, E = Record
         <Show when={!sheet}>
           <style>{WEB_COMPONENT_CSS}</style>
         </Show>
-        {/* display:contents — no layout box; carries the .dark token scope and
+        {/* display:contents — no layout box; carries the scheme scope and
             re-roots the inherited `color` to the active mode's foreground, so text
             without an explicit color class (e.g. attachment filename labels) follows
             light/dark instead of inheriting the host page's color. */}
-        <div classList={{ dark: isDark() }} style={{ display: 'contents', color: 'var(--color-foreground)' }}>
+        <div style={schemeStyle(props.theme as string | undefined)}>
           <div ref={portalNode} />
           <ChatConfig portalMount={portalNode}>
             {/* UNTRACKED, deliberately — the facade body must run ONCE. As a bare

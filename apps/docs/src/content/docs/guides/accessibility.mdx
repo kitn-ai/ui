@@ -88,9 +88,9 @@ Tooltips and hover cards (on sources, context meter, attachment previews) confor
 
 ## Color contrast and theming
 
-The default light and dark palettes both pass AA contrast requirements. The `theme` attribute on every web component (`light | dark | auto`) controls which token set loads.
+The default light and dark palettes both pass AA contrast requirements. The `theme` attribute on every web component (`light | dark | auto`) pins the scheme for that element.
 
-`auto`, the default, follows the OS `prefers-color-scheme` media query, so users who enable dark mode at the OS level get it automatically.
+`auto`, the default, inherits the page's `--kai-color-scheme` (a `.dark` or `.light` class on an ancestor) and otherwise follows the OS `prefers-color-scheme`, so users who enable dark mode at the OS level get it automatically.
 
 <Aside type="caution" title="Custom tokens need manual verification">
 If you override `--color-*` tokens, contrast checking is your responsibility. Nothing in the kit's CI checks contrast, for its own token values or yours.

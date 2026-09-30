@@ -285,6 +285,9 @@ export default defineConfig({
           // hangs off the window passes: the wrong environment is a NAMED cause of
           // green, not a slower one.
           'tests/browser/**', '**/tests/browser/**',
+          // `tests/theme/**` are real-browser specs too (`light-dark()` needs a real cascade), run by
+          // vitest.browser.config.ts alongside tests/browser.
+          'tests/theme/**', '**/tests/theme/**',
           ...EMITTED_CODE_TESTS_EXCLUDE,
         ]
       }

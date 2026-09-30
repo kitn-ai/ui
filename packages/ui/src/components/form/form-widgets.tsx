@@ -1,7 +1,7 @@
 import { type JSX, For, Show, createMemo, createSignal } from 'solid-js';
 import { cn } from '../../utils/cn';
 import { Textarea } from '../textarea/textarea';
-import { Input, FIELD_BASE as inputBase } from '../input/input';
+import { Input, FIELD_BASE as inputBase, FIELD_INVALID } from '../input/input';
 import { Slider } from '../slider/slider';
 import { Select } from '../select/select';
 import { Switch } from '../switch/switch';
@@ -122,7 +122,7 @@ export function TextareaWidget(props: WidgetProps): JSX.Element {
       <Textarea
         id={props.id}
         data-control
-        class={cn(inputBase, props.invalid && 'border-destructive dark:border-red-400/70')}
+        class={cn(inputBase, props.invalid && FIELD_INVALID)}
         value={(props.value as string) ?? ''}
         placeholder={props.placeholder}
         disabled={props.disabled}

@@ -948,9 +948,9 @@ export function Composer(props: ComposerProps): JSX.Element {
            NO \`prefers-color-scheme\` here, deliberately: the OS scheme and the kit's
            RESOLVED theme are different questions, and \`theme="light"\` on a dark-OS
            machine is ordinary, so a scheme-keyed value would paint the dark amber on
-           the light field. The pills below answer this by scoping to \`.dark\`, which is
-           unavailable here: \`::highlight()\` names a document-registered highlight, so
-           there is no wrapper to hang a descendant selector on.
+           the light field. The pills below answer this with \`light-dark()\`, which does
+           not fit here: \`::highlight()\` names a document-registered highlight, so
+           there is no wrapper to hang a scheme on.
 
            It does not need one: \`--color-highlight\` reaches this pseudo through
            highlight inheritance from the ORIGINATING element, so the token already
@@ -986,24 +986,17 @@ export function Composer(props: ComposerProps): JSX.Element {
              entity label + emitted payload keep the consumer's original casing. */
           text-transform: lowercase;
         }
-        .kai-composer-pill[data-kind="skill"] { color: var(--kai-pill-skill, #2563eb); }
-        .kai-composer-pill[data-kind="agent"] { color: var(--kai-pill-agent, #7c3aed); }
-        /* Brighter hues on dark so they don't muddy against a dark field. The
-           consumer's --kai-pill-* override still wins (it's the var value); only
-           the FALLBACK shifts per scheme.
-
-           Keyed on the kit's RESOLVED theme (the \`.dark\` wrapper an element
-           facade puts inside its shadow root, and the \`.dark\` class the docs /
-           Storybook put on <html>) — NOT \`prefers-color-scheme\`. Those are
-           different questions: \`theme="light"\` on a machine whose OS is dark is
-           an ordinary, common configuration, and the media query answered the OS
-           while the surface under the pill answered the attribute. That painted
-           the DARK hue (#6ea8fe) on the LIGHT field: 2.33:1, under both the
-           4.5:1 text floor (SC 1.4.3) and even 3:1. Matched pairs looked fine,
-           which is why it survived — never scheme-match a colour whose backdrop
-           is chosen by the theme attribute. */
-        .dark .kai-composer-pill[data-kind="skill"] { color: var(--kai-pill-skill, #6ea8fe); }
-        .dark .kai-composer-pill[data-kind="agent"] { color: var(--kai-pill-agent, #c4a7fc); }
+        /* Brighter hues on dark so they don't muddy against a dark field. One
+           declaration per kind: \`light-dark(<light>, <dark>)\` resolves against the
+           RESOLVED scheme of the element (the inherited --kai-color-scheme, or the
+           \`theme\` prop on the facade wrapper, else the OS) and NOT against
+           \`prefers-color-scheme\` alone. Those are different questions:
+           \`theme="light"\` on a dark-OS machine is an ordinary configuration, and a
+           media query painted the DARK hue (#6ea8fe) on the LIGHT field, 2.33:1,
+           under the 4.5:1 text floor (SC 1.4.3). The consumer's --kai-pill-*
+           override still wins (it is the var value); only the FALLBACK shifts. */
+        .kai-composer-pill[data-kind="skill"] { color: var(--kai-pill-skill, light-dark(#2563eb, #6ea8fe)); }
+        .kai-composer-pill[data-kind="agent"] { color: var(--kai-pill-agent, light-dark(#7c3aed, #c4a7fc)); }
         /* Dimmer than the label, but the sigil is what makes a pill read as
            \`/skill\` vs \`@agent\`, so it is a meaningful glyph and owes 3:1
            (SC 1.4.11). At 0.6 the light-mode composite was 2.52:1. */
@@ -1119,9 +1112,8 @@ export function Composer(props: ComposerProps): JSX.Element {
             menu's own styles come from bare-class rules in this component's
             `<style>` blocks (`.kai-composer-pill*`), which sit in the SAME tree as
             that mount point, so nothing here depended on being a descendant of the
-            composer root. The one ancestry-keyed rule that does apply —
-            `.dark .kai-composer-pill[data-kind=…]` — still matches, because the
-            facade's portal node lives inside its `.dark` wrapper. */}
+            composer root. The pill colours are `light-dark()` values, so they follow
+            the facade wrapper's scheme, which the portal node sits inside. */}
         <Portal mount={config.portalMount()}>
           <div
             ref={(el) => { setMenuRef(el); setRef(el); }}

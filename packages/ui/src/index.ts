@@ -23,6 +23,8 @@ export { cn } from './utils/cn';
 // Layer 1: Headless Primitives
 export { createKaiChat } from './stores/create-kai-chat';
 export type { CreateKaiChatOptions, KaiChatStore } from './stores/create-kai-chat';
+export { createResolvedColorScheme } from './primitives/color-scheme';
+export type { ResolvedColorScheme } from './primitives/color-scheme';
 export { useAutoResize } from './primitives/use-auto-resize';
 export { useStickToBottom } from './primitives/use-stick-to-bottom';
 export { useTextStream } from './primitives/use-text-stream';

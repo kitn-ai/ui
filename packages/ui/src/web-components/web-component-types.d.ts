@@ -132,7 +132,7 @@ export declare const toast: {
 export declare function configureToasts(config: ToastConfig): void;
 
 export interface KaiAgentCardElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The agent's name, the primary label. Attribute: `name`. */
   name?: string;
@@ -149,7 +149,7 @@ export interface KaiAgentCardElement extends HTMLElement {
 }
 
 export interface KaiArtifactElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
@@ -210,7 +210,7 @@ export interface KaiArtifactElement extends HTMLElement {
 }
 
 export interface KaiAttachmentsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. */
   items: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
@@ -233,7 +233,7 @@ export interface KaiAttachmentsElement extends HTMLElement {
 }
 
 export interface KaiAudioVisualizerElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. */
   variant?: string;
@@ -272,7 +272,7 @@ export interface KaiAudioVisualizerElement extends HTMLElement {
 }
 
 export interface KaiAvatarElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Image URL/data-URI. When absent, the `fallback` initials show instead. */
   src?: string;
@@ -285,14 +285,14 @@ export interface KaiAvatarElement extends HTMLElement {
 }
 
 export interface KaiBadgeElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
 export interface KaiButtonElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Visual style. Defaults to `default` (filled). */
   variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
@@ -325,7 +325,7 @@ export interface KaiButtonElement extends HTMLElement {
 }
 
 export interface KaiCardElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
   appearance?: "outlined" | "filled" | "plain" | "accent";
@@ -352,7 +352,7 @@ export interface KaiCardElement extends HTMLElement {
 }
 
 export interface KaiCardsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
@@ -377,7 +377,7 @@ export interface KaiCardsElement extends HTMLElement {
 }
 
 export interface KaiChainOfThoughtElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. */
   steps: { label: string; content?: string; id?: string }[];
@@ -400,7 +400,7 @@ export interface KaiChainOfThoughtElement extends HTMLElement {
 }
 
 export interface KaiChatElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
   density?: "default" | "compact";
@@ -517,7 +517,7 @@ export interface KaiChatElement extends HTMLElement {
 }
 
 export interface KaiCheckboxElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled checked state, reflected to the `checked` attribute. Ticking the box updates it and fires `kai-change`. */
   checked?: boolean;
@@ -546,7 +546,7 @@ export interface KaiCheckboxElement extends HTMLElement {
 }
 
 export interface KaiCheckboxGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
@@ -569,7 +569,7 @@ export interface KaiCheckboxGroupElement extends HTMLElement {
 }
 
 export interface KaiCheckpointElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Text beside the icon. */
   label?: string;
@@ -586,7 +586,7 @@ export interface KaiCheckpointElement extends HTMLElement {
 }
 
 export interface KaiChoiceElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. */
   data?: { prompt?: string; options: { id: string; label: string; description?: string; media?: { image?: string; imageAlt?: string; icon?: string }; meta?: string; recommended?: boolean; disabled?: boolean; payload?: unknown }[]; allowOther?: boolean | { label?: string; placeholder?: string }; submitLabel?: string; dismissible?: boolean };
@@ -619,7 +619,7 @@ export interface KaiChoiceElement extends HTMLElement {
 }
 
 export interface KaiCoachmarkElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -648,7 +648,7 @@ export interface KaiCoachmarkElement extends HTMLElement {
 }
 
 export interface KaiCodeBlockElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The source code to render. */
   code: string;
@@ -665,7 +665,7 @@ export interface KaiCodeBlockElement extends HTMLElement {
 }
 
 export interface KaiCommandElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Flat list of items. Set as a JS property, not an HTML attribute. */
   items?: { id: string; label: string; icon?: string; description?: string; shortcut?: string; group?: string }[];
@@ -686,7 +686,7 @@ export interface KaiCommandElement extends HTMLElement {
 }
 
 export interface KaiCompareElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The compare definition (prompt + the two candidates). JS property: `el.data = { prompt, candidates: [A, B] }`. */
   data?: Record<string, unknown>;
@@ -713,7 +713,7 @@ export interface KaiCompareElement extends HTMLElement {
 }
 
 export interface KaiComposerElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled value: a string or a full ComposerDoc (set as JS property). */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
@@ -750,7 +750,7 @@ export interface KaiComposerElement extends HTMLElement {
 }
 
 export interface KaiConfirmElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. */
   data?: { heading?: string; body?: string; tone?: "default" | "warning" | "danger"; actions: { id: string; label: string; style?: "primary" | "default" | "destructive"; payload?: unknown; default?: boolean }[]; dismissible?: boolean };
@@ -773,7 +773,7 @@ export interface KaiConfirmElement extends HTMLElement {
 }
 
 export interface KaiContextElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
@@ -788,7 +788,7 @@ export interface KaiContextElement extends HTMLElement {
 }
 
 export interface KaiConversationItemElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The row's identity: the `conversation-id` attribute, else the host `id`. */
   conversationId?: string;
@@ -807,7 +807,7 @@ export interface KaiConversationItemElement extends HTMLElement {
 }
 
 export interface KaiConversationsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[];
@@ -846,7 +846,7 @@ export interface KaiConversationsElement extends HTMLElement {
 }
 
 export interface KaiDialogElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -869,7 +869,7 @@ export interface KaiDialogElement extends HTMLElement {
 }
 
 export interface KaiDockElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -906,7 +906,7 @@ export interface KaiDockElement extends HTMLElement {
 }
 
 export interface KaiDropdownElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. */
   triggerIcon?: string;
@@ -937,7 +937,7 @@ export interface KaiDropdownElement extends HTMLElement {
 }
 
 export interface KaiEditableLabelElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. */
   value?: string;
@@ -962,7 +962,7 @@ export interface KaiEditableLabelElement extends HTMLElement {
 }
 
 export interface KaiEmbedElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -971,7 +971,7 @@ export interface KaiEmbedElement extends HTMLElement {
 }
 
 export interface KaiEmptyElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
@@ -980,7 +980,7 @@ export interface KaiEmptyElement extends HTMLElement {
 }
 
 export interface KaiFeedbackBarElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided because it is a global HTML attribute). */
   barTitle?: string;
@@ -1003,7 +1003,7 @@ export interface KaiFeedbackBarElement extends HTMLElement {
 }
 
 export interface KaiFileTreeElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
@@ -1020,7 +1020,7 @@ export interface KaiFileTreeElement extends HTMLElement {
 }
 
 export interface KaiFileUploadElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Allow picking more than one file. Default true. */
   multiple?: boolean;
@@ -1037,7 +1037,7 @@ export interface KaiFileUploadElement extends HTMLElement {
 }
 
 export interface KaiFormElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. */
   data?: { type: "object"; title?: string; description?: string; required?: string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: string; description?: string; default?: unknown; enum?: unknown[]; format?: "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: number; maximum?: number; minLength?: number; maxLength?: number; pattern?: string; minItems?: number; maxItems?: number; items?: Record<string, unknown> | { enum: unknown[] }; properties?: Record<string, Record<string, unknown>>; required?: string[]; readOnly?: boolean; "x-kai-widget"?: "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: string; "x-kai-step"?: number; "x-kai-format"?: "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: string; "x-kai-mask-guide"?: string }>; "x-kai-order"?: string[]; "x-kai-inlineMax"?: number; "x-kai-submitLabel"?: string; "x-kai-dismissible"?: boolean; "x-kai-actions"?: { id: string; label: string; variant?: "default" | "ghost" | "outline" }[] };
@@ -1072,7 +1072,7 @@ export interface KaiFormElement extends HTMLElement {
 }
 
 export interface KaiHoverCardElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). */
   openDelay?: number;
@@ -1099,7 +1099,7 @@ export interface KaiHoverCardElement extends HTMLElement {
 }
 
 export interface KaiIconElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. */
   name?: string;
@@ -1108,7 +1108,7 @@ export interface KaiIconElement extends HTMLElement {
 }
 
 export interface KaiImageElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. */
   src?: string;
@@ -1119,7 +1119,7 @@ export interface KaiImageElement extends HTMLElement {
 }
 
 export interface KaiImageArtifactElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The image PAYLOAD: BARE base64 (never a URI) or raw bytes. Attribute `data` for base64; JS property for `Uint8Array`. */
   data?: string | Uint8Array;
@@ -1132,7 +1132,7 @@ export interface KaiImageArtifactElement extends HTMLElement {
 }
 
 export interface KaiInputElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
   type?: string;
@@ -1189,7 +1189,7 @@ export interface KaiInputElement extends HTMLElement {
 }
 
 export interface KaiKbdElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. */
   keys?: string;
@@ -1200,12 +1200,12 @@ export interface KaiKbdElement extends HTMLElement {
 }
 
 export interface KaiKbdGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiLightboxElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1232,7 +1232,7 @@ export interface KaiLightboxElement extends HTMLElement {
 }
 
 export interface KaiLinkPreviewElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -1241,7 +1241,7 @@ export interface KaiLinkPreviewElement extends HTMLElement {
 }
 
 export interface KaiLoaderElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Animation style. Default `circular`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
@@ -1252,7 +1252,7 @@ export interface KaiLoaderElement extends HTMLElement {
 }
 
 export interface KaiMarkdownElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The markdown source. */
   content: string;
@@ -1265,7 +1265,7 @@ export interface KaiMarkdownElement extends HTMLElement {
 }
 
 export interface KaiMenuElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
   items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
@@ -1300,7 +1300,7 @@ export interface KaiMenuElement extends HTMLElement {
 }
 
 export interface KaiMessageElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
@@ -1335,7 +1335,7 @@ export interface KaiMessageElement extends HTMLElement {
 }
 
 export interface KaiModelSwitcherElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. */
   models: { id: string; name: string; provider?: string; description?: string; group?: string }[];
@@ -1360,7 +1360,7 @@ export interface KaiModelSwitcherElement extends HTMLElement {
 }
 
 export interface KaiNavElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
   items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string; action?: { icon: string; label: string }; closable?: boolean }[];
@@ -1379,7 +1379,7 @@ export interface KaiNavElement extends HTMLElement {
 }
 
 export interface KaiNoticeElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Severity. Defaults to `'neutral'`. */
   severity?: "neutral" | "info" | "warning" | "error" | "success";
@@ -1394,7 +1394,7 @@ export interface KaiNoticeElement extends HTMLElement {
 }
 
 export interface KaiPaneElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. */
   headline?: string;
@@ -1417,7 +1417,7 @@ export interface KaiPaneElement extends HTMLElement {
 }
 
 export interface KaiPaneGridElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Minimum width of every pane, in px, before columns drop / the grid scrolls. Defaults to `280`. Attribute: `min-pane-width`. */
   minPaneWidth?: number;
@@ -1432,7 +1432,7 @@ export interface KaiPaneGridElement extends HTMLElement {
 }
 
 export interface KaiPaneGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
   tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
@@ -1451,19 +1451,19 @@ export interface KaiPaneGroupElement extends HTMLElement {
 }
 
 export interface KaiPanelElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Standalone widget-box chrome: border, radius and shadow on the panel itself. */
   frame?: boolean;
 }
 
 export interface KaiPanelHeaderElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiPopoverElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Floating placement relative to the trigger (floating-ui placement). */
   placement?: "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start";
@@ -1488,7 +1488,7 @@ export interface KaiPopoverElement extends HTMLElement {
 }
 
 export interface KaiProgressBarElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Current progress value (0..max). Attribute: `value`. */
   value?: number;
@@ -1501,7 +1501,7 @@ export interface KaiProgressBarElement extends HTMLElement {
 }
 
 export interface KaiPromptDockElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. */
   frame?: "inset" | "edge" | "none";
@@ -1514,7 +1514,7 @@ export interface KaiPromptDockElement extends HTMLElement {
 }
 
 export interface KaiPromptInputElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
@@ -1563,7 +1563,7 @@ export interface KaiPromptInputElement extends HTMLElement {
 }
 
 export interface KaiRadioGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
@@ -1584,7 +1584,7 @@ export interface KaiRadioGroupElement extends HTMLElement {
 }
 
 export interface KaiReasoningElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The reasoning text to display. */
   text: string;
@@ -1613,7 +1613,7 @@ export interface KaiReasoningElement extends HTMLElement {
 }
 
 export interface KaiRemoteElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The remote card URL. Attribute: `src`. */
   src?: string;
@@ -1626,7 +1626,7 @@ export interface KaiRemoteElement extends HTMLElement {
 }
 
 export interface KaiResizableElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Whether the group lays out as a row or a column. */
   orientation?: "horizontal" | "vertical";
@@ -1645,7 +1645,7 @@ export interface KaiResizableElement extends HTMLElement {
 }
 
 export interface KaiResizableItemElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
   size?: string;
@@ -1662,7 +1662,7 @@ export interface KaiResizableItemElement extends HTMLElement {
 }
 
 export interface KaiResponseStreamElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Text to stream: a string, or an `AsyncIterable<string>` set as a property. */
   text: string | AsyncIterable<string>;
@@ -1679,7 +1679,7 @@ export interface KaiResponseStreamElement extends HTMLElement {
 }
 
 export interface KaiRowElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Pressable row: renders real button semantics (click, Enter, Space) and fires `kai-click` on activation. Ignored when `href` is set. */
   interactive?: boolean;
@@ -1694,12 +1694,12 @@ export interface KaiRowElement extends HTMLElement {
 }
 
 export interface KaiRowGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiScopePickerElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Authors to offer as filters. Omit to drop the Authors section. Property only. */
   availableAuthors: string[];
@@ -1726,7 +1726,7 @@ export interface KaiScopePickerElement extends HTMLElement {
 }
 
 export interface KaiScreenElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -1753,14 +1753,14 @@ export interface KaiScreenElement extends HTMLElement {
 }
 
 export interface KaiScrollAreaElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
   orientation?: "vertical" | "horizontal" | "both";
 }
 
 export interface KaiScrollButtonElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** CSS id of the scroll container to control. */
   for?: string;
@@ -1779,7 +1779,7 @@ export interface KaiScrollButtonElement extends HTMLElement {
 }
 
 export interface KaiSearchElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled query. Settable and reflected to the `value` attribute. Read `el.value` for live state. */
   value?: string;
@@ -1804,7 +1804,7 @@ export interface KaiSearchElement extends HTMLElement {
 }
 
 export interface KaiSegmentedElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The selectable segments, left to right. Set as a JS property (array). */
   options: { value: string; label: string; icon?: undefined | string }[];
@@ -1819,7 +1819,7 @@ export interface KaiSegmentedElement extends HTMLElement {
 }
 
 export interface KaiSelectElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, in display order. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
@@ -1850,14 +1850,14 @@ export interface KaiSelectElement extends HTMLElement {
 }
 
 export interface KaiSeparatorElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. */
   orientation?: "horizontal" | "vertical";
 }
 
 export interface KaiSettingItemElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Row label (primary text). Attribute: `label`. */
   label?: string;
@@ -1866,7 +1866,7 @@ export interface KaiSettingItemElement extends HTMLElement {
 }
 
 export interface KaiSettingsGroupElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Small section heading shown above the card. Attribute: `heading`. */
   heading?: string;
@@ -1875,7 +1875,7 @@ export interface KaiSettingsGroupElement extends HTMLElement {
 }
 
 export interface KaiSkeletonElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. */
   variant?: "text" | "rect" | "circle";
@@ -1888,14 +1888,14 @@ export interface KaiSkeletonElement extends HTMLElement {
 }
 
 export interface KaiSkillsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. */
   skills: { id: string; name: string }[];
 }
 
 export interface KaiSliderElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Lowest selectable value. Required: a range with no bounds is a guess, and the guess belongs to whoever knows what the number means. */
   min?: number;
@@ -1922,7 +1922,7 @@ export interface KaiSliderElement extends HTMLElement {
 }
 
 export interface KaiSourceElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The URL this citation links to (the domain also seeds the default label/favicon). */
   href?: string;
@@ -1937,7 +1937,7 @@ export interface KaiSourceElement extends HTMLElement {
 }
 
 export interface KaiSourcesElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. */
   sources: { href: string; title?: string; description?: string; label?: string; showFavicon?: boolean }[];
@@ -1948,7 +1948,7 @@ export interface KaiSourcesElement extends HTMLElement {
 }
 
 export interface KaiStatusElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. */
   status?: "new" | "online" | "busy" | "away" | "offline" | "working" | "idle" | "done" | "error" | "blocked";
@@ -1961,7 +1961,7 @@ export interface KaiStatusElement extends HTMLElement {
 }
 
 export interface KaiSuggestionsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions: (string | { label: string; value?: string; icon?: string })[];
@@ -1982,7 +1982,7 @@ export interface KaiSuggestionsElement extends HTMLElement {
 }
 
 export interface KaiSwitchElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled checked state, reflected to the `checked` attribute. The toggle updates it and fires `kai-change`. */
   checked?: boolean;
@@ -2007,7 +2007,7 @@ export interface KaiSwitchElement extends HTMLElement {
 }
 
 export interface KaiTabBarElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled selected value. Omit for uncontrolled, seeded from `defaultValue` else the first enabled tab. */
   value?: string;
@@ -2028,7 +2028,7 @@ export interface KaiTabBarElement extends HTMLElement {
 }
 
 export interface KaiTabBarItemElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tab's identity: the `value` attribute (host `id` is the fallback). It is the `value` in the bar's `kai-tab-change` detail. */
   value?: string;
@@ -2047,7 +2047,7 @@ export interface KaiTabBarItemElement extends HTMLElement {
 }
 
 export interface KaiTabsElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Tabs to render. Set as a JS property, not an HTML attribute. */
   items?: { id: string; label?: string; icon?: string; disabled?: boolean }[];
@@ -2072,7 +2072,7 @@ export interface KaiTabsElement extends HTMLElement {
 }
 
 export interface KaiTasksElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. */
   data?: { mode?: "select" | "progress"; heading?: string; tasks: { id: string; label: string; description?: string; checked?: boolean; disabled?: boolean }[]; selectAll?: boolean; confirmLabel?: string; allowEmpty?: boolean; min?: number; max?: number; dismissible?: boolean };
@@ -2109,7 +2109,7 @@ export interface KaiTasksElement extends HTMLElement {
 }
 
 export interface KaiTextShimmerElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The text to shimmer. */
   text?: string;
@@ -2122,7 +2122,7 @@ export interface KaiTextShimmerElement extends HTMLElement {
 }
 
 export interface KaiThinkingBarElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The shimmering label, e.g. "Thinking…". */
   text?: string;
@@ -2137,7 +2137,7 @@ export interface KaiThinkingBarElement extends HTMLElement {
 }
 
 export interface KaiThreadElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
@@ -2172,7 +2172,7 @@ export interface KaiThreadElement extends HTMLElement {
 }
 
 export interface KaiToastRegionElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The toasts to render, newest on top. JS property; a new array reference updates it. */
   toasts: { id: string; message: string; variant?: "neutral" | "success" | "warning" | "error" | "info"; appearance?: "pill" | "card"; inverse?: boolean; description?: string; action?: { label: string; onAction: () => void | false }; duration?: number; dismissible?: boolean; target?: HTMLElement }[];
@@ -2195,7 +2195,7 @@ export interface KaiToastRegionElement extends HTMLElement {
 }
 
 export interface KaiToolElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } };
@@ -2218,7 +2218,7 @@ export interface KaiToolElement extends HTMLElement {
 }
 
 export interface KaiTooltipElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The hint text shown on hover/focus of the slotted trigger. */
   content?: string;
@@ -2247,7 +2247,7 @@ export interface KaiTooltipElement extends HTMLElement {
 }
 
 export interface KaiViewElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The view's name: what `push()` / `selectTab()` / the stack's `view` attribute address. Attribute: `name`. */
   name?: string;
@@ -2256,7 +2256,7 @@ export interface KaiViewElement extends HTMLElement {
 }
 
 export interface KaiViewStackElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Deep link / initial view name. */
   view?: string;
@@ -2279,7 +2279,7 @@ export interface KaiViewStackElement extends HTMLElement {
 }
 
 export interface KaiVoiceInputElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Transcriber the host supplies: records audio, returns the text. **Function-valued property.** */
   transcribe?: (audio: Blob) => Promise<string>;
@@ -2300,7 +2300,7 @@ export interface KaiVoiceInputElement extends HTMLElement {
 }
 
 export interface KaiVoiceOutputElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The utterance to read aloud. */
   text?: string;
@@ -2325,7 +2325,7 @@ export interface KaiVoiceOutputElement extends HTMLElement {
 }
 
 export interface KaiWorkspaceElement extends HTMLElement {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). */
   startCollapsed?: boolean;
@@ -3116,7 +3116,7 @@ declare module 'react' {
 }
 
 export interface KaiAgentCardElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The agent's name, the primary label. Attribute: `name`. */
   name?: string;
@@ -3129,7 +3129,7 @@ export interface KaiAgentCardElementProps {
 }
 
 export interface KaiArtifactElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** URL the preview iframe frames. Consumer-controlled. */
   src?: string;
@@ -3160,7 +3160,7 @@ export interface KaiArtifactElementProps {
 }
 
 export interface KaiAttachmentsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The attachments to render (omit or pass `[]` for the empty state). Each `url` must be a `data:` URI or https URL, never `blob:`. */
   items?: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }[];
@@ -3179,7 +3179,7 @@ export interface KaiAttachmentsElementProps {
 }
 
 export interface KaiAudioVisualizerElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Look to render: `bar` (default), `grid`, `radial`, `wave`, `aurora`, `custom`. `aura` is accepted as a LiveKit-markup alias for `aurora`. Attribute: `variant`. */
   variant?: string;
@@ -3218,7 +3218,7 @@ export interface KaiAudioVisualizerElementProps {
 }
 
 export interface KaiAvatarElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Image URL/data-URI. When absent, the `fallback` initials show instead. */
   src?: string;
@@ -3231,14 +3231,14 @@ export interface KaiAvatarElementProps {
 }
 
 export interface KaiBadgeElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Badge style; `default` is the muted pill, `outline` a transparent one with a control-strength border. */
   variant?: "default" | "count" | "citation" | "outline";
 }
 
 export interface KaiButtonElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Visual style. Defaults to `default` (filled). */
   variant?: "default" | "subtle" | "ghost" | "outline" | "destructive";
@@ -3261,7 +3261,7 @@ export interface KaiButtonElementProps {
 }
 
 export interface KaiCardElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Surface treatment: `outlined` (default) | `filled` | `plain` | `accent`. Attribute: `appearance`. */
   appearance?: "outlined" | "filled" | "plain" | "accent";
@@ -3284,7 +3284,7 @@ export interface KaiCardElementProps {
 }
 
 export interface KaiCardsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The stream of card envelopes to render. Set as a JS PROPERTY: `el.cards = [...]`. */
   cards?: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }[];
@@ -3299,7 +3299,7 @@ export interface KaiCardsElementProps {
 }
 
 export interface KaiChainOfThoughtElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The reasoning steps. JS property (array); omit to pass `<kai-step>` light-DOM children instead. */
   steps?: { label: string; content?: string; id?: string }[];
@@ -3312,7 +3312,7 @@ export interface KaiChainOfThoughtElementProps {
 }
 
 export interface KaiChatElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** How much air the thread has: `'default'` (the shipped look) or `'compact'` (a desktop-panel rhythm: 8px between turns, a tighter band). */
   density?: "default" | "compact";
@@ -3411,7 +3411,7 @@ export interface KaiChatElementProps {
 }
 
 export interface KaiCheckboxElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled checked state, reflected to the `checked` attribute. Ticking the box updates it and fires `kai-change`. */
   checked?: boolean;
@@ -3432,7 +3432,7 @@ export interface KaiCheckboxElementProps {
 }
 
 export interface KaiCheckboxGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
@@ -3449,7 +3449,7 @@ export interface KaiCheckboxGroupElementProps {
 }
 
 export interface KaiCheckpointElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Text beside the icon. */
   label?: string;
@@ -3462,7 +3462,7 @@ export interface KaiCheckpointElementProps {
 }
 
 export interface KaiChoiceElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choice definition (the card's `data`). JS property: `el.data = { prompt, options: [...] }`. */
   data?: { prompt?: string; options: { id: string; label: string; description?: string; media?: { image?: string; imageAlt?: string; icon?: string }; meta?: string; recommended?: boolean; disabled?: boolean; payload?: unknown }[]; allowOther?: boolean | { label?: string; placeholder?: string }; submitLabel?: string; dismissible?: boolean };
@@ -3481,7 +3481,7 @@ export interface KaiChoiceElementProps {
 }
 
 export interface KaiCoachmarkElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3500,7 +3500,7 @@ export interface KaiCoachmarkElementProps {
 }
 
 export interface KaiCodeBlockElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The source code to render. */
   code: string;
@@ -3517,7 +3517,7 @@ export interface KaiCodeBlockElementProps {
 }
 
 export interface KaiCommandElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Flat list of items. Set as a JS property, not an HTML attribute. */
   items?: { id: string; label: string; icon?: string; description?: string; shortcut?: string; group?: string }[];
@@ -3528,7 +3528,7 @@ export interface KaiCommandElementProps {
 }
 
 export interface KaiCompareElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The compare definition (prompt + the two candidates). JS property: `el.data = { prompt, candidates: [A, B] }`. */
   data?: Record<string, unknown>;
@@ -3547,7 +3547,7 @@ export interface KaiCompareElementProps {
 }
 
 export interface KaiComposerElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled value: a string or a full ComposerDoc (set as JS property). */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
@@ -3570,7 +3570,7 @@ export interface KaiComposerElementProps {
 }
 
 export interface KaiConfirmElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The confirm definition (the card's `data`). JS property: `el.data = { body, tone, actions: [...] }`. */
   data?: { heading?: string; body?: string; tone?: "default" | "warning" | "danger"; actions: { id: string; label: string; style?: "primary" | "default" | "destructive"; payload?: unknown; default?: boolean }[]; dismissible?: boolean };
@@ -3585,7 +3585,7 @@ export interface KaiConfirmElementProps {
 }
 
 export interface KaiContextElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Token-usage data. Set as a JS property. */
   context?: { usedTokens: number; maxTokens: number; inputTokens?: number; outputTokens?: number; reasoningTokens?: number; cacheTokens?: number; estimatedCost?: number };
@@ -3596,7 +3596,7 @@ export interface KaiContextElementProps {
 }
 
 export interface KaiConversationItemElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The row's identity: the `conversation-id` attribute, else the host `id`. */
   conversationId?: string;
@@ -3611,7 +3611,7 @@ export interface KaiConversationItemElementProps {
 }
 
 export interface KaiConversationsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The list's section headers (`{ id, name, sortOrder, createdAt }`) in array order. JS property; omit for an ungrouped list. */
   groups?: { id: string; userId?: string; teamId?: string; name: string; sortOrder: number; createdAt: string }[];
@@ -3634,7 +3634,7 @@ export interface KaiConversationsElementProps {
 }
 
 export interface KaiDialogElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3645,7 +3645,7 @@ export interface KaiDialogElementProps {
 }
 
 export interface KaiDockElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3670,7 +3670,7 @@ export interface KaiDockElementProps {
 }
 
 export interface KaiDropdownElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Built-in trigger: leading icon (a named icon like `"plus"`, an image URL/data-URI, or text). A slotted `slot="trigger"` overrides it. */
   triggerIcon?: string;
@@ -3691,7 +3691,7 @@ export interface KaiDropdownElementProps {
 }
 
 export interface KaiEditableLabelElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The label text. Settable and reflected to the `value` attribute. Read `el.value` for live state. */
   value?: string;
@@ -3706,7 +3706,7 @@ export interface KaiEditableLabelElementProps {
 }
 
 export interface KaiEmbedElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -3715,7 +3715,7 @@ export interface KaiEmbedElementProps {
 }
 
 export interface KaiEmptyElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Title text. Attribute: `empty-title` (`title` is a global HTML attribute). */
   emptyTitle?: string;
@@ -3724,7 +3724,7 @@ export interface KaiEmptyElementProps {
 }
 
 export interface KaiFeedbackBarElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The banner label (e.g. "Was this helpful?"). Attribute: `bar-title` (`title` is avoided because it is a global HTML attribute). */
   barTitle?: string;
@@ -3743,7 +3743,7 @@ export interface KaiFeedbackBarElementProps {
 }
 
 export interface KaiFileTreeElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The files to render. Set as a JS property (array of `{ path, url?, code?, language?, type?, additions?, deletions?, status? }`). */
   files: { path: string; url?: undefined | string; code?: undefined | string; language?: undefined | string; type?: undefined | "html" | "pdf" | "image" | "other"; additions?: undefined | number; deletions?: undefined | number; status?: undefined | "added" | "modified" | "deleted" | "renamed" | "untracked" }[];
@@ -3756,7 +3756,7 @@ export interface KaiFileTreeElementProps {
 }
 
 export interface KaiFileUploadElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Allow picking more than one file. Default true. */
   multiple?: boolean;
@@ -3769,7 +3769,7 @@ export interface KaiFileUploadElementProps {
 }
 
 export interface KaiFormElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The form definition: a JSON Schema + `x-kai-*` UI hints. JS property: `el.data = { type: 'object', properties: {...} }`. */
   data?: { type: "object"; title?: string; description?: string; required?: string[]; properties: Record<string, { type: "string" | "number" | "integer" | "boolean" | "array" | "object"; title?: string; description?: string; default?: unknown; enum?: unknown[]; format?: "email" | "uri" | "url" | "date" | "date-time" | "time"; minimum?: number; maximum?: number; minLength?: number; maxLength?: number; pattern?: string; minItems?: number; maxItems?: number; items?: Record<string, unknown> | { enum: unknown[] }; properties?: Record<string, Record<string, unknown>>; required?: string[]; readOnly?: boolean; "x-kai-widget"?: "textarea" | "slider" | "rating" | "radio" | "select" | "checkbox" | "password" | "switch"; "x-kai-placeholder"?: string; "x-kai-step"?: number; "x-kai-format"?: "tel" | "ssn" | "credit-card" | "custom"; "x-kai-mask"?: string; "x-kai-mask-guide"?: string }>; "x-kai-order"?: string[]; "x-kai-inlineMax"?: number; "x-kai-submitLabel"?: string; "x-kai-dismissible"?: boolean; "x-kai-actions"?: { id: string; label: string; variant?: "default" | "ghost" | "outline" }[] };
@@ -3788,7 +3788,7 @@ export interface KaiFormElementProps {
 }
 
 export interface KaiHoverCardElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Delay (ms) before the card opens on hover. Defaults to 0 (focus opens it immediately too). */
   openDelay?: number;
@@ -3805,7 +3805,7 @@ export interface KaiHoverCardElementProps {
 }
 
 export interface KaiIconElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** A curated icon name (e.g. `"mic"`, `"globe"`), an image URL/data-URI, or plain text. */
   name?: string;
@@ -3814,7 +3814,7 @@ export interface KaiIconElementProps {
 }
 
 export interface KaiImageElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The image URL: an `https:`/`http:` location, a `data:` URI, or a `blob:` object URL you created. */
   src?: string;
@@ -3825,7 +3825,7 @@ export interface KaiImageElementProps {
 }
 
 export interface KaiImageArtifactElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The image PAYLOAD: BARE base64 (never a URI) or raw bytes. Attribute `data` for base64; JS property for `Uint8Array`. */
   data?: string | Uint8Array;
@@ -3838,7 +3838,7 @@ export interface KaiImageArtifactElementProps {
 }
 
 export interface KaiInputElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Native input type: `text` (default) · `email` · `url` · `search` · `tel` · `password` · `number`. Single-line only. */
   type?: string;
@@ -3881,7 +3881,7 @@ export interface KaiInputElementProps {
 }
 
 export interface KaiKbdElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Shortcut spec: tokens joined by `+` (e.g. `Mod+Shift+K`). Omit it to show default-slot content instead. Display only; the element does not bind keys. */
   keys?: string;
@@ -3892,12 +3892,12 @@ export interface KaiKbdElementProps {
 }
 
 export interface KaiKbdGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiLightboxElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -3914,7 +3914,7 @@ export interface KaiLightboxElementProps {
 }
 
 export interface KaiLinkPreviewElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Stable card id correlating every emitted event. Set as an attribute or property. */
   cardId?: string;
@@ -3923,7 +3923,7 @@ export interface KaiLinkPreviewElementProps {
 }
 
 export interface KaiLoaderElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Animation style. Default `circular`. */
   variant?: "circular" | "classic" | "pulse" | "pulse-dot" | "dots" | "typing" | "wave" | "bars" | "terminal" | "text-blink" | "text-shimmer" | "loading-dots";
@@ -3934,7 +3934,7 @@ export interface KaiLoaderElementProps {
 }
 
 export interface KaiMarkdownElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The markdown source. */
   content: string;
@@ -3947,7 +3947,7 @@ export interface KaiMarkdownElementProps {
 }
 
 export interface KaiMenuElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Tree of menu items. Set as a JS property, not an HTML attribute. */
   items?: { id?: string; label?: string; icon?: string; shortcut?: string; checked?: boolean; radioGroup?: string; disabled?: boolean; description?: string; control?: "check" | "switch"; note?: true; separator?: boolean; heading?: boolean; items?: Record<string, unknown>[] }[];
@@ -3972,7 +3972,7 @@ export interface KaiMenuElementProps {
 }
 
 export interface KaiMessageElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The full message object. Set as a JS property. */
   message?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" };
@@ -4001,7 +4001,7 @@ export interface KaiMessageElementProps {
 }
 
 export interface KaiModelSwitcherElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The selectable models. JS property (array); omit to pass `<kai-model>` light-DOM children instead. */
   models?: { id: string; name: string; provider?: string; description?: string; group?: string }[];
@@ -4016,7 +4016,7 @@ export interface KaiModelSwitcherElementProps {
 }
 
 export interface KaiNavElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The nav items. Set as a JS property (array, not an attribute). Each item may carry `children` (a collapsible group), a `status` dot, and trailing `meta` text. */
   items?: { id: string; label?: string; icon?: string; badge?: string; trailing?: string; disabled?: boolean; children?: Record<string, unknown>[]; status?: { tone: "primary" | "info" | "success" | "warning" | "error" | "neutral"; label?: string; pulse?: boolean }; meta?: string; action?: { icon: string; label: string }; closable?: boolean }[];
@@ -4029,7 +4029,7 @@ export interface KaiNavElementProps {
 }
 
 export interface KaiNoticeElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Severity. Defaults to `'neutral'`. */
   severity?: "neutral" | "info" | "warning" | "error" | "success";
@@ -4040,7 +4040,7 @@ export interface KaiNoticeElementProps {
 }
 
 export interface KaiPaneElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The pane title (the agent / window name). Named `headline` because `title` collides with the global `HTMLElement.title`. */
   headline?: string;
@@ -4059,7 +4059,7 @@ export interface KaiPaneElementProps {
 }
 
 export interface KaiPaneGridElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Minimum width of every pane, in px, before columns drop / the grid scrolls. Defaults to `280`. Attribute: `min-pane-width`. */
   minPaneWidth?: number;
@@ -4074,7 +4074,7 @@ export interface KaiPaneGridElementProps {
 }
 
 export interface KaiPaneGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tabs to render. An array of `{ id, name, status?, needsAttention?, number? }` set as a JS PROPERTY (not an HTML attribute). */
   tabs?: { id: string; name: string; status?: { tone: "working" | "idle" | "done" | "error" | "blocked"; label?: string; pulse?: boolean }; needsAttention?: boolean; number?: number }[];
@@ -4085,19 +4085,19 @@ export interface KaiPaneGroupElementProps {
 }
 
 export interface KaiPanelElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Standalone widget-box chrome: border, radius and shadow on the panel itself. */
   frame?: boolean;
 }
 
 export interface KaiPanelHeaderElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiPopoverElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Floating placement relative to the trigger (floating-ui placement). */
   placement?: "top" | "right" | "bottom" | "left" | "bottom-end" | "bottom-start" | "left-end" | "left-start" | "right-end" | "right-start" | "top-end" | "top-start";
@@ -4112,7 +4112,7 @@ export interface KaiPopoverElementProps {
 }
 
 export interface KaiProgressBarElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Current progress value (0..max). Attribute: `value`. */
   value?: number;
@@ -4125,7 +4125,7 @@ export interface KaiProgressBarElementProps {
 }
 
 export interface KaiPromptDockElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** How the tray frames the input, the SPATIAL axis: `inset` (default, recessed on every side), `edge` (top/bottom only), or `none`. */
   frame?: "inset" | "edge" | "none";
@@ -4138,7 +4138,7 @@ export interface KaiPromptDockElementProps {
 }
 
 export interface KaiPromptInputElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Value of the input: a **string** is the controlled text mirror, a **ComposerDoc** is a one-time pill seed. */
   value?: string | ({ type: "text"; text: string } | { type: "entity"; entity: { kind: string; id: string; label: string; icon?: string; promptText?: string; data?: Record<string, unknown> } })[];
@@ -4175,7 +4175,7 @@ export interface KaiPromptInputElementProps {
 }
 
 export interface KaiRadioGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, top to bottom. Set as a JS PROPERTY (array), never an attribute. */
   options: { value: string; label: string; description?: undefined | string; disabled?: undefined | boolean }[];
@@ -4190,7 +4190,7 @@ export interface KaiRadioGroupElementProps {
 }
 
 export interface KaiReasoningElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The reasoning text to display. */
   text: string;
@@ -4209,7 +4209,7 @@ export interface KaiReasoningElementProps {
 }
 
 export interface KaiRemoteElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The remote card URL. Attribute: `src`. */
   src?: string;
@@ -4222,7 +4222,7 @@ export interface KaiRemoteElementProps {
 }
 
 export interface KaiResizableElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Whether the group lays out as a row or a column. */
   orientation?: "horizontal" | "vertical";
@@ -4233,7 +4233,7 @@ export interface KaiResizableElementProps {
 }
 
 export interface KaiResizableItemElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Initial main-axis size: `"280px"` (fixed) or `"25%"`/`25` (percent). Omitted → flexible. */
   size?: string;
@@ -4250,7 +4250,7 @@ export interface KaiResizableItemElementProps {
 }
 
 export interface KaiResponseStreamElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Text to stream: a string, or an `AsyncIterable<string>` set as a property. */
   text?: string | AsyncIterable<string>;
@@ -4263,7 +4263,7 @@ export interface KaiResponseStreamElementProps {
 }
 
 export interface KaiRowElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Pressable row: renders real button semantics (click, Enter, Space) and fires `kai-click` on activation. Ignored when `href` is set. */
   interactive?: boolean;
@@ -4274,12 +4274,12 @@ export interface KaiRowElementProps {
 }
 
 export interface KaiRowGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
 }
 
 export interface KaiScopePickerElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Authors to offer as filters. Omit to drop the Authors section. Property only. */
   availableAuthors?: string[];
@@ -4296,7 +4296,7 @@ export interface KaiScopePickerElementProps {
 }
 
 export interface KaiScreenElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Drive/observe the open state: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`. */
   open?: boolean;
@@ -4311,14 +4311,14 @@ export interface KaiScreenElementProps {
 }
 
 export interface KaiScrollAreaElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Which axis scrolls. `vertical` (default) · `horizontal` · `both`. The cross axis is clamped so content can't overflow it. */
   orientation?: "vertical" | "horizontal" | "both";
 }
 
 export interface KaiScrollButtonElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** CSS id of the scroll container to control. */
   for?: string;
@@ -4333,7 +4333,7 @@ export interface KaiScrollButtonElementProps {
 }
 
 export interface KaiSearchElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled query. Settable and reflected to the `value` attribute. Read `el.value` for live state. */
   value?: string;
@@ -4350,7 +4350,7 @@ export interface KaiSearchElementProps {
 }
 
 export interface KaiSegmentedElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The selectable segments, left to right. Set as a JS property (array). */
   options: { value: string; label: string; icon?: undefined | string }[];
@@ -4361,7 +4361,7 @@ export interface KaiSegmentedElementProps {
 }
 
 export interface KaiSelectElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The choices, in display order. Set as a JS PROPERTY (array), never an attribute. Rendered in full: the kit never truncates, re-orders or de-duplicates them. */
   options: { value: string; label?: undefined | string; disabled?: undefined | boolean }[];
@@ -4386,14 +4386,14 @@ export interface KaiSelectElementProps {
 }
 
 export interface KaiSeparatorElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The separator's axis. Defaults to a full-width block; the cross-axis form suits a flex or grid row. */
   orientation?: "horizontal" | "vertical";
 }
 
 export interface KaiSettingItemElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Row label (primary text). Attribute: `label`. */
   label?: string;
@@ -4402,7 +4402,7 @@ export interface KaiSettingItemElementProps {
 }
 
 export interface KaiSettingsGroupElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Small section heading shown above the card. Attribute: `heading`. */
   heading?: string;
@@ -4411,7 +4411,7 @@ export interface KaiSettingsGroupElementProps {
 }
 
 export interface KaiSkeletonElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** `text` (one or more lines), `rect` (a block), or `circle` (round). Defaults to `text`. */
   variant?: "text" | "rect" | "circle";
@@ -4424,14 +4424,14 @@ export interface KaiSkeletonElementProps {
 }
 
 export interface KaiSkillsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The active skills to badge. JS property (array); omit to pass `<kai-skill>` light-DOM children instead. */
   skills?: { id: string; name: string }[];
 }
 
 export interface KaiSliderElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Lowest selectable value. Required: a range with no bounds is a guess, and the guess belongs to whoever knows what the number means. */
   min?: number;
@@ -4452,7 +4452,7 @@ export interface KaiSliderElementProps {
 }
 
 export interface KaiSourceElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The URL this citation links to (the domain also seeds the default label/favicon). */
   href?: string;
@@ -4467,7 +4467,7 @@ export interface KaiSourceElementProps {
 }
 
 export interface KaiSourcesElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The sources to render. JS property; omit to pass `<kai-source>` light-DOM children instead. */
   sources?: { href: string; title?: string; description?: string; label?: string; showFavicon?: boolean }[];
@@ -4478,7 +4478,7 @@ export interface KaiSourcesElementProps {
 }
 
 export interface KaiStatusElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Presence state (`new | online | busy | away | offline`) or agent run tone (`working | idle | done | error | blocked`); sets the colour. Default `new`. */
   status?: "new" | "online" | "busy" | "away" | "offline" | "working" | "idle" | "done" | "error" | "blocked";
@@ -4491,7 +4491,7 @@ export interface KaiStatusElementProps {
 }
 
 export interface KaiSuggestionsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The suggestions: strings, or `{ label, value }` when the displayed text and emitted value differ. JS property (array). */
   suggestions?: (string | { label: string; value?: string; icon?: string })[];
@@ -4508,7 +4508,7 @@ export interface KaiSuggestionsElementProps {
 }
 
 export interface KaiSwitchElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled checked state, reflected to the `checked` attribute. The toggle updates it and fires `kai-change`. */
   checked?: boolean;
@@ -4525,7 +4525,7 @@ export interface KaiSwitchElementProps {
 }
 
 export interface KaiTabBarElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled selected value. Omit for uncontrolled, seeded from `defaultValue` else the first enabled tab. */
   value?: string;
@@ -4538,7 +4538,7 @@ export interface KaiTabBarElementProps {
 }
 
 export interface KaiTabBarItemElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tab's identity: the `value` attribute (host `id` is the fallback). It is the `value` in the bar's `kai-tab-change` detail. */
   value?: string;
@@ -4557,7 +4557,7 @@ export interface KaiTabBarItemElementProps {
 }
 
 export interface KaiTabsElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Tabs to render. Set as a JS property, not an HTML attribute. */
   items?: { id: string; label?: string; icon?: string; disabled?: boolean }[];
@@ -4574,7 +4574,7 @@ export interface KaiTabsElementProps {
 }
 
 export interface KaiTasksElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tasks definition (the card's `data`). JS property: `el.data = { tasks: [...], selectAll, confirmLabel }`. */
   data?: { mode?: "select" | "progress"; heading?: string; tasks: { id: string; label: string; description?: string; checked?: boolean; disabled?: boolean }[]; selectAll?: boolean; confirmLabel?: string; allowEmpty?: boolean; min?: number; max?: number; dismissible?: boolean };
@@ -4595,7 +4595,7 @@ export interface KaiTasksElementProps {
 }
 
 export interface KaiTextShimmerElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The text to shimmer. */
   text?: string;
@@ -4608,7 +4608,7 @@ export interface KaiTextShimmerElementProps {
 }
 
 export interface KaiThinkingBarElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The shimmering label, e.g. "Thinking…". */
   text?: string;
@@ -4619,7 +4619,7 @@ export interface KaiThinkingBarElementProps {
 }
 
 export interface KaiThreadElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The message thread to render, newest last. JS property; pass a NEW array per streaming chunk. Omit for an empty thread. */
   messages?: { id: string; role: "user" | "assistant"; parts: ({ type: "text"; text: string; raw?: { source: string; payload: unknown } } | { type: "reasoning"; text: string; label?: string; index?: number; streamId?: string; signature?: string; raw?: { source: string; payload: unknown } } | { type: "tool"; tool: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } }; raw?: { source: string; payload: unknown } } | { type: "card"; envelope: { type: string; id: string; data: unknown; title?: string; resolution?: { kind: "action"; action: string; payload?: unknown; at?: string } | { kind: "submit"; data: unknown; at?: string } | { kind: "dismissed"; at?: string } | { kind: "expired"; reason?: string; at?: string } }; raw?: { source: string; payload: unknown } } | { type: "source"; source: { id?: string; url?: string; title?: string; snippet?: string; index?: number }; raw?: { source: string; payload: unknown } } | { type: "file"; attachment: { id: string; type: "file" | "source-document"; filename?: string; mediaType?: string; url?: string; title?: string }; raw?: { source: string; payload: unknown } })[]; actions?: ("copy" | "dislike" | "edit" | "like" | "regenerate" | "speak" | { id: string; label: string; icon?: string; tooltip?: string })[]; avatar?: { src?: string; fallback?: string; alt?: string }; feedback?: "like" | "dislike" }[];
@@ -4648,7 +4648,7 @@ export interface KaiThreadElementProps {
 }
 
 export interface KaiToastRegionElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The toasts to render, newest on top. JS property; a new array reference updates it. */
   toasts?: { id: string; message: string; variant?: "neutral" | "success" | "warning" | "error" | "info"; appearance?: "pill" | "card"; inverse?: boolean; description?: string; action?: { label: string; onAction: () => void | false }; duration?: number; dismissible?: boolean; target?: HTMLElement }[];
@@ -4667,7 +4667,7 @@ export interface KaiToastRegionElementProps {
 }
 
 export interface KaiToolElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The tool-call to display. Set as a JS property. */
   tool?: { type: string; kind?: "command" | "file-change" | "search" | "fetch" | "mcp" | "image" | "generic"; state: "input-streaming" | "input-available" | "output-available" | "output-error"; input?: Record<string, unknown>; rawInput?: string; output?: Record<string, unknown>; toolCallId?: string; errorText?: string; raw?: { source: string; payload: unknown } };
@@ -4680,7 +4680,7 @@ export interface KaiToolElementProps {
 }
 
 export interface KaiTooltipElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The hint text shown on hover/focus of the slotted trigger. */
   content?: string;
@@ -4699,7 +4699,7 @@ export interface KaiTooltipElementProps {
 }
 
 export interface KaiViewElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The view's name: what `push()` / `selectTab()` / the stack's `view` attribute address. Attribute: `name`. */
   name?: string;
@@ -4708,7 +4708,7 @@ export interface KaiViewElementProps {
 }
 
 export interface KaiViewStackElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Deep link / initial view name. */
   view?: string;
@@ -4717,7 +4717,7 @@ export interface KaiViewStackElementProps {
 }
 
 export interface KaiVoiceInputElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Transcriber the host supplies: records audio, returns the text. **Function-valued property.** */
   transcribe?: (audio: Blob) => Promise<string>;
@@ -4730,7 +4730,7 @@ export interface KaiVoiceInputElementProps {
 }
 
 export interface KaiVoiceOutputElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** The utterance to read aloud. */
   text?: string;
@@ -4743,7 +4743,7 @@ export interface KaiVoiceOutputElementProps {
 }
 
 export interface KaiWorkspaceElementProps {
-  /** Color mode (`auto` follows prefers-color-scheme). */
+  /** Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents. */
   theme?: "light" | "dark" | "auto";
   /** Controlled collapsed state of the start aside. Omit for uncontrolled (the element manages it). */
   startCollapsed?: boolean;

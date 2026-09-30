@@ -90,6 +90,7 @@
      mode — NOT the OS — so e.g. the native calendar icon never renders black
      on a dark surface. `color-scheme` drives that native rendering; the light
      half is set here on :host, the dark half (`.dark { color-scheme: dark }`)
-     lives in kit-base.css because it applies in the light DOM too. */
+     lives in kit-base.css because it applies in the light DOM too. Inside a
+     facade the wrapper overrides both from `--kai-color-scheme`. */
   :host { color-scheme: light; }
 }

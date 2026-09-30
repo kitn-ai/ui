@@ -87,17 +87,16 @@ export function AudioVisualizerFacade(
   props: Props,
   ctx?: Partial<Pick<WebComponentContext, 'dark' | 'flag' | 'reflectFlag'>>,
 ): JSX.Element {
-  // Every element already resolves `theme='light'|'dark'|'auto'` against a
-  // live `prefers-color-scheme` listener in `defineWebComponent` (see
-  // `createDarkMode`), to drive the `.dark` class every web component's content
-  // sits inside. A WebGL shader cannot read that class or a CSS custom
-  // property, so `<kai-audio-visualizer variant="aurora">` needs the ALREADY
+  // Every element already resolves `theme='light'|'dark'|'auto'` in
+  // `defineWebComponent` (see `createDarkMode`): `auto` follows an inherited
+  // `--kai-color-scheme`, then the OS, and re-resolves live. A WebGL shader cannot
+  // read a CSS custom property, so `<kai-audio-visualizer variant="aurora">` needs the ALREADY
   // -RESOLVED boolean forwarded explicitly instead. Passing it through as a
   // definite 'light'/'dark' (never 'auto') means the resolution RULE itself
   // -- explicit wins, 'auto' follows the media query -- lives in exactly one
   // place (`createDarkMode`); this is a plain relay, not a second
   // implementation of that rule.
-  const dark = ctx?.dark?.() ?? false;
+  const dark = () => ctx?.dark?.() ?? false;
 
   // `flag` is what makes a BARE attribute
   // (`<kai-audio-visualizer animate-when-not-visible>`) mean true:
@@ -144,7 +143,7 @@ export function AudioVisualizerFacade(
       listeningAmplitude={listeningAmplitude}
       shader={props.shader as ShaderSpec | undefined}
       animateWhenNotVisible={animateWhenNotVisible}
-      theme={dark ? 'dark' : 'light'}
+      theme={dark() ? 'dark' : 'light'}
     />
   );
 }

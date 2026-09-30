@@ -6,7 +6,7 @@
 // import AND applies no tokens (browsers ignore `@theme {}`). This emits the
 // same tokens as plain CSS so a host page can `<link>` it: the `@theme` block
 // becomes `:root {}`, its `@keyframes` are hoisted to top level, and the already-
-// plain `.dark` / `.chat-markdown` / `.kai-scrollbar-thin` rules are kept verbatim.
+// plain `.dark` / `.light` / `.chat-markdown` / `.kai-scrollbar-thin` rules are kept verbatim.
 //
 // theme.css stays the single source of truth; run on every build.
 
@@ -47,14 +47,28 @@ function stripUtilities(css) {
   return out.replace(/\n{3,}/g, '\n\n'); // collapse blank lines left where blocks were removed
 }
 
-// --- locate the @theme block ---
-const themeAt = src.indexOf('@theme');
-if (themeAt === -1) throw new Error('no @theme block in theme.css');
-const themeOpen = src.indexOf('{', themeAt);
-const { body: themeBody, end: themeEnd } = matchBraces(src, themeOpen);
-// .dark / .chat-markdown / .kai-scrollbar-thin / .kai-elevation — already plain CSS;
+// --- locate EVERY @theme block ---
+// theme.css has more than one: the colour group is `@theme static` (emitted whole, whether or not a
+// class reads a token) and the rest is a plain `@theme`. Both become the one `:root {}` here, and both
+// are cut out of the pass-through tail so neither leaks into the output as an invalid at-rule.
+const themeBlocks = [];
+// Only a rule that STARTS a line: the word also appears inside theme.css's own comments.
+for (const m of src.matchAll(/^@theme\b[^{]*\{/gm)) {
+  const open = m.index + m[0].length - 1;
+  themeBlocks.push({ at: m.index, ...matchBraces(src, open) });
+}
+if (!themeBlocks.length) throw new Error('no @theme block in theme.css');
+const themeBody = themeBlocks.map((b) => b.body).join('\n');
+// .dark / .light / .chat-markdown / .kai-scrollbar-thin / .kai-elevation -- already plain CSS;
 // drop the trailing `@utility` blocks (Tailwind-source directives, inert here).
-const afterTheme = stripUtilities(src.slice(themeEnd + 1));
+let tail = '';
+let cursor = themeBlocks[0].end + 1;
+for (const blk of themeBlocks.slice(1)) {
+  tail += src.slice(cursor, blk.at);
+  cursor = blk.end + 1;
+}
+tail += src.slice(cursor);
+const afterTheme = stripUtilities(tail);
 
 // --- split @theme body into token declarations vs hoisted @keyframes ---
 const keyframes = [];

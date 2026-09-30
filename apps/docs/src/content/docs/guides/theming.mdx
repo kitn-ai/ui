@@ -45,7 +45,7 @@ Two files ship for when you want the same `--color-*` tokens on your own markup 
 
 | File | Is | Reach for it when |
 |---|---|---|
-| `@kitn.ai/ui/theme.tokens.css` | Plain CSS: a `:root` block, a `.dark` block, the kit's keyframes and two classes | You want the token names for your own CSS and nothing touching your Tailwind config. The default for Tailwind apps too, unless you want the kit's scale. |
+| `@kitn.ai/ui/theme.tokens.css` | Plain CSS: a `:root` block, the `.dark` / `.light` scheme rules, the kit's keyframes and two classes | You want the token names for your own CSS and nothing touching your Tailwind config. The default for Tailwind apps too, unless you want the kit's scale. |
 | `@kitn.ai/ui/theme.css` | Tailwind v4 *source*: an `@theme` block, a `@custom-variant`, `@utility` rules | You run Tailwind and want to opt in to the kit's scale wholesale: its colors as your utilities, its radius and type scale, class-based dark mode. |
 
 ```js
@@ -144,48 +144,71 @@ Assign tokens to a container element instead of `:root` to theme only that secti
 
 ## Dark mode
 
-Every `kai-*` web component carries a `theme` attribute — `'light' | 'dark' | 'auto'`, defaulting to **`auto`**. On `auto` the element watches `prefers-color-scheme` itself and applies the kit's dark tokens inside its own shadow root, so OS dark mode works with no wiring:
+Set the scheme once and every `kai-*` element follows it. Each color token is one `light-dark(<light>, <dark>)`, resolved against an inherited variable, **`--kai-color-scheme`** (`light` or `dark`). Put a class on `<html>`, or on any ancestor to scope a subtree:
 
 ```html
-<kai-chat></kai-chat>                <!-- follows the OS -->
-<kai-chat theme="dark"></kai-chat>   <!-- pinned dark -->
+<html class="dark">          <!-- every kai-* element on the page is dark -->
+<div class="light">          <!-- ...except the ones under this wrapper -->
 ```
 
-For your own markup and the light-DOM Solid components, toggle the `dark` class on `<html>` (or any ancestor):
+`.dark` and `.light` are the whole API for a class-based app. The kit registers the two rules at document scope when the first element loads, so `<html class="dark">` needs no stylesheet from you. To skip the class, set the variable directly:
 
-```js
-document.documentElement.classList.toggle('dark');
+```css
+:root { --kai-color-scheme: dark; }
 ```
 
-That class does not reach the web components. If your app owns dark mode through `.dark`, set `theme="dark"` on the web components alongside it, or they keep following the OS while the page around them goes dark.
+Set nothing and the elements follow the OS (`prefers-color-scheme`), the same as `color-scheme: light dark` does for a page. An explicit scheme beats the OS.
 
-The `.dark` selector in `theme.css` redefines every `--color-*` token for dark surfaces. Override inside `.dark` to customize the dark-mode palette:
+### The `theme` attribute is a local override
+
+`theme` is `'light' | 'dark' | 'auto'`, default `auto`. `auto` inherits the page's scheme. `light` and `dark` pin that one element and everything inside it, whatever the page is doing:
+
+```html
+<html class="dark">
+  <kai-chat></kai-chat>                  <!-- dark: inherited -->
+  <kai-chat theme="light"></kai-chat>    <!-- light: pinned -->
+</html>
+```
+
+### Override colors per scheme
+
+A `--kai-color-*` override is a color, so a plain value applies to both schemes. To give each scheme its own, write `light-dark()` yourself. It resolves per element, so it also reaches a `theme="dark"` element on a light page:
 
 ```css
 :root {
-  --color-primary: hsl(271 91% 65%);     /* light mode */
-}
-
-.dark {
-  --color-primary: hsl(271 91% 75%);     /* dark mode — brighter for contrast */
+  --kai-color-primary: light-dark(hsl(271 91% 65%), hsl(271 91% 75%));
 }
 ```
 
-<Aside type="note" title="prefers-color-scheme">
-The kit never adds `.dark` to your `<html>` — your page's chrome is yours. It only syncs the web components, each of which follows `prefers-color-scheme` on its own while `theme` is `auto`. Pin an element with `theme="light"` / `theme="dark"` when your app owns the choice, and mirror the media query onto your own markup:
+The `.dark { --kai-color-primary: ... }` form still works when the class is on an ancestor. It cannot reach an element pinned with `theme`, because that selector only matches ancestors.
 
-```js
-const mq = window.matchMedia('(prefers-color-scheme: dark)');
-mq.addEventListener('change', (e) => {
-  document.documentElement.classList.toggle('dark', e.matches);
-});
-document.documentElement.classList.toggle('dark', mq.matches);
+### Your own markup and the light-DOM Solid components
+
+`theme.css` and `theme.tokens.css` ship the same `.dark` / `.light` rules, and they set `color-scheme` too, so `light-dark()` resolves under them. Toggle the class on `<html>` as above.
+
+`--kai-color-scheme` alone is not enough there. A light-DOM component has no element wrapper to turn the variable into `color-scheme`, so `:root { --kai-color-scheme: dark }` leaves it light. Use the class, or set `color-scheme` yourself:
+
+```css
+:root { color-scheme: dark; }
 ```
-</Aside>
+
+### Browser support
+
+`light-dark()` is Baseline 2024: Chrome and Edge 123, Firefox 120, Safari 17.5. Older browsers drop the whole color declaration and render without kit colors, so the kit needs those versions or newer.
+
+### Reading the scheme in JavaScript
+
+Most code never needs it, since the CSS already follows. For the few things that cannot read a custom property (a WebGL shader, a cross-frame card theme), `createResolvedColorScheme(el)` returns a reactive `'light' | 'dark'` that tracks the same variable, the OS, and class changes on the element, its ancestors and `<html>`:
+
+```ts
+import { createResolvedColorScheme } from '@kitn.ai/ui';
+
+const scheme = createResolvedColorScheme(myElement); // () => 'light' | 'dark'
+```
 
 ## Namespaced overrides (`--kai-color-*`)
 
-Every `--color-*` token resolves through a **`--kai-color-*` alias** before falling back to its default. Override the `--kai-color-*` form to rebrand without importing or redefining the entire `theme.css` token set:
+Every `--color-*` token resolves through a **`--kai-color-*` alias** before falling back to its default (a `light-dark(<light>, <dark>)` pair; see [Dark mode](#dark-mode)). Override the `--kai-color-*` form to rebrand without importing or redefining the entire `theme.css` token set:
 
 ```css
 :root {
@@ -260,4 +283,4 @@ import { ChatConfig } from '@kitn.ai/ui';
 
 ## Token reference
 
-The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/ui/theme.css`). For a browser-ready version with `:root` and `.dark` blocks pre-separated, use `@kitn.ai/ui/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.
+The full list of overridable tokens lives in `theme.css` (shipped at `@kitn.ai/ui/theme.css`). For a browser-ready version (one `:root` block plus the `.dark` / `.light` scheme rules), use `@kitn.ai/ui/theme.tokens.css` — it is auto-generated from `theme.css` and never drifts.

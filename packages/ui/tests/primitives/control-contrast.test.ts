@@ -21,19 +21,25 @@ const themeCss = readFileSync(
   'utf8',
 );
 
-/** The `.dark { … }` block, and everything before it (the light `@theme`). */
-const darkStart = themeCss.indexOf('\n.dark {');
-expect(darkStart).toBeGreaterThan(0);
-const BLOCKS = {
-  light: themeCss.slice(0, darkStart),
-  dark: themeCss.slice(darkStart),
-} as const;
+/** Each colour token is one `light-dark(<light>, <dark>)` declaration; a mode picks its half. */
+const BLOCKS = { light: 'light', dark: 'dark' } as const;
 
-/** Read a token's DEFAULT — the fallback inside `var(--kai-…, <default>)`. */
-function tokenDefault(block: string, name: string): string {
-  const m = new RegExp(`--${name}:\\s*var\\(--kai-${name},\\s*([^)]*\\)?[^;]*)\\);`).exec(block);
+/** Read a token's DEFAULT for one mode -- the fallback inside `var(--kai-…, <default>)`, and for a
+ *  `light-dark(L, D)` fallback the half that mode resolves to. */
+function tokenDefault(mode: 'light' | 'dark', name: string): string {
+  const m = new RegExp(`--${name}:\\s*var\\(--kai-${name},\\s*([^)]*\\)?[^;]*)\\);`).exec(themeCss);
   if (!m) throw new Error(`--${name} not found (or not in var(--kai-…, default) form)`);
-  return m[1].trim();
+  const value = m[1].trim();
+  const ld = /^light-dark\(([\s\S]*)\)$/.exec(value);
+  if (!ld) return value; // single-valued: identical in both schemes
+  let depth = 0;
+  for (let i = 0; i < ld[1].length; i++) {
+    const c = ld[1][i];
+    if (c === '(') depth++;
+    else if (c === ')') depth--;
+    else if (c === ',' && depth === 0) return (mode === 'light' ? ld[1].slice(0, i) : ld[1].slice(i + 1)).trim();
+  }
+  throw new Error(`--${name}: malformed light-dark(${ld[1]})`);
 }
 
 function toRgb(css: string): [number, number, number] {
@@ -216,15 +222,14 @@ const pillCss = (() => {
   return composerSrc.slice(at, composerSrc.indexOf('</style>', at));
 })();
 
-/** A `--kai-pill-<kind>` fallback hue, from the rule at the given scope. */
+/** A `--kai-pill-<kind>` fallback hue: one half of the rule's `light-dark(<light>, <dark>)`. */
 function pillHue(kind: 'skill' | 'agent', scope: 'light' | 'dark'): string {
-  const prefix = scope === 'dark' ? '\\.dark ' : '';
   const re = new RegExp(
-    `(^|\\n)\\s*${prefix}\\.kai-composer-pill\\[data-kind="${kind}"\\] \\{ color: var\\(--kai-pill-${kind}, (#[0-9a-f]{6})\\); \\}`,
+    `\\.kai-composer-pill\\[data-kind="${kind}"\\] \\{ color: var\\(--kai-pill-${kind}, light-dark\\((#[0-9a-f]{6}), (#[0-9a-f]{6})\\)\\); \\}`,
   );
   const m = re.exec(pillCss);
-  if (!m) throw new Error(`no ${scope} colour rule for pill kind "${kind}"`);
-  return m[2];
+  if (!m) throw new Error(`no light-dark() colour rule for pill kind "${kind}"`);
+  return scope === 'dark' ? m[2] : m[1];
 }
 
 describe('composer entity pills (WCAG 2.1 SC 1.4.3)', () => {
@@ -232,8 +237,11 @@ describe('composer entity pills (WCAG 2.1 SC 1.4.3)', () => {
     // The OS preference cannot be the switch: the surface behind the pill is
     // chosen by the theme attribute, so the two can disagree.
     expect(pillCss).not.toContain('@media (prefers-color-scheme'); // the rule, not the comment explaining it
-    expect(pillCss).toContain('.dark .kai-composer-pill[data-kind="skill"]');
-    expect(pillCss).toContain('.dark .kai-composer-pill[data-kind="agent"]');
+    // ... and not on a `.dark` ancestor either: a light-dark() fallback resolves against the element's
+    // own scheme (inherited `--kai-color-scheme`, or `theme`), which a `.dark` selector cannot see.
+    expect(pillCss).not.toContain('.dark .kai-composer-pill');
+    expect(pillCss).toMatch(/data-kind="skill"\] \{ color: var\(--kai-pill-skill, light-dark\(/);
+    expect(pillCss).toMatch(/data-kind="agent"\] \{ color: var\(--kai-pill-agent, light-dark\(/);
   });
 
   for (const [scope, surfaces] of [

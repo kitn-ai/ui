@@ -73,14 +73,14 @@ describe('Input keeps its DOM node across keystrokes (K-D12a)', () => {
     const { container } = render(() => <Input label="Ticket" invalid={invalid()} />);
 
     const el = container.querySelector('input') as HTMLInputElement;
-    expect(el.className).not.toContain('border-destructive');
+    expect(el.className).not.toContain('color:light-dark(');
     expect(el.getAttribute('aria-invalid')).toBeNull();
 
     setInvalid(true);
 
     // Same node, new attributes — the whole point of the fix.
     expect(container.querySelector('input')).toBe(el);
-    expect(el.className).toContain('border-destructive');
+    expect(el.className).toContain('color:light-dark(');
     expect(el.getAttribute('aria-invalid')).toBe('true');
   });
 
@@ -114,7 +114,7 @@ describe('Input keeps its DOM node across keystrokes (K-D12a)', () => {
 
     const first = container.querySelector('input') as HTMLInputElement;
     first.focus();
-    expect(first.className).toContain('border-destructive');
+    expect(first.className).toContain('color:light-dark(');
 
     // The formatted text after each successive keystroke. The `-` appears when
     // the fourth character arrives, not before: with no guide the field shows
@@ -133,7 +133,7 @@ describe('Input keeps its DOM node across keystrokes (K-D12a)', () => {
     expect(value()).toBe('CHG-4821');
     expect(first.value).toBe('CHG-4821');
     // …and the class really does flip, so the identity half above is evidence.
-    expect(first.className).not.toContain('border-destructive');
+    expect(first.className).not.toContain('color:light-dark(');
 
     // One more key proves the listeners are still bound after the flip.
     press(first, '9');
