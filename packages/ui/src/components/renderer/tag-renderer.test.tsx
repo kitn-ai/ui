@@ -36,4 +36,21 @@ describe('TagRenderer', () => {
     expect(warn).toHaveBeenCalledTimes(1);
     vi.useRealTimers(); warn.mockRestore();
   });
+  it('upgrades from the fallback to the real element when the tag is defined AFTER the timeout', async () => {
+    vi.useFakeTimers();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { container } = render(() => <TagRenderer tag="late-defined-el" data={{ n: 7 }} prop="part" fallback={<span>fb</span>} />);
+    await vi.advanceTimersByTimeAsync(2500);
+    expect(container.textContent).toContain('fb');
+    expect(container.querySelector('late-defined-el')).toBeNull();
+    class LateEl extends HTMLElement {}
+    customElements.define('late-defined-el', LateEl);
+    await vi.advanceTimersByTimeAsync(0);
+    const el = container.querySelector('late-defined-el') as (HTMLElement & { part: unknown }) | null;
+    expect(el).not.toBeNull();
+    expect(el!.part).toEqual({ n: 7 });
+    expect(container.textContent).not.toContain('fb');
+    expect(warn).toHaveBeenCalledTimes(1);
+    vi.useRealTimers(); warn.mockRestore();
+  });
 });

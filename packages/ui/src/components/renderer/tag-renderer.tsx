@@ -25,7 +25,8 @@ function warnOnce(key: string, message: string): void {
 
 /** Renders `data` through a consumer's custom element: the element is created once per tag,
  *  `data` is assigned as a property, and the built-in `fallback` shows instead when the tag
- *  is invalid or is not defined within 2s (each warned once, never silent). */
+ *  is invalid or is not defined within 2s (each warned once, never silent);
+ *  a tag defined after that timeout still upgrades to the real element. */
 export function TagRenderer<T>(props: TagRendererProps<T>): JSX.Element {
   const valid = createMemo(() => {
     if (isValidCustomElementName(props.tag)) return true;
@@ -48,8 +49,16 @@ export function TagRenderer<T>(props: TagRendererProps<T>): JSX.Element {
       );
       setTimedOut(true);
     }, DEFINE_TIMEOUT_MS);
-    onCleanup(() => clearTimeout(timer));
-    void customElements.whenDefined(tag).then(() => clearTimeout(timer));
+    let stale = false;
+    onCleanup(() => {
+      stale = true;
+      clearTimeout(timer);
+    });
+    // A tag defined after the timeout recovers: leave the fallback for the real element.
+    void customElements.whenDefined(tag).then(() => {
+      clearTimeout(timer);
+      if (!stale) setTimedOut(false);
+    });
   });
   const el = createMemo(() => (valid() ? document.createElement(props.tag) : undefined));
   createEffect(() => {
