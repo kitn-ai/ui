@@ -298,7 +298,7 @@ const mock = createMockResponder({
 
 I/O-free pure folds over `ChatMessage[]`. No client, no fetch — you own the transport; these functions own the array-identity discipline the elements re-render on.
 
-Every export (82, derived from `dist/state/index.d.ts`):
+Every export (88, derived from `dist/state/index.d.ts`):
 
 | Export | Kind | Module |
 |---|---|---|
@@ -313,9 +313,7 @@ Every export (82, derived from `dist/state/index.d.ts`):
 | `removeSuggestion` | value | `suggestions` |
 | `createAssistantStream` | value | `stream` |
 | `onStreamSettled` | value | `stream` |
-| `SetMessages` | type | `stream` |
-| `AssistantStream` | type | `stream` |
-| `AssistantStreamInit` | type | `stream` |
+| `SetMessages`, `AssistantStream`, `AssistantStreamInit` | type | `stream` |
 | `appendTextPart` | value | `parts` |
 | `appendReasoningPart` | value | `parts` |
 | `upsertToolPart` | value | `parts` |
@@ -325,38 +323,19 @@ Every export (82, derived from `dist/state/index.d.ts`):
 | `updateThreadMessages` | value | `threads` |
 | `bindThreadMessages` | value | `threads` |
 | `createThreadSessions` | value | `threads` |
-| `ThreadLike` | type | `threads` |
-| `SetThreads` | type | `threads` |
-| `BindThreadOptions` | type | `threads` |
-| `ThreadSessions` | type | `threads` |
+| `ThreadLike`, `SetThreads`, `BindThreadOptions`, `ThreadSessions` | type | `threads` |
 | `parseStoredThread` | value | `persistence` |
 | `createSaveScheduler` | value | `persistence` |
-| `ParsedThread` | type | `persistence` |
-| `DroppedStored` | type | `persistence` |
-| `SaveScheduler` | type | `persistence` |
-| `SaveSchedulerOptions` | type | `persistence` |
+| `ParsedThread`, `DroppedStored`, `SaveScheduler`, `SaveSchedulerOptions` | type | `persistence` |
 | `createMockResponder` | value | `mock` |
 | `DEFAULT_MOCK_REPLIES` | value | `mock` |
 | `MOCK_BANNER` | value | `mock` |
 | `MOCK_MARKER` | value | `mock` |
 | `MOCK_MARKER_KEY` | value | `mock` |
 | `MOCK_MODEL_ID` | value | `mock` |
-| `MockReply` | type | `mock` |
-| `MockResponder` | type | `mock` |
-| `MockResponderOptions` | type | `mock` |
-| `MockSource` | type | `mock` |
-| `MockToolCall` | type | `mock` |
-| `MockTurn` | type | `mock` |
-| `ChatMessage` | type | `../web-components/chat/chat-types` |
-| `ChatMessageAction` | type | `../web-components/chat/chat-types` |
-| `CustomAction` | type | `../web-components/chat/chat-types` |
-| `AvatarData` | type | `../web-components/chat/chat-types` |
-| `FeedbackVote` | type | `../web-components/chat/chat-types` |
-| `MessagePart` | type | `../web-components/chat/chat-types` |
-| `MessageSource` | type | `../web-components/chat/chat-types` |
-| `RawOrigin` | type | `../web-components/chat/chat-types` |
-| `ToolPart` | type | `../components/tool/tool-types` |
-| `PartTiming` | type | `../components/tool/tool-types` |
+| `MockReply`, `MockResponder`, `MockResponderOptions`, `MockSource`, `MockToolCall`, `MockTurn` | type | `mock` |
+| `ChatMessage`, `ChatMessageAction`, `CustomAction`, `AvatarData`, `FeedbackVote`, `MessagePart`, `MessageSource`, `RawOrigin` | type | `../web-components/chat/chat-types` |
+| `ToolPart`, `PartTiming` | type | `../components/tool/tool-types` |
 | `activityStepsFromParts` | value | `../primitives/activity` |
 | `summarizeActivity` | value | `../primitives/activity` |
 | `formatDuration` | value | `../primitives/activity` |
@@ -364,15 +343,12 @@ Every export (82, derived from `dist/state/index.d.ts`):
 | `truncateForDisplay` | value | `../primitives/activity` |
 | `MAX_DISPLAY_NAME` | value | `../primitives/activity` |
 | `ACTIVITY_LABELS` | value | `../primitives/activity` |
-| `ActivityStep` | type | `../primitives/activity` |
-| `ActivityLabel` | type | `../primitives/activity` |
+| `ActivityStep`, `ActivityLabel` | type | `../primitives/activity` |
 | `PLAN_TOOL_NAME` | value | `../primitives/plan` |
 | `isPlanTool` | value | `../primitives/plan` |
 | `validatePlan` | value | `../primitives/plan` |
 | `planFromMessages` | value | `../primitives/plan` |
-| `PlanItem` | type | `../primitives/plan` |
-| `PlanItemStatus` | type | `../primitives/plan` |
-| `PlanValidation` | type | `../primitives/plan` |
+| `PlanItem`, `PlanItemStatus`, `PlanValidation` | type | `../primitives/plan` |
 | `pendingQuestions` | value | `questions` |
 | `answerQuestions` | value | `questions` |
 | `settlePendingQuestions` | value | `questions` |
@@ -380,6 +356,7 @@ Every export (82, derived from `dist/state/index.d.ts`):
 | `threadRows` | value | `questions` |
 | `isOneClick` | value | `questions` |
 | `ThreadRow` | type | `questions` |
+| `Question`, `QuestionKind`, `QuestionOption`, `QuestionSet`, `Answer`, `AskResult` | type | `../primitives/questions` |
 | `ToolKind` | type | `../primitives/tool-classify` |
 | `classifyTool` | value | `../primitives/tool-classify` |
 | `CardEnvelope` | type | `../primitives/card-contract` |
@@ -617,8 +594,7 @@ Every export (66, derived from `dist/wire/index.d.ts`):
 | `readOpenAIStream` | value | `read` |
 | `readAnthropicStream` | value | `read` |
 | `WireError` | value | `read` |
-| `StreamSource` | type | `read` |
-| `ReadOptions` | type | `read` |
+| `StreamSource`, `ReadOptions` | type | `read` |
 | `consumeModelStream` | value | `consume` |
 | `createToolCallAccumulator` | value | `consume` |
 | `applyToolOutput` | value | `sink-helpers` |
@@ -627,23 +603,10 @@ Every export (66, derived from `dist/wire/index.d.ts`):
 | `toOpenAIMessages` | value | `encode` |
 | `toAnthropicMessages` | value | `encode` |
 | `WireEncodeError` | value | `encode` |
-| `AnthropicContentBlock` | type | `encode` |
-| `AnthropicEncodeOptions` | type | `encode` |
-| `AnthropicWireMessage` | type | `encode` |
-| `FileEncodeOptions` | type | `encode` |
-| `OpenAIContentPart` | type | `encode` |
-| `OpenAIEncodeOptions` | type | `encode` |
-| `OpenAIReasoningDetail` | type | `encode` |
-| `OpenAIToolCall` | type | `encode` |
-| `OpenAIWireMessage` | type | `encode` |
-| `UnencodableFilePolicy` | type | `encode` |
+| `AnthropicContentBlock`, `AnthropicEncodeOptions`, `AnthropicWireMessage`, `FileEncodeOptions`, `OpenAIContentPart`, `OpenAIEncodeOptions`, `OpenAIReasoningDetail`, `OpenAIToolCall`, `OpenAIWireMessage`, `UnencodableFilePolicy` | type | `encode` |
 | `encodableMediaTypes` | value | `media-types` |
 | `resolveMediaPolicy` | value | `media-types` |
-| `EncodableKind` | type | `media-types` |
-| `MediaDecision` | type | `media-types` |
-| `MediaPolicy` | type | `media-types` |
-| `MediaPolicyOptions` | type | `media-types` |
-| `MediaTypeFilter` | type | `media-types` |
+| `EncodableKind`, `MediaDecision`, `MediaPolicy`, `MediaPolicyOptions`, `MediaTypeFilter` | type | `media-types` |
 | `openaiChatFormat` | value | `formats/openai` |
 | `anthropicMessagesFormat` | value | `formats/anthropic` |
 | `sseDataFrames` | value | `sse` |
@@ -651,33 +614,10 @@ Every export (66, derived from `dist/wire/index.d.ts`):
 | `readableToAsyncIterable` | value | `sse` |
 | `ByteSource` | type | `sse` |
 | `subscribeWireDiagnostics` | value | `diagnostics` |
-| `AppRequestEvent` | type | `diagnostics` |
-| `EncodeAttachmentReport` | type | `diagnostics` |
-| `EncodeDroppedEvent` | type | `diagnostics` |
-| `EncodeRequestEvent` | type | `diagnostics` |
-| `WireCloseEvent` | type | `diagnostics` |
-| `WireDiagnosticBase` | type | `diagnostics` |
-| `WireDiagnosticEvent` | type | `diagnostics` |
-| `WireFailedEvent` | type | `diagnostics` |
-| `WireFrameEvent` | type | `diagnostics` |
-| `WireInterruptedEvent` | type | `diagnostics` |
-| `WireOpenEvent` | type | `diagnostics` |
-| `WirePartEvent` | type | `diagnostics` |
+| `AppRequestEvent`, `EncodeAttachmentReport`, `EncodeDroppedEvent`, `EncodeRequestEvent`, `WireCloseEvent`, `WireDiagnosticBase`, `WireDiagnosticEvent`, `WireFailedEvent`, `WireFrameEvent`, `WireInterruptedEvent`, `WireOpenEvent`, `WirePartEvent` | type | `diagnostics` |
 | `normalizeStopReason` | value | `chunk` |
-| `AssistantStreamSink` | type | `chunk` |
-| `ConsumeOptions` | type | `chunk` |
-| `ModelStreamChunk` | type | `chunk` |
-| `ModelToolCall` | type | `chunk` |
-| `ModelToolCallDelta` | type | `chunk` |
-| `ModelTurn` | type | `chunk` |
-| `ModelUsage` | type | `chunk` |
-| `StopReason` | type | `chunk` |
-| `WireFormat` | type | `chunk` |
-| `WireFormatReader` | type | `chunk` |
-| `ChatMessage` | type | `../web-components/chat/chat-types` |
-| `MessagePart` | type | `../web-components/chat/chat-types` |
-| `MessageSource` | type | `../web-components/chat/chat-types` |
-| `RawOrigin` | type | `../web-components/chat/chat-types` |
+| `AssistantStreamSink`, `ConsumeOptions`, `ModelStreamChunk`, `ModelToolCall`, `ModelToolCallDelta`, `ModelTurn`, `ModelUsage`, `StopReason`, `WireFormat`, `WireFormatReader` | type | `chunk` |
+| `ChatMessage`, `MessagePart`, `MessageSource`, `RawOrigin` | type | `../web-components/chat/chat-types` |
 | `ToolPart` | type | `../components/tool/tool-types` |
 
 #### `@kitn.ai/ui/wire` · `read` — the shipped declarations

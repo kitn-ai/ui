@@ -178,11 +178,25 @@ function chatRequestBodyDecl() {
   return lines.slice(0, endIdx + 1).join('\n');
 }
 
-/** `| name | kind | module |` rows for every export of one entry point. */
+/**
+ * `| name | kind | module |` rows for every export of one entry point. Consecutive TYPE-ONLY
+ * exports from the same module share one row (`Question`, `Answer`, ... | type | module): a type
+ * costs an agent a name, not a row, so the table's size follows the number of modules and values
+ * rather than punishing an entry point for exporting the types its own signatures use.
+ */
 function indexTable(exports) {
-  const rows = exports.map(
-    (e) => `| \`${e.name}\` | ${e.typeOnly ? 'type' : 'value'} | \`${e.module}\` |`,
-  );
+  const rows = [];
+  for (let i = 0; i < exports.length; ) {
+    const e = exports[i];
+    if (!e.typeOnly) {
+      rows.push(`| \`${e.name}\` | value | \`${e.module}\` |`);
+      i++;
+      continue;
+    }
+    const names = [];
+    while (i < exports.length && exports[i].typeOnly && exports[i].module === e.module) names.push(`\`${exports[i++].name}\``);
+    rows.push(`| ${names.join(', ')} | type | \`${e.module}\` |`);
+  }
   return ['| Export | Kind | Module |', '|---|---|---|', ...rows].join('\n');
 }
 
