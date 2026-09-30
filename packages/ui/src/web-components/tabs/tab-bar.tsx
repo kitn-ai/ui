@@ -1,5 +1,6 @@
 import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+// lint-preset-parts: private TAB_BAR_CLASS -- class-string constant shared with kai-tab-bar-item, a styling internal not a part
 import {
   TAB_BAR_CLASS,
   createTabBarItemsController,

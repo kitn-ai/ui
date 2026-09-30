@@ -165,9 +165,11 @@ jobs:
       - name: Silent-drop guard (wire encoders)
         run: pnpm --filter @kitn.ai/ui run lint:silent-drops
 
-      # A preset facade may render only public parts (re-exported from src/solid.ts
-      # or src/index.ts), so what a preset composes a consumer can compose. Reads
-      # source only, no build. --self-test proves it fires on a private import.
+      # Every web-component facade (found by scanning for defineWebComponent, not a
+      # list) may render only public parts, following re-export chains, so what a
+      # facade composes a consumer can compose. Reads source only, no build.
+      # --self-test proves it fires on a private import, a barrel chain and a
+      # dynamic import().
       - name: Preset-parts guard (facades render public parts only)
         run: pnpm --filter @kitn.ai/ui run lint:preset-parts
 

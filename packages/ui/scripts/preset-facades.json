@@ -1,6 +1,0 @@
-[
-  { "tag": "kai-thread", "facade": "src/web-components/thread/thread.tsx" },
-  { "tag": "kai-message", "facade": "src/web-components/message/message.tsx" },
-  { "tag": "kai-conversations", "facade": "src/web-components/conversation/conversation-list.tsx" },
-  { "tag": "kai-chat", "facade": "src/web-components/chat/chat.tsx" }
-]

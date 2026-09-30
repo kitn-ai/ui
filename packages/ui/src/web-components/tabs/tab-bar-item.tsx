@@ -1,5 +1,6 @@
 import { createSignal, onCleanup, onMount } from 'solid-js';
 import { defineWebComponent } from '../define/define';
+// lint-preset-parts: private tabBarTabClass,tabBarItemAccessibleName -- class-string helpers shared by kai-tab-bar and kai-tab-bar-item, styling internals not parts
 import {
   TabBarItemContent,
   tabBarTabClass,
