@@ -188,6 +188,16 @@ export const Interleaved: Story = {
 /** A tool-only turn streams: the line shows the live step with the shimmer, then settles to
  *  its summary. Reasoning and tool parts are ONE quiet line, in part order. Click to run it. */
 export const ToolRunStreaming: Story = {
+  ...src(`<Thread
+  messages={[
+    user,
+    { id: 'a1', role: 'assistant', parts: [
+      { type: 'reasoning', text: 'Search first.', timing: { startedAt: 0, endedAt: 2000 } },
+      { type: 'tool', tool: { type: 'web_search', toolCallId: 'tc1', state: 'input-available', input: { query: 'solid signals' } } },
+    ] },
+  ]}
+  loading
+/>`),
   render: () => {
     const tool = (state: 'input-available' | 'output-available') => ({
       type: 'tool' as const,
