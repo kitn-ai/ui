@@ -930,6 +930,8 @@ describe('WEB_COMPONENT_COMPOSITION registry (single source of truth the build e
       'kai-pane-group',
       'kai-panel',
       'kai-panel-header',
+      'kai-plan',
+      'kai-plan-item',
       'kai-popover',
       'kai-progress-bar',
       'kai-prompt-dock',

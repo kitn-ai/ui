@@ -122,6 +122,9 @@
   "kai-pane-group": [
     "tabs"
   ],
+  "kai-plan": [
+    "items"
+  ],
   "kai-prompt-input": [
     "attachments",
     "kindIcons",

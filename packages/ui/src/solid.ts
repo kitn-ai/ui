@@ -240,3 +240,9 @@ export type { TagRendererProps } from './components/renderer/tag-renderer';
 // preset (give it `steps`); `ActivityStepItem` is the row, for composing the timeline yourself.
 export { Activity, ActivityStepItem, activityLine, activityStepLabel, activityStepDuration, MAX_VALUE_CHARS, INTERRUPTED_NOTE } from './components/activity/activity';
 export type { ActivityProps, ActivityStepItemProps, ActivityController, ActivityStatus } from './components/activity/activity';
+
+// Plan: the agent's checklist, one line opening to every item. `Plan` is the preset (give it
+// `items`, e.g. `planFromMessages(messages)`); `PlanItemRow` is the row, for composing the list
+// yourself. It has no surface: put it in `DefaultPromptInput`'s `above`.
+export { Plan, PlanItemRow, planSummary } from './components/plan/plan';
+export type { PlanProps, PlanItemRowProps, PlanController } from './components/plan/plan';

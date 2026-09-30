@@ -1052,6 +1052,8 @@ export const WEB_COMPONENT_COMPOSITION: Record<string, WebComponentComposition> 
   'kai-panel-header': { slots: PANEL_HEADER_SLOTS, parts: PANEL_HEADER_PARTS, children: 'The title text. `start` and `end` are the clusters around it: back arrows and close buttons are slotted content, never props.' },
   'kai-activity': { children: 'The `<kai-activity-step>` rows, direct children in timeline order. Omit them and set `steps` for the preset.' },
   'kai-activity-step': { children: 'The step\'s detail (arguments, a result, reasoning text), shown when the step is expanded. Empty means the step cannot expand.' },
+  'kai-plan': { children: 'The `<kai-plan-item>` rows, direct children in list order. Omit them and set `items` for the preset.' },
+  'kai-plan-item': { children: 'The item\'s text. Its `status` sets the glyph and the styling.' },
   'kai-tab-bar': { parts: TAB_BAR_PARTS, children: 'The `<kai-tab-bar-item>` tabs, direct children in tab order.' },
   'kai-tab-bar-item': { parts: TAB_BAR_ITEM_PARTS, children: 'The tab\'s label text (it also names the tab for assistive tech, even in icon-only mode).' },
   'kai-view-stack': { children: 'The named `<kai-view>` children: tab roots (`tab-root`) side by side behind a tab bar, the rest drill views reached by `push()`.' },

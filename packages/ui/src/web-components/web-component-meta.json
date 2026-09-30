@@ -1638,6 +1638,14 @@
         "displayType": "undefined | false | true"
       },
       {
+        "name": "plan",
+        "type": "undefined | \"auto\" | \"off\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it.",
+        "displayType": "undefined | \"auto\" | \"off\""
+      },
+      {
         "name": "chatTitle",
         "type": "undefined | string",
         "optional": true,
@@ -7101,6 +7109,144 @@
         "name": "end",
         "doc": "The trailing cluster wrapper (the `end` slot renders inside it).",
         "recipe": "kai-panel-header::part(end) { gap: 0.25rem }"
+      }
+    ]
+  },
+  {
+    "tag": "kai-plan",
+    "className": "KaiPlanElement",
+    "displayName": "Plan",
+    "description": "The agent's plan: one line (\"2 of 4 done · the running item\") that opens to a checklist, over a thin progress bar. It has no surface of its own, so put it in `<kai-prompt-input>`'s `above` slot (`<kai-chat>` does that for you). Pass `items` for the preset, or put `<kai-plan-item>` children inside to write the rows yourself.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "items",
+        "type": "undefined | { id: string; label: string; status: \"pending\" | \"in_progress\" | \"completed\" }[]",
+        "optional": true,
+        "scalar": false,
+        "description": "Data mode: the plan, as `planFromMessages(messages)` returns it. JS property; omit to pass `<kai-plan-item>` children.",
+        "typeName": "PlanItem[]",
+        "typeShape": "{ id: string; label: string; status: \"pending\" | \"in_progress\" | \"completed\" }[]",
+        "default": "[]",
+        "typeImport": "PlanItem",
+        "displayType": "undefined | { id: string; label: string; status: \"pending\" | \"in_progress\" | \"completed\" }[]"
+      },
+      {
+        "name": "open",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Drive/observe the disclosure: `el.open = true` or the bare `open` attribute. Listen for `kai-open-change`.",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "defaultOpen",
+        "type": "undefined | false | true",
+        "optional": true,
+        "scalar": true,
+        "description": "Initial open state on mount (uncontrolled seed).",
+        "displayType": "undefined | false | true"
+      },
+      {
+        "name": "label",
+        "type": "undefined | string",
+        "optional": true,
+        "scalar": true,
+        "description": "The header shown while open. Default `Plan`.",
+        "displayType": "undefined | string"
+      }
+    ],
+    "events": [
+      {
+        "name": "kai-open-change",
+        "detail": "{ open: false | true }",
+        "description": "The plan expanded or collapsed (via the line, an attribute, or `show()`/`hide()`/`toggle()`).",
+        "displayDetail": "{ open: false | true }"
+      }
+    ],
+    "methods": [
+      {
+        "name": "show",
+        "params": "",
+        "returns": "void",
+        "description": "Open it programmatically (no-op while disabled)."
+      },
+      {
+        "name": "hide",
+        "params": "",
+        "returns": "void",
+        "description": "Close it programmatically."
+      },
+      {
+        "name": "toggle",
+        "params": "",
+        "returns": "void",
+        "description": "Flip the open state (closes while disabled)."
+      }
+    ],
+    "composedFrom": [
+      {
+        "name": "Plan",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The `<kai-plan-item>` rows, direct children in list order. Omit them and set `items` for the preset."
+      }
+    ]
+  },
+  {
+    "tag": "kai-plan-item",
+    "className": "KaiPlanItemElement",
+    "displayName": "PlanItem",
+    "description": "One row of a `kai-plan` checklist. Put the item's text inside it. Compose the rows yourself inside `<kai-plan>`; the container adds the summary line, the progress bar and the list.",
+    "props": [
+      {
+        "name": "theme",
+        "type": "\"light\" | \"dark\" | \"auto\"",
+        "optional": true,
+        "scalar": true,
+        "description": "Color scheme. `auto` inherits the page's `--kai-color-scheme` (`.dark` / `.light` on any ancestor), else the OS; `light` / `dark` override it for this element and its contents.",
+        "default": "'auto'",
+        "universal": true,
+        "displayType": "\"light\" | \"dark\" | \"auto\""
+      },
+      {
+        "name": "status",
+        "type": "undefined | \"pending\" | \"in_progress\" | \"completed\"",
+        "optional": true,
+        "scalar": true,
+        "description": "`pending` (default), `in_progress` or `completed`. Names the glyph for assistive tech and styles the row.",
+        "displayType": "undefined | \"pending\" | \"in_progress\" | \"completed\""
+      }
+    ],
+    "events": [],
+    "methods": [],
+    "composedFrom": [
+      {
+        "name": "PlanItemRow",
+        "group": "Components"
+      }
+    ],
+    "tokens": [],
+    "slots": [
+      {
+        "name": "",
+        "mode": "inject",
+        "doc": "The item's text. Its `status` sets the glyph and the styling."
       }
     ]
   },

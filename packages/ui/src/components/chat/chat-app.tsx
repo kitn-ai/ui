@@ -11,6 +11,8 @@ import {
   Context, ContextTrigger, ContextContent, ContextContentHeader,
   ContextContentBody, ContextContentFooter, ContextInputUsage, ContextOutputUsage,
 } from '../context/context';
+import { Plan } from '../plan/plan';
+import { planFromMessages } from '../../primitives/plan';
 import { DefaultPromptInput, type RejectedAttachment, type ComposerToolItem } from '../prompt/default-input';
 import type { MediaTypeFilter } from '../../wire/media-types';
 import type { TriggerDef } from '../composer/composer';
@@ -104,6 +106,9 @@ export interface ChatAppProps {
   /** Seeds the reasoning disclosure open and keeps it tracking the stream. Default
    *  false; inert unless `reasoning` is `'full'`. */
   reasoningOpen?: boolean;
+  // Derived from `messages` by `planFromMessages`: the latest valid `kai_plan` call.
+  /** Whether the agent's latest plan (a `kai_plan` tool call) shows above the prompt input. Default on; `off` hides it. */
+  plan?: 'auto' | 'off';
   /** Title shown at the start of the header bar. */
   chatTitle?: string;
   /** Model list; more than one renders a switcher in the header. */
@@ -307,6 +312,8 @@ export function ChatApp(props: ChatAppProps) {
   const resolvedDensity = () => resolveThreadDensity(props.density, 'ChatApp');
   const density = () => THREAD_DENSITY_CLASSES[resolvedDensity()];
   const messageKeys = createMemo(() => props.messages.map((m) => m.id));
+  // The plan rides the prompt input's `above` region. An empty plan (the model clearing it) is not shown.
+  const plan = createMemo(() => (props.plan === 'off' ? undefined : planFromMessages(props.messages)));
   // Feedback (copy + vote) state lives ABOVE the per-message <For>, so streaming
   // re-renders (a fresh `messages` array ref per chunk) don't wipe it.
   // The copy/feedback toasts scope to the chat (this thread's root) so they appear
@@ -905,6 +912,7 @@ export function ChatApp(props: ChatAppProps) {
                       accept={props.accept} onAttachmentsRejected={props.onAttachmentsRejected}
                       attach={props.attach} tools={props.tools} expanded={props.expanded} voice={props.voice === true}
                       triggers={props.triggers} kindIcons={props.kindIcons}
+                      above={plan()?.length ? <Plan items={plan()} /> : undefined}
                       onValueChange={handleChange} onSubmit={handleSubmit} onSuggestionClick={handleSuggestionClick}
                       onAttachmentsChange={(a) => { setAttachments(a); props.onAttachmentsChange?.(a); }}
                       onToolSelect={(detail) => props.onToolSelect?.(detail)} onVoice={() => props.onVoice?.()}
