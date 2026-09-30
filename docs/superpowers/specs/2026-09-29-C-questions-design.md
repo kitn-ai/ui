@@ -7,7 +7,7 @@ Owner decisions: 12 and 12b (above the composer, Claude Desktop behaviour), 13 (
 14 (confirm, choice, form, tasks all become question types), 16 (typing answers the active
 question), 17 (tasks is a question type; the plan display is B's).
 
-> 12b, verbatim: "You know how that works in Claude Desktop, and that's what I want. I was just
+> Decision 12b, verbatim: "You know how that works in Claude Desktop, and that's what I want. I was just
 > using that as an example so you can see the information that shows up above and sometimes
 > below the prompt"
 

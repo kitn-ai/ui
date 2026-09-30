@@ -3,11 +3,11 @@
 Part of the [composition round](2026-09-29-composition-round-design.md); builds on
 [A](2026-09-29-A-composition-contract-design.md). Owner decisions 6, 7, 9 (break now).
 
-> 6: "the dev or AI agent constructing with our components would create a native wrapper
+> Decision 6: "the dev or AI agent constructing with our components would create a native wrapper
 > component like Agent Card and construct it using these different parts. We would just provide
 > patterns to show a way of doing this"
 >
-> 7: "exceptions are things like Artifact where it is complex and providing a "mini" app-like
+> Decision 7: "exceptions are things like Artifact where it is complex and providing a "mini" app-like
 > solution is okay… possibly we should be using slots instead of configuration"
 
 The card removals (confirm/choice/form/tasks) are in [C](2026-09-29-C-questions-design.md) §6,
