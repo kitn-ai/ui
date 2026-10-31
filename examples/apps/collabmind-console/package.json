@@ -1,0 +1,21 @@
+{
+  "name": "@kitn.ai/ui-app-collabmind-console",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "An operator console over three real AI backends (Kiro Gateway, LiteLLM Proxy, Fleet Control) behind one zero-dependency Node wrapper. Overview, chat and an explorer for all 1057 upstream endpoints, built from the kit's web components with no framework.",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:server": "node server/server.mjs",
+    "dev:ui": "vite",
+    "build": "vite build",
+    "start": "vite build && node server/server.mjs",
+    "refresh-specs": "REFRESH_SPECS=1 node server/server.mjs"
+  },
+  "dependencies": {
+    "@kitn.ai/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

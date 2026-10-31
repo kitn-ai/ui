@@ -131,6 +131,16 @@ importers:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(less@4.2.0)(sass@1.99.0)(terser@5.31.6)(yaml@2.9.0)
 
+  examples/apps/collabmind-console:
+    dependencies:
+      '@kitn.ai/ui':
+        specifier: workspace:*
+        version: link:../../../packages/ui
+    devDependencies:
+      vite:
+        specifier: ^6.0.0
+        version: 6.4.3(@types/node@26.2.0)(jiti@2.7.0)(less@4.2.0)(lightningcss@1.33.0)(sass@1.99.0)(terser@5.31.6)(yaml@2.9.0)
+
   examples/apps/composed-thread:
     dependencies:
       '@kitn.ai/ui':

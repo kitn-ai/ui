@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CollabMind Console</title>
+  </head>
+  <body>
+    <div id="app" class="app">
+      <aside class="rail">
+        <a class="brand" href="#/overview">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="5" cy="12" r="2.6"/><circle cx="19" cy="5" r="2.2"/><circle cx="19" cy="12" r="2.2"/><circle cx="19" cy="19" r="2.2"/><path d="M7.5 12h9M7 11 17 5.6M7 13l10 5.4" fill="none" stroke-width="1.6"/></svg>
+          <span>CollabMind Console</span>
+        </a>
+        <kai-nav id="nav" theme="auto"></kai-nav>
+        <div class="rail-foot" id="railFoot"></div>
+      </aside>
+      <main id="view" class="view"></main>
+    </div>
+    <kai-toast-region position="bottom-right" theme="auto"></kai-toast-region>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
