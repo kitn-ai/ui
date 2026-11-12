@@ -1,5 +1,7 @@
 # AI/UI
 
+> PRE-ALPHA: This is still being developed and is subject to change a lot. Use at your own risk.
+
 **The web UI layer for AI apps. Works anywhere you can put HTML.**
 
 Threads, workspaces, artifacts, tool and reasoning panels, generative UI, voice.
